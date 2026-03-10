@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: hireflow-pro-v2
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: HireFlowPro
+      - key: Jwt__Audience
+        value: HireFlowPro
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hireflow-db-v2
+          property: connectionString
+
+databases:
+  - name: hireflow-db-v2
+    plan: free
+    databaseName: hireflow_v2
+    user: hireflow

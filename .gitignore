@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-wal
+*.db-shm
+
+## React
+hireflow-ui/node_modules/
+hireflow-ui/dist/
+hireflow-ui/.vite/
+
+## IDE
+.idea/
+.vscode/
+*.swp
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Secrets
+.env
+appsettings.Development.json
+*.pfx
+*.pem

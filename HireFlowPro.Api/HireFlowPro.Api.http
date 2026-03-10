@@ -1,0 +1,6 @@
+@HireFlowPro.Api_HostAddress = http://localhost:5146
+
+GET {{HireFlowPro.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireFlow Pro</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 340px; min-height: 200px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc; color: #0f172a; font-size: 13px;
+  }
+  .header {
+    background: linear-gradient(135deg, #2563eb, #7c3aed); color: white;
+    padding: 16px 20px; display: flex; align-items: center; gap: 10px;
+  }
+  .header-logo { font-size: 20px; }
+  .header-text { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+  .header-text span { opacity: 0.8; font-weight: 400; font-size: 11px; margin-left: 4px; }
+
+  .body { padding: 16px 20px; }
+
+  /* Login Form */
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px; display: block; }
+  .form-input {
+    width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; background: white; outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  .btn {
+    display: block; width: 100%; padding: 10px; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .btn-primary { background: #2563eb; color: white; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .error { background: #fef2f2; color: #dc2626; border: 1px solid rgba(220,38,38,0.2); border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-bottom: 12px; display: none; }
+  .success { background: #ecfdf5; color: #059669; border: 1px solid rgba(5,150,105,0.2); border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-bottom: 12px; display: none; }
+
+  /* Logged in view */
+  .user-card {
+    display: flex; align-items: center; gap: 10px; padding: 12px;
+    background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 12px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 14px;
+  }
+  .user-name { font-weight: 700; font-size: 14px; }
+  .user-email { font-size: 11px; color: #64748b; }
+
+  .job-preview {
+    background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px;
+  }
+  .job-company { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .job-role { font-size: 12px; color: #475569; }
+  .job-meta { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+
+  .footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; text-align: center; }
+  .footer a { color: #2563eb; font-size: 11px; font-weight: 600; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-logo">🚀</div>
+    <div class="header-text">HireFlow<span>PRO</span></div>
+  </div>
+
+  <!-- Login View -->
+  <div id="login-view" class="body">
+    <div id="login-error" class="error"></div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" id="email" class="form-input" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="password" class="form-input" placeholder="Your password">
+    </div>
+    <button id="login-btn" class="btn btn-primary">Sign In</button>
+  </div>
+
+  <!-- Logged In View -->
+  <div id="main-view" class="body hidden">
+    <div id="success-msg" class="success"></div>
+    <div id="error-msg" class="error"></div>
+
+    <div class="user-card">
+      <div class="user-avatar" id="avatar">?</div>
+      <div>
+        <div class="user-name" id="user-name">—</div>
+        <div class="user-email" id="user-email">—</div>
+      </div>
+    </div>
+
+    <div id="job-preview" class="job-preview hidden">
+      <div class="job-company" id="job-company">—</div>
+      <div class="job-role" id="job-role">—</div>
+      <div class="job-meta" id="job-meta">—</div>
+    </div>
+
+    <button id="save-btn" class="btn btn-primary" style="margin-bottom:8px">🚀 Save This Job</button>
+    <button id="logout-btn" class="btn btn-danger">Sign Out</button>
+  </div>
+
+  <div class="footer">
+    <a id="open-app" href="#">Open HireFlow Pro Dashboard</a>
+  </div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  // Check auth state on popup open
+  chrome.runtime.sendMessage({ type: 'CHECK_AUTH' }, (res) => {
+    if (res?.loggedIn) {
+      showMainView();
+    } else {
+      showLoginView();
+    }
+  });
+
+  function showLoginView() {
+    $('login-view').classList.remove('hidden');
+    $('main-view').classList.add('hidden');
+  }
+
+  function showMainView() {
+    $('login-view').classList.add('hidden');
+    $('main-view').classList.remove('hidden');
+
+    chrome.storage.local.get('user', (data) => {
+      if (data.user) {
+        $('user-name').textContent = data.user.name;
+        $('user-email').textContent = data.user.email;
+        $('avatar').textContent = (data.user.name || '?')[0].toUpperCase();
+      }
+    });
+
+    // Try to scrape current tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SCRAPE_PAGE' }, (data) => {
+          if (chrome.runtime.lastError || !data) {
+            $('job-preview').classList.add('hidden');
+            $('save-btn').textContent = 'No job page detected';
+            $('save-btn').disabled = true;
+            return;
+          }
+          if (data.company || data.role) {
+            $('job-preview').classList.remove('hidden');
+            $('job-company').textContent = data.company || 'Unknown Company';
+            $('job-role').textContent = data.role || 'Unknown Role';
+            $('job-meta').textContent = [data.location, data.salary].filter(Boolean).join(' · ') || data.source;
+            $('save-btn').dataset.job = JSON.stringify(data);
+            $('save-btn').disabled = false;
+          } else {
+            $('save-btn').textContent = 'No job data found on this page';
+            $('save-btn').disabled = true;
+          }
+        });
+      }
+    });
+  }
+
+  // Login
+  $('login-btn').addEventListener('click', () => {
+    const email = $('email').value.trim();
+    const password = $('password').value;
+    if (!email || !password) return;
+
+    $('login-btn').disabled = true;
+    $('login-btn').textContent = 'Signing in...';
+    $('login-error').style.display = 'none';
+
+    chrome.runtime.sendMessage({ type: 'LOGIN', email, password }, (res) => {
+      if (res?.success) {
+        showMainView();
+      } else {
+        $('login-error').textContent = res?.error || 'Login failed';
+        $('login-error').style.display = 'block';
+      }
+      $('login-btn').disabled = false;
+      $('login-btn').textContent = 'Sign In';
+    });
+  });
+
+  // Save job
+  $('save-btn').addEventListener('click', () => {
+    const jobStr = $('save-btn').dataset.job;
+    if (!jobStr) return;
+
+    $('save-btn').disabled = true;
+    $('save-btn').textContent = 'Saving...';
+
+    const jobData = JSON.parse(jobStr);
+    chrome.runtime.sendMessage({ type: 'SAVE_JOB', data: jobData }, (res) => {
+      if (res?.success) {
+        $('success-msg').textContent = 'Job saved to HireFlow Pro!';
+        $('success-msg').style.display = 'block';
+        $('error-msg').style.display = 'none';
+        $('save-btn').textContent = 'Saved!';
+      } else {
+        $('error-msg').textContent = res?.error || 'Failed to save';
+        $('error-msg').style.display = 'block';
+        $('success-msg').style.display = 'none';
+        $('save-btn').textContent = '🚀 Save This Job';
+        $('save-btn').disabled = false;
+      }
+    });
+  });
+
+  // Logout
+  $('logout-btn').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'LOGOUT' }, () => {
+      showLoginView();
+    });
+  });
+
+  // Open dashboard
+  $('open-app').addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.storage.local.get('apiUrl', (data) => {
+      const url = data.apiUrl || 'http://localhost:5173';
+      chrome.tabs.create({ url: url + '/dashboard' });
+    });
+  });
+</script>
+</body>
+</html>

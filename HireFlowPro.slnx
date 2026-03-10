@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="HireFlowPro.Api/HireFlowPro.Api.csproj" />
+  <Project Path="HireFlowPro.Core/HireFlowPro.Core.csproj" />
+  <Project Path="HireFlowPro.Infrastructure/HireFlowPro.Infrastructure.csproj" />
+</Solution>
