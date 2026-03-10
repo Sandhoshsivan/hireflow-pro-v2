@@ -9,11 +9,12 @@ RUN npm run build
 # ── Stage 2: Build .NET Backend ───────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /app
-COPY HireFlowPro.slnx ./
+# Copy project files for layer-cached restore
 COPY HireFlowPro.Api/HireFlowPro.Api.csproj HireFlowPro.Api/
 COPY HireFlowPro.Core/HireFlowPro.Core.csproj HireFlowPro.Core/
 COPY HireFlowPro.Infrastructure/HireFlowPro.Infrastructure.csproj HireFlowPro.Infrastructure/
-RUN dotnet restore
+RUN dotnet restore HireFlowPro.Api/HireFlowPro.Api.csproj
+# Copy everything and publish
 COPY . .
 RUN dotnet publish HireFlowPro.Api/HireFlowPro.Api.csproj -c Release -o /publish
 

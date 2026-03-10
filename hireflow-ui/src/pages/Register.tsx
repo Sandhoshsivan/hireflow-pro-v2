@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Briefcase, CheckCircle, Shield, Zap, Star, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Briefcase, Shield, Zap, Star, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../lib/auth';
 
 const BRAND_PERKS = [
