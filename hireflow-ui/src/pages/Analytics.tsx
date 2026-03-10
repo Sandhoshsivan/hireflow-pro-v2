@@ -4,6 +4,7 @@ import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application } from '../types';
 import { BarChart2, TrendingUp, Layers, Zap } from 'lucide-react';
+import { extractApplications } from '../lib/normalize';
 
 type DateRange = '30' | '90' | 'all';
 
@@ -52,20 +53,25 @@ function HorizontalBar({
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="flex items-center gap-3">
-      <div className="w-20 shrink-0">
-        <span className="text-xs font-medium truncate block" style={{ color: '#475569' }}>{label}</span>
+      <span
+        className="text-xs font-medium w-20 shrink-0 truncate"
+        style={{ color: '#475569' }}
+      >
+        {label}
+      </span>
+      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+        <div
+          className={clsx('h-full rounded-lg transition-all duration-700 ease-out', barClass)}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <div className="flex-1">
-        <div className="h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
-          <div
-            className={clsx('h-full rounded-lg transition-all duration-700 ease-out', barClass)}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-      <div className="w-16 text-right shrink-0">
-        <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>{value}</span>
-        <span className="text-xs ml-1" style={{ color: '#94a3b8' }}>{pct}%</span>
+      <div className="flex items-baseline gap-1 shrink-0 w-16 justify-end">
+        <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+          {value}
+        </span>
+        <span className="text-xs" style={{ color: '#94a3b8' }}>
+          {pct}%
+        </span>
       </div>
     </div>
   );
@@ -123,7 +129,14 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
         ))}
 
         <path d={areaD} fill="url(#areaGrad)" />
-        <path d={pathD} fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d={pathD}
+          fill="none"
+          stroke="#6366f1"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
         {points.map((p, i) => (
           <g key={i}>
@@ -153,7 +166,7 @@ export default function Analytics() {
     const load = async () => {
       try {
         const { data } = await api.get('/applications');
-        setApps(data.applications ?? data ?? []);
+        setApps(extractApplications(data));
       } catch {
         // silent
       } finally {
@@ -205,29 +218,34 @@ export default function Analytics() {
 
   const mostActiveMonth = useMemo(() => {
     if (monthlyData.length === 0) return 'N/A';
-    const max = monthlyData.reduce((best, cur) => (cur.value > best.value ? cur : best), monthlyData[0]);
+    const max = monthlyData.reduce(
+      (best, cur) => (cur.value > best.value ? cur : best),
+      monthlyData[0]
+    );
     const [year, month] = max.label.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1, 1);
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }, [monthlyData]);
 
-  const statusCounts = useMemo(() =>
-    Object.keys(statusConfig).map((s) => ({
-      label: statusConfig[s].label,
-      value: filteredApps.filter((a) => a.status === s).length,
-      bar: statusConfig[s].color,
-      key: s,
-    })),
+  const statusCounts = useMemo(
+    () =>
+      Object.keys(statusConfig).map((s) => ({
+        label: statusConfig[s].label,
+        value: filteredApps.filter((a) => a.status === s).length,
+        bar: statusConfig[s].color,
+        key: s,
+      })),
     [filteredApps]
   );
   const maxStatus = Math.max(...statusCounts.map((s) => s.value), 1);
 
-  const priorityCounts = useMemo(() =>
-    Object.keys(priorityConfig).map((p) => ({
-      label: priorityConfig[p].label,
-      value: filteredApps.filter((a) => a.priority === p).length,
-      bar: priorityConfig[p].color,
-    })),
+  const priorityCounts = useMemo(
+    () =>
+      Object.keys(priorityConfig).map((p) => ({
+        label: priorityConfig[p].label,
+        value: filteredApps.filter((a) => a.priority === p).length,
+        bar: priorityConfig[p].color,
+      })),
     [filteredApps]
   );
   const maxPriority = Math.max(...priorityCounts.map((p) => p.value), 1);
@@ -236,8 +254,8 @@ export default function Analytics() {
   const maxSource = topSourcesTop5.length > 0 ? Math.max(...topSourcesTop5.map((s) => s.value), 1) : 1;
 
   const rangeOptions: { label: string; value: DateRange }[] = [
-    { label: '30 days', value: '30' },
-    { label: '90 days', value: '90' },
+    { label: '30d', value: '30' },
+    { label: '90d', value: '90' },
     { label: 'All time', value: 'all' },
   ];
 
@@ -254,8 +272,14 @@ export default function Analytics() {
       label: 'Response Rate',
       value: `${responseRate}%`,
       icon: TrendingUp,
-      iconBg: responseRate >= 30 ? 'bg-emerald-50' : responseRate >= 15 ? 'bg-amber-50' : 'bg-slate-50',
-      iconColor: responseRate >= 30 ? 'text-emerald-600' : responseRate >= 15 ? 'text-amber-600' : 'text-slate-500',
+      iconBg:
+        responseRate >= 30 ? 'bg-emerald-50' : responseRate >= 15 ? 'bg-amber-50' : 'bg-slate-50',
+      iconColor:
+        responseRate >= 30
+          ? 'text-emerald-600'
+          : responseRate >= 15
+          ? 'text-amber-600'
+          : 'text-slate-500',
       sub: `${responded} responses received`,
     },
     {
@@ -280,8 +304,10 @@ export default function Analytics() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading analytics...</p>
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
+            Loading analytics...
+          </p>
         </div>
       </div>
     );
@@ -302,14 +328,14 @@ export default function Analytics() {
                 key={opt.value}
                 onClick={() => setDateRange(opt.value)}
                 className={clsx(
-                  'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150',
+                  'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
                   dateRange === opt.value
-                    ? 'text-white shadow-sm'
-                    : 'hover:bg-slate-50'
+                    ? 'shadow-sm'
+                    : 'hover:text-slate-700'
                 )}
                 style={
                   dateRange === opt.value
-                    ? { background: '#6366f1', color: 'white' }
+                    ? { background: '#4f46e5', color: 'white' }
                     : { color: '#64748b' }
                 }
               >
@@ -321,42 +347,53 @@ export default function Analytics() {
       />
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-fade-up">
-        {kpis.map((kpi, idx) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        {kpis.map((kpi) => (
           <div
             key={kpi.label}
             className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200"
             style={{
               boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-              animationDelay: `${idx * 60}ms`,
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium" style={{ color: '#64748b' }}>{kpi.label}</span>
-              <div className={clsx('p-1.5 rounded-lg', kpi.iconBg)}>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-medium" style={{ color: '#64748b' }}>
+                {kpi.label}
+              </span>
+              <div
+                className={clsx(
+                  'w-8 h-8 rounded-lg flex items-center justify-center',
+                  kpi.iconBg
+                )}
+              >
                 <kpi.icon className={clsx('w-4 h-4', kpi.iconColor)} />
               </div>
             </div>
-            <p className="text-2xl font-bold mb-0.5 tracking-tight" style={{ color: '#0f172a' }}>
+            <p
+              className="text-2xl font-bold mb-0.5 tracking-tight"
+              style={{ color: '#0f172a', letterSpacing: '-0.02em' }}
+            >
               {kpi.value}
             </p>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>{kpi.sub}</p>
+            <p className="text-xs" style={{ color: '#94a3b8' }}>
+              {kpi.sub}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Charts 2x2 grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* 1. Applications by Status */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="mb-5">
-            <h3 className="text-sm font-semibold mb-0.5" style={{ color: '#0f172a' }}>
+            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
               Applications by Status
             </h3>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
               {total} total in selected range
             </p>
           </div>
@@ -379,28 +416,32 @@ export default function Analytics() {
 
         {/* 2. Monthly Trend */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="mb-5">
-            <h3 className="text-sm font-semibold mb-0.5" style={{ color: '#0f172a' }}>
+            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
               Monthly Applications Trend
             </h3>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>Applications submitted per month (last 6)</p>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+              Applications submitted per month (last 6)
+            </p>
           </div>
           <MonthlyTrendSVG data={monthlyData} />
         </div>
 
         {/* 3. Top Sources */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="mb-5">
-            <h3 className="text-sm font-semibold mb-0.5" style={{ color: '#0f172a' }}>
+            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
               Top Sources
             </h3>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>Where you're finding opportunities (top 5)</p>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+              Where you're finding opportunities (top 5)
+            </p>
           </div>
           {topSourcesTop5.length === 0 ? (
             <EmptyChart message="No source data yet" />
@@ -421,14 +462,16 @@ export default function Analytics() {
 
         {/* 4. Priority Breakdown */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="mb-5">
-            <h3 className="text-sm font-semibold mb-0.5" style={{ color: '#0f172a' }}>
+            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
               Priority Breakdown
             </h3>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>How you're prioritizing applications</p>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+              How you're prioritizing applications
+            </p>
           </div>
           {total === 0 ? (
             <EmptyChart />
@@ -445,7 +488,9 @@ export default function Analytics() {
               ))}
               <div className="pt-3 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs" style={{ color: '#94a3b8' }}>Total tracked</span>
+                  <span className="text-xs" style={{ color: '#94a3b8' }}>
+                    Total tracked
+                  </span>
                   <span className="text-xs font-semibold" style={{ color: '#475569' }}>
                     {total} application{total !== 1 ? 's' : ''}
                   </span>

@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application, ApplicationStatus } from '../types';
+import { extractApplications } from '../lib/normalize';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   saved: '#06b6d4',
@@ -25,12 +26,12 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
 };
 
 const STATUS_BG_LIGHT: Record<ApplicationStatus, string> = {
-  saved: 'rgba(6,182,212,0.08)',
-  applied: 'rgba(59,130,246,0.08)',
-  interview: 'rgba(245,158,11,0.08)',
-  offer: 'rgba(16,185,129,0.08)',
-  rejected: 'rgba(239,68,68,0.08)',
-  ghosted: 'rgba(148,163,184,0.08)',
+  saved: 'rgba(6,182,212,0.04)',
+  applied: 'rgba(59,130,246,0.04)',
+  interview: 'rgba(245,158,11,0.04)',
+  offer: 'rgba(16,185,129,0.04)',
+  rejected: 'rgba(239,68,68,0.04)',
+  ghosted: 'rgba(148,163,184,0.04)',
 };
 
 const statusBadge: Record<ApplicationStatus, string> = {
@@ -43,15 +44,12 @@ const statusBadge: Record<ApplicationStatus, string> = {
 };
 
 const priorityDots: Record<string, string> = {
-  high: 'bg-red-500',
-  medium: 'bg-amber-400',
-  low: 'bg-slate-300',
+  high: '#ef4444',
+  medium: '#f59e0b',
+  low: '#cbd5e1',
 };
 
-const columns: {
-  status: ApplicationStatus;
-  label: string;
-}[] = [
+const columns: { status: ApplicationStatus; label: string }[] = [
   { status: 'saved', label: 'Saved' },
   { status: 'applied', label: 'Applied' },
   { status: 'interview', label: 'Interview' },
@@ -80,17 +78,20 @@ function KanbanCard({
   if (upcoming && dueDate) {
     if (daysLeft === 0) followUpLabel = 'Follow up today';
     else if (daysLeft === 1) followUpLabel = 'Follow up tomorrow';
-    else followUpLabel = `Follow up ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    else
+      followUpLabel = `Follow up ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   }
+
+  const priorityColor = priorityDots[app.priority] ?? '#cbd5e1';
 
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md hover:border-indigo-200 transition-all duration-150 cursor-pointer group"
-      style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}
+      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-300 hover:shadow-md cursor-pointer transition-all duration-150 group"
+      style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}
     >
-      {/* Header */}
-      <div className="flex items-start gap-2.5 mb-3">
+      {/* Top row: avatar + details + priority dot */}
+      <div className="flex items-start gap-2.5">
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
           style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
@@ -104,26 +105,27 @@ function KanbanCard({
           >
             {app.company}
           </p>
-          <p className="text-xs truncate mt-0.5" style={{ color: '#64748b' }}>
+          <p className="text-xs truncate mt-0.5" style={{ color: '#94a3b8' }}>
             {app.role}
           </p>
         </div>
         <span
-          className={clsx('w-2 h-2 rounded-full flex-shrink-0 mt-1', priorityDots[app.priority])}
+          className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
+          style={{ background: priorityColor }}
           title={`${app.priority} priority`}
         />
       </div>
 
       {/* Follow-up strip */}
       {upcoming && (
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg mb-3 border border-amber-200 bg-amber-50">
+        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-50 border border-amber-200 my-2">
           <Clock className="w-3 h-3 text-amber-500 flex-shrink-0" />
           <span className="text-xs font-medium text-amber-700">{followUpLabel}</span>
         </div>
       )}
 
-      {/* Footer meta */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Footer: source tag + date */}
+      <div className={clsx('flex items-center justify-between gap-2', upcoming ? '' : 'mt-3')}>
         <div className="flex items-center gap-1.5 flex-wrap">
           {app.source && (
             <span
@@ -149,7 +151,9 @@ function KanbanCard({
 function EmptyColumn() {
   return (
     <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
-      <p className="text-xs" style={{ color: '#94a3b8' }}>No applications</p>
+      <p className="text-xs" style={{ color: '#94a3b8' }}>
+        No applications
+      </p>
     </div>
   );
 }
@@ -164,7 +168,7 @@ export default function Pipeline() {
     const load = async () => {
       try {
         const { data } = await api.get('/applications');
-        setApps(data.applications ?? data ?? []);
+        setApps(extractApplications(data));
       } catch {
         setError(true);
       } finally {
@@ -182,11 +186,13 @@ export default function Pipeline() {
   if (loading) {
     return (
       <div>
-        <TopBar title="Pipeline" subtitle="Visual pipeline of your job search" />
+        <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
-            <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading your pipeline...</p>
+            <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+            <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
+              Loading your pipeline...
+            </p>
           </div>
         </div>
       </div>
@@ -196,16 +202,21 @@ export default function Pipeline() {
   if (error) {
     return (
       <div>
-        <TopBar title="Pipeline" subtitle="Visual pipeline of your job search" />
+        <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
         <div className="flex flex-col items-center justify-center h-64">
           <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-4">
             <AlertCircle className="w-7 h-7 text-red-400" />
           </div>
-          <h3 className="text-base font-semibold mb-1" style={{ color: '#334155' }}>Failed to load pipeline</h3>
-          <p className="text-sm mb-5" style={{ color: '#94a3b8' }}>There was an error fetching your applications.</p>
+          <h3 className="text-base font-semibold mb-1" style={{ color: '#334155' }}>
+            Failed to load pipeline
+          </h3>
+          <p className="text-sm mb-5" style={{ color: '#94a3b8' }}>
+            There was an error fetching your applications.
+          </p>
           <button
             onClick={() => window.location.reload()}
-            className="btn-primary text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
           >
             Try again
           </button>
@@ -216,24 +227,18 @@ export default function Pipeline() {
 
   return (
     <div>
-      <TopBar
-        title="Pipeline"
-        subtitle="Drag-free visual pipeline"
-      />
+      <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
 
       {/* Kanban Board */}
-      <div
-        className="overflow-x-auto pb-6"
-        style={{ minHeight: 'calc(100vh - 200px)' }}
-      >
-        <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
+      <div className="overflow-x-auto pb-6 -mx-2 px-2">
+        <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
           {grouped.map((col, colIdx) => {
             const accentColor = STATUS_COLORS[col.status];
             const bgLight = STATUS_BG_LIGHT[col.status];
             return (
               <div
                 key={col.status}
-                className="flex flex-col animate-fade-up"
+                className="flex flex-col"
                 style={{
                   minWidth: 260,
                   maxWidth: 280,
@@ -242,7 +247,7 @@ export default function Pipeline() {
               >
                 {/* Column Header */}
                 <div
-                  className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center justify-between"
+                  className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center justify-between mb-3"
                   style={{
                     borderLeft: `4px solid ${accentColor}`,
                     boxShadow: '0 1px 3px rgba(15,23,42,0.06)',
@@ -269,7 +274,7 @@ export default function Pipeline() {
 
                 {/* Cards container */}
                 <div
-                  className="rounded-xl p-2 flex-1 mt-2 space-y-2"
+                  className="space-y-2 flex-1 rounded-xl p-2"
                   style={{ background: bgLight, minHeight: 400 }}
                 >
                   {col.apps.length === 0 ? (
@@ -292,13 +297,21 @@ export default function Pipeline() {
 
       {/* Card Detail Modal */}
       {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setSelectedApp(null)}
+        >
           <div
             className="bg-white rounded-2xl max-w-md w-full overflow-hidden"
-            style={{ boxShadow: '0 25px 50px rgba(15,23,42,0.25)' }}
+            style={{ boxShadow: '0 25px 60px rgba(15,23,42,0.25), 0 8px 24px rgba(15,23,42,0.12)' }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Gradient top bar */}
-            <div className="h-1" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }} />
+            <div
+              className="h-1 w-full"
+              style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+            />
 
             {/* Header */}
             <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100">
@@ -313,10 +326,12 @@ export default function Pipeline() {
                   <h2 className="text-base font-bold" style={{ color: '#0f172a' }}>
                     {selectedApp.company}
                   </h2>
-                  <p className="text-sm" style={{ color: '#64748b' }}>{selectedApp.role}</p>
+                  <p className="text-sm" style={{ color: '#64748b' }}>
+                    {selectedApp.role}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                 <span
                   className={clsx(
                     'text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
@@ -327,7 +342,7 @@ export default function Pipeline() {
                 </span>
                 <button
                   onClick={() => setSelectedApp(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors flex-shrink-0"
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
                   style={{ color: '#94a3b8' }}
                 >
                   <X className="w-4 h-4" />
@@ -339,50 +354,80 @@ export default function Pipeline() {
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 {selectedApp.salary && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                  <div
+                    className="flex items-center gap-2.5 p-3 rounded-xl"
+                    style={{ background: '#f8fafc' }}
+                  >
                     <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                     <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Salary</p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{selectedApp.salary}</p>
+                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                        Salary
+                      </p>
+                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+                        {selectedApp.salary}
+                      </p>
                     </div>
                   </div>
                 )}
                 {selectedApp.location && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                  <div
+                    className="flex items-center gap-2.5 p-3 rounded-xl"
+                    style={{ background: '#f8fafc' }}
+                  >
                     <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                     <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Location</p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{selectedApp.location}</p>
+                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                        Location
+                      </p>
+                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+                        {selectedApp.location}
+                      </p>
                     </div>
                   </div>
                 )}
-                <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                <div
+                  className="flex items-center gap-2.5 p-3 rounded-xl"
+                  style={{ background: '#f8fafc' }}
+                >
                   <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                   <div>
-                    <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Applied</p>
+                    <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                      Applied
+                    </p>
                     <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                      {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                      {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString(
+                        'en-US',
+                        { month: 'short', day: 'numeric', year: 'numeric' }
+                      )}
                     </p>
                   </div>
                 </div>
                 {selectedApp.source && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                  <div
+                    className="flex items-center gap-2.5 p-3 rounded-xl"
+                    style={{ background: '#f8fafc' }}
+                  >
                     <Tag className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                     <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Source</p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{selectedApp.source}</p>
+                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                        Source
+                      </p>
+                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+                        {selectedApp.source}
+                      </p>
                     </div>
                   </div>
                 )}
                 {selectedApp.url && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                  <div
+                    className="flex items-center gap-2.5 p-3 rounded-xl"
+                    style={{ background: '#f8fafc' }}
+                  >
                     <ExternalLink className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                     <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Job Link</p>
+                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                        Job Link
+                      </p>
                       <a
                         href={selectedApp.url}
                         target="_blank"
@@ -397,11 +442,19 @@ export default function Pipeline() {
                   </div>
                 )}
                 {selectedApp.priority && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
+                  <div
+                    className="flex items-center gap-2.5 p-3 rounded-xl"
+                    style={{ background: '#f8fafc' }}
+                  >
                     <Briefcase className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
                     <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Priority</p>
-                      <p className="text-sm font-semibold capitalize" style={{ color: '#0f172a' }}>
+                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
+                        Priority
+                      </p>
+                      <p
+                        className="text-sm font-semibold capitalize"
+                        style={{ color: '#0f172a' }}
+                      >
                         {selectedApp.priority}
                       </p>
                     </div>
@@ -411,7 +464,10 @@ export default function Pipeline() {
 
               {selectedApp.notes && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94a3b8' }}>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-wide mb-2"
+                    style={{ color: '#94a3b8' }}
+                  >
                     Notes
                   </p>
                   <p

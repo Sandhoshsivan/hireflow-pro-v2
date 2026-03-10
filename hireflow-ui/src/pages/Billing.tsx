@@ -24,22 +24,25 @@ const planConfig: Record<string, {
   limit: number | 'Unlimited';
   icon: React.ReactNode;
   price: string;
+  iconBg: string;
 }> = {
-  free:    {
+  free: {
     label: 'Free',
     badge: 'bg-slate-100 text-slate-600',
     barColor: '#94a3b8',
     limit: 20,
     icon: <Star className="w-5 h-5 text-slate-400" />,
     price: '$0',
+    iconBg: '#f1f5f9',
   },
-  pro:     {
+  pro: {
     label: 'Pro',
     badge: 'bg-indigo-100 text-indigo-700',
     barColor: '#6366f1',
     limit: 500,
     icon: <Zap className="w-5 h-5 text-indigo-600" />,
     price: '$9.99',
+    iconBg: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
   },
   premium: {
     label: 'Premium',
@@ -48,6 +51,7 @@ const planConfig: Record<string, {
     limit: 'Unlimited',
     icon: <Crown className="w-5 h-5 text-violet-600" />,
     price: '$19.99',
+    iconBg: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
   },
 };
 
@@ -102,11 +106,11 @@ export default function Billing() {
     const load = async () => {
       try {
         const [payRes, statsRes] = await Promise.all([
-          api.get('/payments'),
+          api.get('/billing/history'),
           api.get('/applications/stats'),
         ]);
         setPayments(payRes.data ?? []);
-        setAppCount(statsRes.data?.total ?? 0);
+        setAppCount(statsRes.data?.totalApplications ?? statsRes.data?.total ?? 0);
       } catch {
         // silent
       } finally {
@@ -120,7 +124,7 @@ export default function Billing() {
     if (!confirm('Are you sure you want to cancel your subscription? You will be downgraded to the Free plan.')) return;
     setCancelling(true);
     try {
-      await api.post('/payments/cancel');
+      await api.post('/billing/downgrade');
       addToast('success', 'Subscription cancelled. You have been moved to the Free plan.');
     } catch {
       addToast('error', 'Failed to cancel subscription. Please contact support.');
@@ -133,15 +137,12 @@ export default function Billing() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading billing...</p>
         </div>
       </div>
     );
   }
-
-  const renewalDate = new Date();
-  renewalDate.setDate(renewalDate.getDate() + 30);
 
   const sinceDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -154,27 +155,22 @@ export default function Billing() {
         subtitle="Manage your subscription and payments"
       />
 
-      {/* Current Plan Hero Card */}
+      {/* Current Plan Card */}
       <div
         className="bg-white rounded-2xl border border-slate-200 p-6 mb-5 animate-fade-up"
         style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
       >
+        {/* Top section */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
-          {/* Left side */}
-          <div className="flex items-start gap-4 flex-1">
+          {/* Plan icon + info */}
+          <div className="flex items-start gap-4 flex-1 min-w-0">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                background: planKey === 'premium'
-                  ? 'linear-gradient(135deg, #ede9fe, #ddd6fe)'
-                  : planKey === 'pro'
-                  ? 'linear-gradient(135deg, #eef2ff, #e0e7ff)'
-                  : '#f1f5f9',
-              }}
+              style={{ background: plan.iconBg }}
             >
               {plan.icon}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2.5 mb-1">
                 <h3 className="text-xl font-bold" style={{ color: '#0f172a' }}>
                   {plan.label} Plan
@@ -195,11 +191,11 @@ export default function Billing() {
             </div>
           </div>
 
-          {/* Right side actions */}
+          {/* Right-side action buttons */}
           <div className="flex flex-col items-start sm:items-end gap-2.5 shrink-0">
             <a
               href="/pricing"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
             >
               Change Plan
@@ -218,17 +214,17 @@ export default function Billing() {
           </div>
         </div>
 
-        {/* Usage Bar */}
+        {/* Usage section */}
         <div className="mt-6 pt-5 border-t border-slate-100">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2.5">
             <span className="text-sm font-medium" style={{ color: '#475569' }}>Application usage</span>
             <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-              {appCount} / {typeof plan.limit === 'number' ? plan.limit.toLocaleString() : 'Unlimited'}
+              {appCount.toLocaleString()} / {typeof plan.limit === 'number' ? plan.limit.toLocaleString() : 'Unlimited'}
             </span>
           </div>
           <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#f1f5f9' }}>
             <div
-              className="h-full rounded-full transition-all duration-700"
+              className="h-2.5 rounded-full transition-all duration-700"
               style={{
                 width: `${typeof plan.limit === 'string'
                   ? Math.min((appCount / 100) * 5, 100)
@@ -239,7 +235,7 @@ export default function Billing() {
           </div>
           {usagePct >= 80 && typeof plan.limit === 'number' && (
             <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: '#d97706' }}>
-              <AlertCircle className="w-3.5 h-3.5" />
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               You're approaching your plan limit. Consider upgrading.
             </p>
           )}
@@ -254,10 +250,9 @@ export default function Billing() {
           animationDelay: '80ms',
         }}
       >
-        <div
-          className="px-6 py-4 border-b border-slate-100 flex items-center gap-2"
-        >
-          <Receipt className="w-4 h-4" style={{ color: '#94a3b8' }} />
+        {/* Card header */}
+        <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-100">
+          <Receipt className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
           <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Payment History</h3>
           {payments.length > 0 && (
             <span className="ml-auto text-xs" style={{ color: '#94a3b8' }}>
@@ -267,6 +262,7 @@ export default function Billing() {
         </div>
 
         {payments.length === 0 ? (
+          /* Empty state */
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -285,7 +281,7 @@ export default function Billing() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>
                     Date
                   </th>

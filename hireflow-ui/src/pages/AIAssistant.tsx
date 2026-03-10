@@ -93,7 +93,8 @@ export default function AIAssistant() {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+      textareaRef.current.style.height =
+        Math.min(textareaRef.current.scrollHeight, 120) + 'px';
     }
   }, [input]);
 
@@ -173,37 +174,45 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="flex flex-col gap-0" style={{ height: 'calc(100vh - 5rem)' }}>
-      {/* Page header */}
-      <TopBar
-        title="AI Assistant"
-        subtitle="Your intelligent career companion"
-      />
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
+      <TopBar title="AI Assistant" subtitle="Your intelligent career companion" />
 
-      <div className="flex-1 grid grid-cols-5 gap-6 min-h-0">
-        {/* ===== Chat Panel (col-span-3) ===== */}
+      <div
+        style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: '3fr 2fr',
+          gap: 24,
+          minHeight: 0,
+        }}
+      >
+        {/* ===== Chat Panel ===== */}
         <div
-          className="col-span-3 flex flex-col rounded-xl border border-slate-200 overflow-hidden"
+          className="flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden"
           style={{
-            background: 'white',
+            minHeight: 0,
+            flex: 1,
             boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-            height: 'calc(100vh - 200px)',
           }}
         >
           {/* Chat Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
               >
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold" style={{ color: '#0f172a' }}>AI Assistant</h2>
+                <h2 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+                  AI Assistant
+                </h2>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-xs" style={{ color: '#94a3b8' }}>Active</span>
+                  <span className="text-xs" style={{ color: '#94a3b8' }}>
+                    Online
+                  </span>
                 </div>
               </div>
             </div>
@@ -216,7 +225,7 @@ export default function AIAssistant() {
             </div>
           </div>
 
-          {/* Messages area */}
+          {/* Messages area — flex-1 + overflow-y-auto is the key scroll fix */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full gap-5 py-8">
@@ -239,13 +248,10 @@ export default function AIAssistant() {
                     <button
                       key={prompt}
                       onClick={() => sendMessage(prompt)}
-                      className="text-left px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 text-xs transition-all duration-150 flex items-center justify-between group"
-                      style={{ color: '#475569' }}
+                      className="text-left px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 text-xs text-slate-600 transition-all flex items-center justify-between group"
                     >
                       <span>{prompt}</span>
-                      <ArrowUpRight
-                        className="w-3 h-3 shrink-0 ml-2 text-slate-300 group-hover:text-indigo-400 transition-colors"
-                      />
+                      <ArrowUpRight className="w-3 h-3 shrink-0 ml-2 text-slate-300 group-hover:text-indigo-400 transition-colors" />
                     </button>
                   ))}
                 </div>
@@ -259,35 +265,41 @@ export default function AIAssistant() {
               >
                 {/* Avatar */}
                 <div
-                  className={clsx(
-                    'w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1'
-                  )}
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1"
                   style={
                     msg.role === 'user'
                       ? { background: '#eef2ff' }
                       : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }
                   }
                 >
-                  {msg.role === 'user'
-                    ? <User className="w-3.5 h-3.5 text-indigo-600" />
-                    : <Bot className="w-3.5 h-3.5 text-white" />
-                  }
+                  {msg.role === 'user' ? (
+                    <User className="w-3.5 h-3.5 text-indigo-600" />
+                  ) : (
+                    <Bot className="w-3.5 h-3.5 text-white" />
+                  )}
                 </div>
 
                 {/* Bubble */}
-                <div className={clsx('flex flex-col gap-1 max-w-[75%]', msg.role === 'user' && 'items-end')}>
+                <div
+                  className={clsx(
+                    'flex flex-col gap-1 max-w-[75%]',
+                    msg.role === 'user' && 'items-end'
+                  )}
+                >
                   <div
-                    className={clsx('px-4 py-3 rounded-2xl text-sm leading-relaxed')}
+                    className="px-4 py-3 text-sm leading-relaxed"
                     style={
                       msg.role === 'user'
                         ? {
                             background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
                             color: 'white',
+                            borderRadius: '16px',
                             borderBottomRightRadius: 4,
                           }
                         : {
                             background: '#f1f5f9',
                             color: '#0f172a',
+                            borderRadius: '16px',
                             borderBottomLeftRadius: 4,
                           }
                     }
@@ -298,7 +310,10 @@ export default function AIAssistant() {
                     className={clsx('text-xs px-1', msg.role === 'user' && 'text-right')}
                     style={{ color: '#94a3b8' }}
                   >
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(msg.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
               </div>
@@ -313,25 +328,27 @@ export default function AIAssistant() {
                   <Bot className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div
-                  className="px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2"
-                  style={{ background: '#f1f5f9' }}
+                  className="px-4 py-3 rounded-2xl flex items-center gap-2"
+                  style={{ background: '#f1f5f9', borderBottomLeftRadius: 4 }}
                 >
                   <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: '#94a3b8' }} />
-                  <span className="text-xs" style={{ color: '#94a3b8' }}>Thinking...</span>
+                  <span className="text-xs" style={{ color: '#94a3b8' }}>
+                    Thinking...
+                  </span>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input area */}
-          <form onSubmit={handleFormSubmit} className="border-t border-slate-100 p-4 flex-shrink-0">
+          {/* Input area — fixed at bottom of chat panel */}
+          <form
+            onSubmit={handleFormSubmit}
+            className="border-t border-slate-100 p-4 flex-shrink-0"
+          >
             <div
-              className="flex items-end gap-3 rounded-xl border px-4 py-3 transition-all"
-              style={{
-                background: '#f8fafc',
-                borderColor: '#e2e8f0',
-              }}
+              className="flex items-end gap-3 rounded-xl border px-4 py-3 bg-slate-50 transition-all"
+              style={{ borderColor: '#e2e8f0' }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#6366f1';
                 e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
@@ -347,13 +364,8 @@ export default function AIAssistant() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask me anything... (Shift+Enter for new line)"
-                className="flex-1 bg-transparent text-sm resize-none outline-none"
-                style={{
-                  color: '#0f172a',
-                  minHeight: 20,
-                  maxHeight: 120,
-                  lineHeight: '1.5',
-                }}
+                className="flex-1 bg-transparent text-sm resize-none outline-none text-slate-900"
+                style={{ minHeight: 20, maxHeight: 120, lineHeight: '1.5' }}
                 disabled={isChatLoading}
                 rows={1}
               />
@@ -363,10 +375,11 @@ export default function AIAssistant() {
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}
               >
-                {isChatLoading
-                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  : <Send className="w-3.5 h-3.5" />
-                }
+                {isChatLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
               </button>
             </div>
             <p className="text-xs text-center mt-2" style={{ color: '#94a3b8' }}>
@@ -375,32 +388,40 @@ export default function AIAssistant() {
           </form>
         </div>
 
-        {/* ===== Match Analyzer Panel (col-span-2) ===== */}
+        {/* ===== Match Analyzer Panel ===== */}
         <div
-          className="col-span-2 flex flex-col rounded-xl border border-slate-200 overflow-hidden"
+          className="flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden"
           style={{
-            background: 'white',
+            minHeight: 0,
             boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-            height: 'calc(100vh - 200px)',
           }}
         >
           {/* Analyzer Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
               <Zap className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Job Match Analyzer</h2>
-              <p className="text-xs" style={{ color: '#94a3b8' }}>Analyze your fit for a role</p>
+              <h2 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+                Job Match Analyzer
+              </h2>
+              <p className="text-xs" style={{ color: '#94a3b8' }}>
+                Analyze your fit for a role
+              </p>
             </div>
           </div>
 
+          {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {!matchResult ? (
               <>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: '#475569' }}>
-                    Job Description <span className="text-red-400 normal-case">*</span>
+                  <label
+                    className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                    style={{ color: '#475569' }}
+                  >
+                    Job Description{' '}
+                    <span className="text-red-400 normal-case font-normal">*</span>
                   </label>
                   <textarea
                     value={jobDescription}
@@ -425,9 +446,14 @@ export default function AIAssistant() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: '#475569' }}>
+                  <label
+                    className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                    style={{ color: '#475569' }}
+                  >
                     Your Resume{' '}
-                    <span className="normal-case font-normal" style={{ color: '#94a3b8' }}>(optional)</span>
+                    <span className="normal-case font-normal" style={{ color: '#94a3b8' }}>
+                      (optional)
+                    </span>
                   </label>
                   <textarea
                     value={resume}
@@ -501,7 +527,10 @@ export default function AIAssistant() {
                 {/* Matched Skills */}
                 {matchResult.strengths?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold mb-2.5 flex items-center gap-1.5" style={{ color: '#475569' }}>
+                    <h4
+                      className="text-xs font-semibold mb-2.5 flex items-center gap-1.5"
+                      style={{ color: '#475569' }}
+                    >
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
                       Matched Skills ({matchResult.strengths.length})
                     </h4>
@@ -516,7 +545,10 @@ export default function AIAssistant() {
                 {/* Missing Skills */}
                 {matchResult.gaps?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold mb-2.5 flex items-center gap-1.5" style={{ color: '#475569' }}>
+                    <h4
+                      className="text-xs font-semibold mb-2.5 flex items-center gap-1.5"
+                      style={{ color: '#475569' }}
+                    >
                       <span className="w-2 h-2 rounded-full bg-red-500" />
                       Missing Skills ({matchResult.gaps.length})
                     </h4>
@@ -531,13 +563,20 @@ export default function AIAssistant() {
                 {/* Suggestions */}
                 {matchResult.suggestions?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold mb-2.5 flex items-center gap-1.5" style={{ color: '#475569' }}>
+                    <h4
+                      className="text-xs font-semibold mb-2.5 flex items-center gap-1.5"
+                      style={{ color: '#475569' }}
+                    >
                       <Sparkles className="w-3 h-3 text-violet-500" />
                       AI Suggestions
                     </h4>
                     <ul className="space-y-2.5">
                       {matchResult.suggestions.map((s, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-xs" style={{ color: '#475569' }}>
+                        <li
+                          key={i}
+                          className="flex items-start gap-2.5 text-xs"
+                          style={{ color: '#475569' }}
+                        >
                           <span
                             className="font-bold shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px]"
                             style={{ background: '#6366f1' }}

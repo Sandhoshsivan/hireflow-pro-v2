@@ -8,19 +8,58 @@ interface TopBarProps {
 
 export default function TopBar({ title, subtitle, actions }: TopBarProps) {
   return (
-    <div className="flex items-start justify-between mb-7">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: '1.5rem', // mb-6
+        fontFamily: 'Inter, sans-serif',
+      }}
+    >
+      {/* Title block */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#0f172a', letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.3,
+            margin: 0,
+          }}
+        >
           {title}
         </h1>
         {subtitle && (
-          <p className="text-sm mt-1 font-normal" style={{ color: '#64748b' }}>
+          <p
+            style={{
+              fontSize: '0.875rem',
+              color: '#64748b',
+              marginTop: '2px',
+              fontWeight: 400,
+              lineHeight: 1.5,
+              margin: '2px 0 0 0',
+            }}
+          >
             {subtitle}
           </p>
         )}
       </div>
+
+      {/* Actions — right-aligned, vertically centered with title */}
       {actions && (
-        <div className="flex items-center gap-2.5 ml-4 mt-0.5">{actions}</div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginLeft: '16px',
+            flexShrink: 0,
+          }}
+        >
+          {actions}
+        </div>
       )}
     </div>
   );

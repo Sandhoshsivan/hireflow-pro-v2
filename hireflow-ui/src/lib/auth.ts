@@ -2,6 +2,22 @@ import { create } from 'zustand';
 import type { User } from '../types';
 import api from './api';
 
+// Bridges the gap between the .NET API user shape and the frontend User type.
+// The API returns roleTitle (not role), plan as "Free" (not "free"), and isAdmin as boolean.
+function normalizeUser(raw: Record<string, unknown>): User {
+  return {
+    id: raw.id as number,
+    name: (raw.name as string) ?? '',
+    email: (raw.email as string) ?? '',
+    role: raw.isAdmin ? 'admin' : (raw.roleTitle as string ?? 'user').toLowerCase(),
+    plan: ((raw.plan as string) ?? 'free').toLowerCase(),
+    isActive: (raw.isActive as boolean) ?? true,
+    createdAt: (raw.createdAt as string) ?? new Date().toISOString(),
+    lastLogin: raw.lastLogin as string | undefined,
+    applicationCount: raw.applicationCount as number | undefined,
+  };
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -30,11 +46,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await api.post('/auth/login', { email, password });
       localStorage.setItem('hireflow_token', data.token);
+      const normalizedUser = normalizeUser(data.user);
       set({
-        user: data.user,
+        user: normalizedUser,
         token: data.token,
         isAuthenticated: true,
-        isAdmin: data.user.role === 'admin',
+        isAdmin: data.user.isAdmin === true || data.user.roleTitle === 'Admin',
         isLoading: false,
       });
     } catch (err: unknown) {
@@ -49,11 +66,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await api.post('/auth/register', { name, email, password, role });
       localStorage.setItem('hireflow_token', data.token);
+      const normalizedUser = normalizeUser(data.user);
       set({
-        user: data.user,
+        user: normalizedUser,
         token: data.token,
         isAuthenticated: true,
-        isAdmin: data.user.role === 'admin',
+        isAdmin: data.user.isAdmin === true || data.user.roleTitle === 'Admin',
         isLoading: false,
       });
     } catch (err: unknown) {
@@ -77,11 +95,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!get().token) return;
     set({ isLoading: true });
     try {
-      const { data } = await api.get('/auth/profile');
+      // The .NET API exposes the profile at /api/auth/me (not /api/auth/profile)
+      const { data } = await api.get('/auth/me');
+      const raw = data.user ?? data;
+      const normalizedUser = normalizeUser(raw);
       set({
-        user: data.user ?? data,
+        user: normalizedUser,
         isAuthenticated: true,
-        isAdmin: (data.user ?? data).role === 'admin',
+        isAdmin: raw.isAdmin === true || raw.roleTitle === 'Admin' || raw.role === 'admin',
         isLoading: false,
       });
     } catch {

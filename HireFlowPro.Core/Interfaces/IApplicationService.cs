@@ -12,4 +12,6 @@ public interface IApplicationService
     Task DeleteAsync(int userId, int applicationId);
     Task<ApplicationStatsDto> GetStatsAsync(int userId);
     Task<string> ExportCsvAsync(int userId);
+    Task<IEnumerable<TimelineDto>> GetTimelineAsync(int userId, int applicationId);
+    Task<IEnumerable<ContactDto>> GetContactsAsync(int userId, int applicationId);
 }

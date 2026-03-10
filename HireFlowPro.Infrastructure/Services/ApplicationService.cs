@@ -342,6 +342,43 @@ public class ApplicationService : IApplicationService
         return sb.ToString();
     }
 
+    public async Task<IEnumerable<TimelineDto>> GetTimelineAsync(int userId, int applicationId)
+    {
+        var app = await _db.Applications
+            .Include(a => a.Timelines.OrderByDescending(t => t.CreatedAt))
+            .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+            ?? throw new InvalidOperationException("Application not found.");
+
+        return app.Timelines.Select(t => new TimelineDto
+        {
+            Id = t.Id,
+            FromStatus = t.FromStatus,
+            ToStatus = t.ToStatus,
+            Note = t.Note,
+            CreatedAt = t.CreatedAt
+        });
+    }
+
+    public async Task<IEnumerable<ContactDto>> GetContactsAsync(int userId, int applicationId)
+    {
+        var app = await _db.Applications
+            .Include(a => a.Contacts)
+            .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+            ?? throw new InvalidOperationException("Application not found.");
+
+        return app.Contacts.Select(c => new ContactDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Title = c.Title,
+            Email = c.Email,
+            Phone = c.Phone,
+            LinkedInUrl = c.LinkedInUrl,
+            Notes = c.Notes,
+            CreatedAt = c.CreatedAt
+        });
+    }
+
     // ---- Helpers ----
 
     private static ApplicationDetailDto MapToDetail(Application app) => new()

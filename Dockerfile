@@ -9,7 +9,7 @@ RUN npm run build
 # ── Stage 2: Build .NET Backend ───────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /app
-COPY HireFlowPro.sln ./
+COPY HireFlowPro.slnx ./
 COPY HireFlowPro.Api/HireFlowPro.Api.csproj HireFlowPro.Api/
 COPY HireFlowPro.Core/HireFlowPro.Core.csproj HireFlowPro.Core/
 COPY HireFlowPro.Infrastructure/HireFlowPro.Infrastructure.csproj HireFlowPro.Infrastructure/

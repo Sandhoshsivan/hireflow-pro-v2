@@ -94,6 +94,22 @@ public class ApplicationsController : ControllerBase
         return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "applications.csv");
     }
 
+    [HttpGet("{id:int}/timeline")]
+    public async Task<IActionResult> GetTimeline(int id)
+    {
+        var userId = GetUserId();
+        var result = await _applicationService.GetTimelineAsync(userId, id);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}/contacts")]
+    public async Task<IActionResult> GetContacts(int id)
+    {
+        var userId = GetUserId();
+        var result = await _applicationService.GetContactsAsync(userId, id);
+        return Ok(result);
+    }
+
     private int GetUserId()
     {
         return int.Parse(User.FindFirst("userId")?.Value

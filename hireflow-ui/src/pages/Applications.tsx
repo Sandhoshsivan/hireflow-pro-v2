@@ -22,6 +22,7 @@ import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
 import type { Application, ApplicationStatus, Priority, TimelineEntry, Contact } from '../types';
+import { extractApplications } from '../lib/normalize';
 
 const statusOptions: ApplicationStatus[] = [
   'saved',
@@ -62,16 +63,6 @@ const priorityLabels: Record<string, string> = {
   high: 'text-red-600',
   medium: 'text-amber-600',
   low: 'text-slate-400',
-};
-
-const statusPillActive: Record<string, string> = {
-  '': 'bg-indigo-600 text-white shadow-sm',
-  saved: 'bg-indigo-600 text-white shadow-sm',
-  applied: 'bg-indigo-600 text-white shadow-sm',
-  interview: 'bg-indigo-600 text-white shadow-sm',
-  offer: 'bg-indigo-600 text-white shadow-sm',
-  rejected: 'bg-indigo-600 text-white shadow-sm',
-  ghosted: 'bg-indigo-600 text-white shadow-sm',
 };
 
 interface FormData {
@@ -120,6 +111,9 @@ function FormField({
   );
 }
 
+const inputClass =
+  'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white';
+
 export default function Applications() {
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status') ?? '';
@@ -152,7 +146,7 @@ export default function Applications() {
       if (filterStatus) params.set('status', filterStatus);
       if (sortBy) params.set('sort', sortBy);
       const { data } = await api.get(`/applications?${params}`);
-      setApps(data.applications ?? data ?? []);
+      setApps(extractApplications(data));
     } catch {
       // empty
     } finally {
@@ -194,11 +188,23 @@ export default function Applications() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = {
+        jobTitle: form.role,
+        company: form.company,
+        status: form.status,
+        priority: form.priority,
+        salaryRange: form.salary,
+        location: form.location,
+        source: form.source,
+        jobUrl: form.url,
+        notes: form.notes,
+        followUpDate: form.followUpDate || undefined,
+      };
       if (editingApp) {
-        await api.put(`/applications/${editingApp.id}`, form);
+        await api.put(`/applications/${editingApp.id}`, payload);
         addToast('success', 'Application updated');
       } else {
-        await api.post('/applications', form);
+        await api.post('/applications', payload);
         addToast('success', 'Application created');
       }
       setShowModal(false);
@@ -229,8 +235,24 @@ export default function Applications() {
         api.get(`/applications/${app.id}/timeline`),
         api.get(`/applications/${app.id}/contacts`),
       ]);
-      setTimeline(tlRes.data ?? []);
-      setContacts(ctRes.data ?? []);
+      const rawTimeline: Record<string, unknown>[] = tlRes.data ?? [];
+      setTimeline(rawTimeline.map((t) => ({
+        id: t.id as number,
+        applicationId: (t.applicationId as number) ?? 0,
+        action: (t.action as string) ?? `${t.fromStatus} → ${t.toStatus}`,
+        details: (t.details as string) ?? (t.note as string),
+        createdAt: t.createdAt as string,
+      })));
+      const rawContacts: Record<string, unknown>[] = ctRes.data ?? [];
+      setContacts(rawContacts.map((c) => ({
+        id: c.id as number,
+        applicationId: (c.applicationId as number) ?? 0,
+        name: (c.name as string) ?? '',
+        title: c.title as string,
+        email: c.email as string,
+        phone: c.phone as string,
+        notes: c.notes as string,
+      })));
     } catch {
       setTimeline([]);
       setContacts([]);
@@ -241,7 +263,7 @@ export default function Applications() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm text-slate-500 font-medium">Loading applications...</p>
         </div>
       </div>
@@ -255,13 +277,15 @@ export default function Applications() {
 
   return (
     <div>
+      {/* TopBar */}
       <TopBar
         title="Applications"
         subtitle={`${apps.length} ${apps.length === 1 ? 'application' : 'applications'} tracked`}
         actions={
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
           >
             <Plus className="w-4 h-4" />
             Add Application
@@ -270,7 +294,7 @@ export default function Applications() {
       />
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-5">
+      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-4">
           {/* Search */}
           <div className="relative flex-1 min-w-[220px] max-w-sm">
@@ -280,12 +304,12 @@ export default function Applications() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search company or role..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
             />
           </div>
 
           {/* Status Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap">
             {allPills.map((pill) => (
               <button
                 key={pill.value}
@@ -293,7 +317,7 @@ export default function Applications() {
                 className={clsx(
                   'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
                   filterStatus === pill.value
-                    ? statusPillActive[pill.value]
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 )}
               >
@@ -302,8 +326,8 @@ export default function Applications() {
             ))}
           </div>
 
-          {/* Sort */}
-          <div className="relative ml-auto">
+          {/* Sort dropdown */}
+          <div className="relative">
             <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
             <select
               value={sortBy}
@@ -318,7 +342,8 @@ export default function Applications() {
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           </div>
 
-          <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+          {/* Result count */}
+          <span className="text-xs text-slate-400 font-medium ml-auto whitespace-nowrap">
             {apps.length} {apps.length === 1 ? 'result' : 'results'}
           </span>
         </div>
@@ -328,30 +353,30 @@ export default function Applications() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Company / Role
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Salary
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Location
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Source
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="text-center px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Priority
                 </th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -370,7 +395,8 @@ export default function Applications() {
                       </p>
                       <button
                         onClick={openAdd}
-                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
+                        style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
                       >
                         <Plus className="w-4 h-4" />
                         Add your first application
@@ -385,7 +411,8 @@ export default function Applications() {
                     onClick={() => openDetail(app)}
                     className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
                   >
-                    <td className="px-5 py-3.5">
+                    {/* Company / Role */}
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-indigo-700">
@@ -398,7 +425,8 @@ export default function Applications() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5">
+                    {/* Status */}
+                    <td className="px-4 py-3">
                       <span
                         className={clsx(
                           'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
@@ -409,16 +437,20 @@ export default function Applications() {
                         {app.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    {/* Salary */}
+                    <td className="px-4 py-3">
                       <span className="text-sm text-slate-600">{app.salary || '—'}</span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    {/* Location */}
+                    <td className="px-4 py-3">
                       <span className="text-sm text-slate-600">{app.location || '—'}</span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    {/* Source */}
+                    <td className="px-4 py-3">
                       <span className="text-sm text-slate-600">{app.source || '—'}</span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    {/* Date */}
+                    <td className="px-4 py-3">
                       <span className="text-sm text-slate-500">
                         {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
@@ -427,18 +459,17 @@ export default function Applications() {
                         })}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-center">
+                    {/* Priority */}
+                    <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <span
-                          className={clsx('w-2 h-2 rounded-full', priorityDots[app.priority])}
-                          title={app.priority}
-                        />
+                        <span className={clsx('w-2 h-2 rounded-full', priorityDots[app.priority])} title={app.priority} />
                         <span className={clsx('text-xs font-medium capitalize', priorityLabels[app.priority])}>
                           {app.priority}
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    {/* Actions — appear on row hover */}
+                    <td className="px-4 py-3 text-right">
                       <div
                         className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => e.stopPropagation()}
@@ -467,11 +498,11 @@ export default function Applications() {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
+      {/* Add / Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Gradient top bar */}
+            {/* Top gradient bar */}
             <div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-500 flex-shrink-0" />
 
             {/* Header */}
@@ -492,7 +523,7 @@ export default function Applications() {
               </button>
             </div>
 
-            {/* Body */}
+            {/* Body — scrollable form */}
             <div className="overflow-y-auto flex-1 px-6 py-5">
               <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
@@ -502,7 +533,7 @@ export default function Applications() {
                       value={form.company}
                       onChange={(e) => setForm({ ...form, company: e.target.value })}
                       placeholder="e.g. Stripe"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                   <FormField label="Role" required>
@@ -511,7 +542,7 @@ export default function Applications() {
                       value={form.role}
                       onChange={(e) => setForm({ ...form, role: e.target.value })}
                       placeholder="e.g. Senior Engineer"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                 </div>
@@ -521,7 +552,7 @@ export default function Applications() {
                     <select
                       value={form.status}
                       onChange={(e) => setForm({ ...form, status: e.target.value as ApplicationStatus })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className={inputClass}
                     >
                       {statusOptions.map((s) => (
                         <option key={s} value={s}>
@@ -534,7 +565,7 @@ export default function Applications() {
                     <select
                       value={form.priority}
                       onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className={inputClass}
                     >
                       {priorityOptions.map((p) => (
                         <option key={p} value={p}>
@@ -552,7 +583,7 @@ export default function Applications() {
                       value={form.salary}
                       onChange={(e) => setForm({ ...form, salary: e.target.value })}
                       placeholder="e.g. $120,000"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                   <FormField label="Location">
@@ -561,7 +592,7 @@ export default function Applications() {
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
                       placeholder="e.g. San Francisco, CA"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                 </div>
@@ -573,7 +604,7 @@ export default function Applications() {
                       value={form.source}
                       onChange={(e) => setForm({ ...form, source: e.target.value })}
                       placeholder="LinkedIn, Indeed, etc."
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                   <FormField label="Follow-up Date">
@@ -581,7 +612,7 @@ export default function Applications() {
                       type="date"
                       value={form.followUpDate}
                       onChange={(e) => setForm({ ...form, followUpDate: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                      className={inputClass}
                     />
                   </FormField>
                 </div>
@@ -592,7 +623,7 @@ export default function Applications() {
                     value={form.url}
                     onChange={(e) => setForm({ ...form, url: e.target.value })}
                     placeholder="https://..."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
+                    className={inputClass}
                   />
                 </FormField>
 
@@ -602,7 +633,7 @@ export default function Applications() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Add any notes about this opportunity..."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none bg-white"
+                    className={clsx(inputClass, 'resize-none')}
                   />
                 </FormField>
               </div>
@@ -612,14 +643,15 @@ export default function Applications() {
             <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.company || !form.role}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg hover:from-indigo-700 hover:to-violet-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
               >
                 {saving ? 'Saving...' : editingApp ? 'Update Application' : 'Create Application'}
               </button>
@@ -631,18 +663,21 @@ export default function Applications() {
       {/* Detail Drawer */}
       {selectedApp && (
         <div className="fixed inset-0 z-40 flex justify-end">
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setSelectedApp(null)}
           />
-          <div className="relative w-full max-w-xl bg-white shadow-2xl overflow-hidden flex flex-col">
-            {/* Gradient accent top */}
+          {/* Panel */}
+          <div className="relative w-full max-w-xl bg-white shadow-2xl flex flex-col animate-slide-in-from-right">
+            {/* Top gradient bar */}
             <div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-500 flex-shrink-0" />
 
-            {/* Header */}
+            {/* Sticky header */}
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-5 flex-shrink-0 z-10">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
+                  {/* Company avatar */}
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-bold text-indigo-700">
                       {selectedApp.company.charAt(0).toUpperCase()}
@@ -654,6 +689,7 @@ export default function Applications() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Status badge */}
                   <span
                     className={clsx(
                       'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
@@ -663,6 +699,7 @@ export default function Applications() {
                     <span className={clsx('w-1.5 h-1.5 rounded-full', statusDots[selectedApp.status])} />
                     {selectedApp.status}
                   </span>
+                  {/* Close */}
                   <button
                     onClick={() => setSelectedApp(null)}
                     className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
@@ -673,9 +710,9 @@ export default function Applications() {
               </div>
             </div>
 
-            {/* Body */}
+            {/* Scrollable body */}
             <div className="overflow-y-auto flex-1 p-6 space-y-6">
-              {/* Info Grid */}
+              {/* Info grid cards */}
               <div className="grid grid-cols-2 gap-3">
                 {selectedApp.salary && (
                   <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
@@ -744,6 +781,7 @@ export default function Applications() {
                 )}
               </div>
 
+              {/* Notes section */}
               {selectedApp.notes && (
                 <div>
                   <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Notes</h4>
@@ -859,7 +897,7 @@ export default function Applications() {
               </div>
             </div>
 
-            {/* Footer Actions */}
+            {/* Footer: Edit + Delete */}
             <div className="flex gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
               <button
                 onClick={() => {

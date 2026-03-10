@@ -122,7 +122,7 @@ export default function Pricing() {
     if (planKey === currentPlan) return;
     setLoadingPlan(planKey);
     try {
-      await api.post('/payments/subscribe', { plan: planKey });
+      await api.post('/billing/checkout', { plan: planKey, successUrl: '/' });
       await fetchProfile();
       addToast('success', `Successfully upgraded to ${planKey.charAt(0).toUpperCase() + planKey.slice(1)} plan`);
     } catch {
@@ -141,10 +141,9 @@ export default function Pricing() {
 
       {/* Current plan banner */}
       <div
-        className="mb-8 flex items-center gap-3 px-4 py-3 rounded-xl border"
-        style={{ background: '#eef2ff', borderColor: '#c7d2fe' }}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-indigo-200 bg-indigo-50 mb-8"
       >
-        <div className="w-2 h-2 rounded-full" style={{ background: '#6366f1' }} />
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#6366f1' }} />
         <p className="text-sm" style={{ color: '#4338ca' }}>
           You are currently on the{' '}
           <span className="font-semibold capitalize">{currentPlan}</span> plan.
@@ -152,7 +151,7 @@ export default function Pricing() {
         </p>
       </div>
 
-      {/* Pricing cards */}
+      {/* 3-column pricing grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto animate-fade-up">
         {plans.map((plan, idx) => {
           const isCurrent = currentPlan === plan.key;
@@ -162,19 +161,18 @@ export default function Pricing() {
             <div
               key={plan.key}
               className={clsx(
-                'relative bg-white flex flex-col transition-all duration-200',
+                'relative bg-white flex flex-col rounded-2xl border transition-all duration-200',
                 plan.highlighted ? 'scale-[1.03]' : ''
               )}
               style={{
-                borderRadius: 16,
                 border: `1px solid ${plan.highlighted ? plan.accentColor + '60' : '#e2e8f0'}`,
                 boxShadow: plan.highlighted
-                  ? `0 8px 30px rgba(99,102,241,0.15), 0 1px 3px rgba(15,23,42,0.08)`
+                  ? '0 8px 30px rgba(99,102,241,0.15), 0 1px 3px rgba(15,23,42,0.08)'
                   : '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
                 animationDelay: `${idx * 80}ms`,
               }}
             >
-              {/* Most Popular / Best Value ribbon */}
+              {/* Badge: Most Popular / Best Value */}
               {plan.badge && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
                   <span
@@ -190,15 +188,15 @@ export default function Pricing() {
                 </div>
               )}
 
-              {/* Top accent line */}
+              {/* Top gradient bar for Pro */}
               {plan.highlighted && (
                 <div
                   className="h-1 rounded-t-2xl"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(to right, #6366f1, #8b5cf6)' }}
                 />
               )}
 
-              {/* Tinted bg for highlighted */}
+              {/* Subtle tinted bg overlay for highlighted */}
               {plan.highlighted && (
                 <div
                   className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -207,10 +205,10 @@ export default function Pricing() {
               )}
 
               <div className="relative p-7 flex flex-col flex-1">
-                {/* Header */}
+                {/* Header: icon + plan name + tagline */}
                 <div className="flex items-center gap-2.5 mb-5">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                     style={{ background: plan.accentBg }}
                   >
                     {plan.icon}

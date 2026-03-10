@@ -28,7 +28,7 @@ export default function Export() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const response = await api.get('/applications/export', { responseType: 'blob' });
+      const response = await api.get('/applications/export/csv', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -53,12 +53,13 @@ export default function Export() {
     <div>
       <TopBar
         title="Export Data"
-        subtitle="Download your application data in various formats"
+        subtitle="Download your application data"
       />
 
-      {/* Export Cards */}
+      {/* Export format cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6 max-w-3xl animate-fade-up">
-        {/* CSV Export Card - active */}
+
+        {/* CSV Export Card — active */}
         <div
           className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col hover:shadow-md transition-all duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
@@ -85,7 +86,7 @@ export default function Export() {
 
           {lastExported && (
             <div className="flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span className="text-xs" style={{ color: '#64748b' }}>
                 Last exported:{' '}
                 {lastExported.toLocaleString('en-US', {
@@ -118,10 +119,9 @@ export default function Export() {
           </button>
         </div>
 
-        {/* JSON Export Card - coming soon */}
+        {/* JSON Export Card — coming soon / disabled */}
         <div
-          className="bg-white rounded-xl border border-dashed border-slate-200 p-6 flex flex-col"
-          style={{ opacity: 0.6 }}
+          className="bg-white rounded-xl border border-dashed border-slate-200 p-6 flex flex-col opacity-60"
         >
           <div className="flex items-start justify-between mb-5">
             <div
@@ -162,9 +162,10 @@ export default function Export() {
           animationDelay: '80ms',
         }}
       >
+        {/* Header */}
         <div className="flex items-center gap-2.5 mb-5">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
             style={{ background: '#eff6ff' }}
           >
             <Info className="w-4 h-4 text-blue-500" />
@@ -176,6 +177,7 @@ export default function Export() {
           Your CSV export includes all application data across the following fields:
         </p>
 
+        {/* 2-col fields grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
           {EXPORT_FIELDS.map((field) => (
             <div key={field.label} className="flex items-center gap-3">
@@ -197,6 +199,7 @@ export default function Export() {
           ))}
         </div>
 
+        {/* Footer info note */}
         <div className="mt-5 pt-4 border-t border-slate-100 flex items-start gap-2.5">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: '#94a3b8' }} />
           <p className="text-xs" style={{ color: '#94a3b8' }}>

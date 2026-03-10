@@ -16,6 +16,7 @@ import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application, ApplicationStats } from '../types';
 import { useAuthStore } from '../lib/auth';
+import { extractApplications, normalizeStats } from '../lib/normalize';
 
 const statusColors: Record<string, string> = {
   applied: 'bg-blue-100 text-blue-700',
@@ -24,15 +25,6 @@ const statusColors: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700',
   ghosted: 'bg-slate-100 text-slate-500',
   saved: 'bg-cyan-100 text-cyan-700',
-};
-
-const statusDotColors: Record<string, string> = {
-  applied: 'bg-blue-500',
-  interview: 'bg-amber-500',
-  offer: 'bg-emerald-500',
-  rejected: 'bg-red-500',
-  ghosted: 'bg-slate-400',
-  saved: 'bg-cyan-500',
 };
 
 const statusBarColors: Record<string, string> = {
@@ -44,26 +36,20 @@ const statusBarColors: Record<string, string> = {
   saved: 'bg-cyan-500',
 };
 
+const statusDotColors: Record<string, string> = {
+  applied: 'bg-blue-500',
+  interview: 'bg-amber-500',
+  offer: 'bg-emerald-500',
+  rejected: 'bg-red-500',
+  ghosted: 'bg-slate-400',
+  saved: 'bg-cyan-500',
+};
+
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'morning';
   if (hour < 17) return 'afternoon';
   return 'evening';
-}
-
-function SparklineBar({ color }: { color: string }) {
-  const heights = [25, 45, 35, 60, 40, 70, 50, 80, 55, 90];
-  return (
-    <div className="flex items-end gap-[3px] h-8">
-      {heights.map((h, i) => (
-        <div
-          key={i}
-          className={clsx('w-1 rounded-sm', color)}
-          style={{ height: `${h}%`, opacity: 0.4 + (i / heights.length) * 0.6 }}
-        />
-      ))}
-    </div>
-  );
 }
 
 export default function Dashboard() {
@@ -91,8 +77,8 @@ export default function Dashboard() {
           api.get('/applications/stats'),
           api.get('/applications?limit=5&sort=createdAt_desc'),
         ]);
-        setStats(statsRes.data);
-        const apps: Application[] = appsRes.data.applications ?? appsRes.data ?? [];
+        setStats(normalizeStats(statsRes.data));
+        const apps: Application[] = extractApplications(appsRes.data);
         setRecentApps(apps.slice(0, 5));
         setFollowUps(
           apps.filter(
@@ -114,7 +100,7 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading dashboard...</p>
         </div>
       </div>
@@ -130,9 +116,7 @@ export default function Dashboard() {
       icon: Briefcase,
       iconBg: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
-      sparkColor: 'bg-indigo-500',
       trend: 'All time',
-      trendColor: 'text-slate-400',
     },
     {
       label: 'Applied',
@@ -140,9 +124,7 @@ export default function Dashboard() {
       icon: Send,
       iconBg: 'bg-blue-50',
       iconColor: 'text-blue-600',
-      sparkColor: 'bg-blue-500',
       trend: 'Submitted',
-      trendColor: 'text-blue-500',
     },
     {
       label: 'Interviews',
@@ -150,9 +132,7 @@ export default function Dashboard() {
       icon: Users,
       iconBg: 'bg-amber-50',
       iconColor: 'text-amber-600',
-      sparkColor: 'bg-amber-500',
       trend: 'Scheduled',
-      trendColor: 'text-amber-500',
     },
     {
       label: 'Offers',
@@ -160,9 +140,7 @@ export default function Dashboard() {
       icon: HandCoins,
       iconBg: 'bg-emerald-50',
       iconColor: 'text-emerald-600',
-      sparkColor: 'bg-emerald-500',
       trend: 'Received',
-      trendColor: 'text-emerald-600',
     },
     {
       label: 'Response Rate',
@@ -170,11 +148,20 @@ export default function Dashboard() {
       icon: TrendingUp,
       iconBg: 'bg-violet-50',
       iconColor: 'text-violet-600',
-      sparkColor: 'bg-violet-500',
       trend: 'Avg 20% industry',
-      trendColor: 'text-slate-400',
     },
   ];
+
+  const addAppButton = (
+    <Link
+      to="/applications"
+      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
+      style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+    >
+      <Plus className="w-4 h-4" />
+      Add Application
+    </Link>
+  );
 
   if (hasNoApplications) {
     return (
@@ -182,15 +169,7 @@ export default function Dashboard() {
         <TopBar
           title={`Good ${greeting}, ${firstName}!`}
           subtitle={formattedDate}
-          actions={
-            <Link
-              to="/applications"
-              className="btn-primary text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              Add Application
-            </Link>
-          }
+          actions={addAppButton}
         />
         <div className="flex flex-col items-center justify-center py-28 animate-fade-up">
           <div
@@ -207,7 +186,8 @@ export default function Dashboard() {
           </p>
           <Link
             to="/applications"
-            className="btn-primary"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
           >
             <Plus className="w-4 h-4" />
             Add Your First Application
@@ -223,52 +203,48 @@ export default function Dashboard() {
       <TopBar
         title={`Good ${greeting}, ${firstName}!`}
         subtitle={formattedDate}
-        actions={
-          <Link
-            to="/applications"
-            className="btn-primary text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add Application
-          </Link>
-        }
+        actions={addAppButton}
       />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6 animate-fade-up">
+      {/* KPI Cards Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-6 animate-fade-up">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200"
+            className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow duration-200"
             style={{
               boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
               animationDelay: `${idx * 50}ms`,
             }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className={clsx('w-9 h-9 rounded-xl flex items-center justify-center', kpi.iconBg)}>
-                <kpi.icon className={clsx('w-4.5 h-4.5', kpi.iconColor)} />
+            {/* Top row: label + icon */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-medium uppercase tracking-wide" style={{ color: '#64748b' }}>
+                {kpi.label}
+              </span>
+              <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', kpi.iconBg)}>
+                <kpi.icon className={clsx('w-4 h-4', kpi.iconColor)} />
               </div>
-              <SparklineBar color={kpi.sparkColor} />
             </div>
+            {/* Value */}
             <p
-              className="text-3xl font-bold tracking-tight mb-0.5"
+              className="text-2xl font-bold tracking-tight mb-1"
               style={{ color: '#0f172a', letterSpacing: '-0.02em' }}
             >
               {kpi.value}
             </p>
-            <p className="text-xs mb-3" style={{ color: '#94a3b8' }}>{kpi.label}</p>
-            <div className="h-px mb-3" style={{ background: '#f1f5f9' }} />
-            <p className={clsx('text-xs font-medium', kpi.trendColor)}>{kpi.trend}</p>
+            {/* Trend / subtitle */}
+            <p className="text-xs" style={{ color: '#94a3b8' }}>{kpi.trend}</p>
           </div>
         ))}
       </div>
 
       {/* Bottom 3-column grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up" style={{ animationDelay: '150ms' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: '150ms' }}>
+
         {/* Status Distribution */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="flex items-center justify-between mb-5">
@@ -277,28 +253,28 @@ export default function Dashboard() {
               {stats?.total ?? 0} total
             </span>
           </div>
-          <div className="space-y-4">
-            {Object.entries(statusDotColors).map(([status, dotColor]) => {
+          <div className="space-y-3.5">
+            {Object.entries(statusDotColors).map(([status]) => {
               const count = stats?.[status as keyof ApplicationStats] ?? 0;
               const total = stats?.total ?? 1;
               const pct = total > 0 ? Math.round((Number(count) / Number(total)) * 100) : 0;
               return (
-                <div key={status}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className={clsx('w-2 h-2 rounded-full flex-shrink-0', dotColor)} />
-                      <span className="text-xs font-medium capitalize" style={{ color: '#334155' }}>{status}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold" style={{ color: '#0f172a' }}>{String(count)}</span>
-                      <span className="text-xs w-8 text-right" style={{ color: '#94a3b8' }}>{pct}%</span>
-                    </div>
-                  </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#f1f5f9' }}>
+                <div key={status} className="flex items-center gap-3">
+                  {/* Label */}
+                  <span className="text-xs font-medium capitalize w-20 flex-shrink-0" style={{ color: '#475569' }}>
+                    {status}
+                  </span>
+                  {/* Progress bar */}
+                  <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                     <div
-                      className={clsx('h-full rounded-full transition-all duration-700', statusBarColors[status])}
+                      className={clsx('h-full rounded-full transition-all duration-700 ease-out', statusBarColors[status])}
                       style={{ width: `${pct}%` }}
                     />
+                  </div>
+                  {/* Count + pct */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs font-semibold" style={{ color: '#0f172a' }}>{String(count)}</span>
+                    <span className="text-xs w-7 text-right" style={{ color: '#94a3b8' }}>{pct}%</span>
                   </div>
                 </div>
               );
@@ -308,14 +284,14 @@ export default function Dashboard() {
 
         {/* Recent Applications */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Recent Applications</h3>
             <Link
               to="/applications"
-              className="text-xs font-medium flex items-center gap-1 transition-colors hover:opacity-70"
+              className="text-xs font-medium flex items-center gap-1 transition-opacity hover:opacity-70"
               style={{ color: '#6366f1' }}
             >
               View all
@@ -332,21 +308,18 @@ export default function Dashboard() {
               {recentApps.map((app) => (
                 <div
                   key={app.id}
-                  className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default"
                 >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                    style={{
-                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                      color: 'white',
-                    }}
-                  >
+                  {/* Avatar */}
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center text-xs font-bold text-indigo-700 shrink-0">
                     {app.company.charAt(0).toUpperCase()}
                   </div>
+                  {/* Name + role */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>{app.company}</p>
                     <p className="text-xs truncate" style={{ color: '#64748b' }}>{app.role}</p>
                   </div>
+                  {/* Badge + date */}
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
                     <span
                       className={clsx(
@@ -371,7 +344,7 @@ export default function Dashboard() {
 
         {/* Follow-up Alerts */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200"
+          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="flex items-center justify-between mb-5">
@@ -418,12 +391,13 @@ export default function Dashboard() {
                   <div
                     key={app.id}
                     className={clsx(
-                      'flex items-start gap-3 p-3 rounded-xl border transition-colors',
+                      'flex items-start gap-3 p-3 rounded-xl border',
                       isUrgent
                         ? 'bg-red-50 border-red-100'
                         : 'bg-amber-50 border-amber-100'
                     )}
                   >
+                    {/* Icon container */}
                     <div
                       className={clsx(
                         'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5',
@@ -434,6 +408,7 @@ export default function Dashboard() {
                         className={clsx('w-3.5 h-3.5', isUrgent ? 'text-red-500' : 'text-amber-600')}
                       />
                     </div>
+                    {/* Company + role + due label */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>
                         {app.company}
@@ -454,6 +429,7 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

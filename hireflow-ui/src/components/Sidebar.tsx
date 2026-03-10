@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../lib/auth';
 
-const SIDEBAR_BG = '#0c1220';
+const SIDEBAR_BG = '#0f172a';
 
 type BadgeType = 'pro' | 'free';
 
@@ -44,42 +44,45 @@ function SidebarNavItem({ item, isFreePlan }: { item: NavItem; isFreePlan: boole
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              padding: '8px 12px',
-              borderRadius: 8,
+              padding: '7px 10px 7px 13px',
+              borderRadius: 7,
               fontSize: '0.8125rem',
               fontWeight: 500,
-              color: '#ffffff',
-              background: 'rgba(99,102,241,0.12)',
-              boxShadow: 'inset 3px 0 0 #6366f1',
+              color: '#e2e8f0',
+              background: 'rgba(99,102,241,0.15)',
+              borderLeft: '3px solid #6366f1',
               textDecoration: 'none',
-              transition: 'background 0.15s, box-shadow 0.15s',
+              transition: 'all 0.15s ease',
+              marginLeft: 0,
             }
           : {
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              padding: '8px 12px',
-              borderRadius: 8,
+              padding: '7px 10px 7px 13px',
+              borderRadius: 7,
               fontSize: '0.8125rem',
               fontWeight: 500,
-              color: '#64748b',
+              color: '#94a3b8',
               background: 'transparent',
+              borderLeft: '3px solid transparent',
               textDecoration: 'none',
-              transition: 'background 0.15s, color 0.15s',
+              transition: 'all 0.15s ease',
             };
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget;
-        if (!el.style.boxShadow) {
-          el.style.background = 'rgba(255,255,255,0.04)';
-          el.style.color = '#94a3b8';
+        // Only apply hover styles if not active (active has boxShadow via borderLeft)
+        if (!el.style.borderLeftColor || el.style.borderLeftColor === 'transparent') {
+          el.style.background = 'rgba(255,255,255,0.05)';
+          el.style.color = '#cbd5e1';
         }
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget;
-        if (!el.style.boxShadow) {
+        if (!el.style.borderLeftColor || el.style.borderLeftColor === 'transparent') {
           el.style.background = 'transparent';
-          el.style.color = '#64748b';
+          el.style.color = '#94a3b8';
         }
       }}
     >
@@ -89,32 +92,43 @@ function SidebarNavItem({ item, isFreePlan }: { item: NavItem; isFreePlan: boole
           <>
             <item.icon
               className="shrink-0"
-              style={{ width: 16, height: 16, color: active ? '#818cf8' : '#475569' }}
+              style={{ width: 15, height: 15, color: active ? '#818cf8' : '#64748b', flexShrink: 0 }}
             />
             <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {item.label}
             </span>
             {item.badge === 'pro' && (
               <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 2,
-                padding: '1px 6px', borderRadius: 99,
-                fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.04em',
-                background: 'rgba(139,92,246,0.18)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 2,
+                padding: '1px 5px',
+                borderRadius: 99,
+                fontSize: '0.5625rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                background: 'rgba(139,92,246,0.15)',
                 color: '#a78bfa',
-                border: '1px solid rgba(139,92,246,0.25)',
+                border: '1px solid rgba(139,92,246,0.22)',
+                flexShrink: 0,
               }}>
-                <Zap style={{ width: 9, height: 9 }} />
+                <Zap style={{ width: 8, height: 8 }} />
                 PRO
               </span>
             )}
             {item.badge === 'free' && isFreePlan && (
               <span style={{
-                display: 'inline-flex', alignItems: 'center',
-                padding: '1px 6px', borderRadius: 99,
-                fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.04em',
-                background: 'rgba(99,102,241,0.15)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '1px 5px',
+                borderRadius: 99,
+                fontSize: '0.5625rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                background: 'rgba(99,102,241,0.12)',
                 color: '#818cf8',
-                border: '1px solid rgba(99,102,241,0.2)',
+                border: '1px solid rgba(99,102,241,0.18)',
+                flexShrink: 0,
               }}>
                 FREE
               </span>
@@ -194,62 +208,125 @@ export default function Sidebar() {
         background: SIDEBAR_BG,
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+        fontFamily: 'Inter, sans-serif',
       }}
     >
-      {/* Logo */}
-      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* Logo area — 64px height */}
+      <div style={{
+        height: 64,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 16px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+          {/* Icon */}
           <div style={{
-            width: 32, height: 32, borderRadius: 9,
-            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 32,
+            height: 32,
+            borderRadius: 9,
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             flexShrink: 0,
+            boxShadow: '0 0 0 1px rgba(99,102,241,0.35), 0 2px 8px rgba(99,102,241,0.25)',
           }}>
             <Briefcase style={{ width: 16, height: 16, color: '#fff' }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-            <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>HireFlow</span>
-            <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#6366f1', letterSpacing: '-0.02em' }}>Pro</span>
+
+          {/* Wordmark */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
+            <span style={{
+              fontSize: '0.9375rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+            }}>HireFlow</span>
+            <span style={{
+              fontSize: '0.9375rem',
+              fontWeight: 700,
+              color: '#6366f1',
+              letterSpacing: '-0.02em',
+            }}>Pro</span>
           </div>
+
+          {/* v2 badge */}
           <span style={{
-            marginLeft: 'auto', fontSize: '0.625rem', fontWeight: 600,
-            padding: '1px 5px', borderRadius: 4,
-            background: 'rgba(255,255,255,0.07)',
+            marginLeft: 'auto',
+            fontSize: '0.5625rem',
+            fontWeight: 700,
+            padding: '2px 5px',
+            borderRadius: 4,
+            background: 'rgba(255,255,255,0.06)',
             color: '#475569',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            letterSpacing: '0.04em',
+            flexShrink: 0,
           }}>v2</span>
         </div>
       </div>
 
       {/* User card */}
-      <div style={{ padding: '12px 12px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{
+        padding: '10px 10px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        flexShrink: 0,
+      }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '10px 12px', borderRadius: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 9,
+          padding: '9px 10px',
+          borderRadius: 9,
           background: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.06)',
         }}>
+          {/* Avatar */}
           <div style={{
-            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.75rem', fontWeight: 700, color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.6875rem',
+            fontWeight: 700,
+            color: '#fff',
+            flexShrink: 0,
+            letterSpacing: '0.02em',
           }}>
             {initials}
           </div>
+
+          {/* Name + plan */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{
-              fontSize: '0.8125rem', fontWeight: 600, color: '#f1f5f9', lineHeight: 1.3,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              color: '#f1f5f9',
+              lineHeight: 1.3,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}>
               {user?.name ?? 'User'}
             </p>
             <span style={{
-              display: 'inline-block', marginTop: 2,
-              fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-              padding: '0px 6px', borderRadius: 99,
-              background: planStyle.bg, color: planStyle.color,
+              display: 'inline-block',
+              marginTop: 2,
+              fontSize: '0.5625rem',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              padding: '1px 6px',
+              borderRadius: 99,
+              background: planStyle.bg,
+              color: planStyle.color,
             }}>
               {plan}
             </span>
@@ -257,16 +334,29 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
+      {/* Navigation */}
+      <nav style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '10px 6px',
+        scrollbarWidth: 'none',
+      }}>
         {sections.map((section, si) => (
-          <div key={section.label} style={{ marginBottom: si < sections.length - 1 ? 20 : 0 }}>
+          <div key={section.label} style={{ marginBottom: si < sections.length - 1 ? 18 : 0 }}>
+            {/* Section label */}
             <p style={{
-              fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: '#334155', padding: '0 12px', marginBottom: 4,
+              fontSize: '0.5625rem',
+              fontWeight: 700,
+              letterSpacing: '0.09em',
+              textTransform: 'uppercase',
+              color: '#475569',
+              padding: '0 13px',
+              marginBottom: 4,
             }}>
               {section.label}
             </p>
+
+            {/* Nav items */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {section.items.map((item) => (
                 <SidebarNavItem key={item.to} item={item} isFreePlan={isFreePlan} />
@@ -276,18 +366,38 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div style={{ padding: '12px 8px 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* Logout button */}
+      <div style={{
+        padding: '8px 6px 14px',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        flexShrink: 0,
+      }}>
         <button
           onClick={() => { logout(); navigate('/login'); }}
           style={{
-            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
-            background: 'transparent', fontSize: '0.8125rem', fontWeight: 500, color: '#475569',
-            transition: 'background 0.15s, color 0.15s',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '7px 10px 7px 13px',
+            borderRadius: 7,
+            border: 'none',
+            cursor: 'pointer',
+            background: 'transparent',
+            fontSize: '0.8125rem',
+            fontWeight: 500,
+            color: '#64748b',
+            transition: 'all 0.15s ease',
+            textAlign: 'left',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#f87171'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+            e.currentTarget.style.color = '#f87171';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#64748b';
+          }}
         >
           <LogOut style={{ width: 15, height: 15, flexShrink: 0 }} />
           Sign out

@@ -116,6 +116,8 @@ using (var scope = app.Services.CreateScope())
         logger.LogWarning(ex, "Migration failed, ensuring database is created instead.");
         db.Database.EnsureCreated();
     }
+
+    await DbSeeder.SeedAsync(db);
 }
 
 // ── Middleware pipeline ──────────────────────────────────────────────────────

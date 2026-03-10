@@ -37,14 +37,25 @@ function HBar({
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs w-20 capitalize truncate shrink-0" style={{ color: '#475569' }}>{label}</span>
-      <div className="flex-1 h-5 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+      <span
+        className="text-xs font-medium w-20 capitalize truncate shrink-0"
+        style={{ color: '#475569' }}
+      >
+        {label}
+      </span>
+      <div
+        className="flex-1 h-5 rounded-lg overflow-hidden"
+        style={{ background: '#f1f5f9' }}
+      >
         <div
           className={clsx('h-full rounded-lg transition-all duration-700', barClass)}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs font-semibold w-10 text-right shrink-0" style={{ color: '#0f172a' }}>
+      <span
+        className="text-xs font-semibold w-10 text-right shrink-0"
+        style={{ color: '#0f172a' }}
+      >
         {value}
       </span>
     </div>
@@ -132,7 +143,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading admin data...</p>
         </div>
       </div>
@@ -192,7 +203,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => loadStats(true)}
             disabled={refreshing}
-            className="btn-secondary text-sm"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg transition-colors hover:bg-slate-50 disabled:opacity-50"
           >
             <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
             Refresh
@@ -200,8 +211,8 @@ export default function AdminDashboard() {
         }
       />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-fade-up">
+      {/* 4 KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 animate-fade-up">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
@@ -211,13 +222,16 @@ export default function AdminDashboard() {
               animationDelay: `${idx * 60}ms`,
             }}
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-medium" style={{ color: '#64748b' }}>{kpi.label}</span>
               <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', kpi.iconBg)}>
                 <kpi.icon className={clsx('w-4 h-4', kpi.iconColor)} />
               </div>
             </div>
-            <p className="text-2xl font-black tracking-tight mb-0.5" style={{ color: '#0f172a' }}>
+            <p
+              className="text-2xl font-bold mb-0.5"
+              style={{ color: '#0f172a', letterSpacing: '-0.02em' }}
+            >
               {kpi.value}
             </p>
             <p className="text-xs" style={{ color: '#94a3b8' }}>{kpi.sub}</p>
@@ -225,8 +239,11 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
+      {/* 2-col grid: Users by Plan + Recent Signups */}
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5 animate-fade-up"
+        style={{ animationDelay: '120ms' }}
+      >
         {/* Users by Plan */}
         <div
           className="bg-white rounded-xl border border-slate-200 p-6"
@@ -252,6 +269,7 @@ export default function AdminDashboard() {
             })}
           </div>
 
+          {/* Per-plan breakdown rows */}
           <div className="space-y-3">
             {Object.entries(usersByPlan).map(([plan, count]) => {
               const pct = totalPlanUsers > 0 ? Math.round((count / totalPlanUsers) * 100) : 0;
@@ -287,7 +305,7 @@ export default function AdminDashboard() {
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <UserCheck className="w-4 h-4" style={{ color: '#94a3b8' }} />
+            <UserCheck className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
             <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Recent Signups</h3>
           </div>
 
@@ -297,11 +315,11 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {(stats?.recentSignups ?? []).map((user) => {
-                const initials = user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-                const planCfg = planConfig[user.plan] ?? planConfig.free;
+              {(stats?.recentSignups ?? []).map((u) => {
+                const initials = u.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+                const planCfg = planConfig[u.plan] ?? planConfig.free;
                 return (
-                  <div key={user.id} className="flex items-center gap-3 py-1">
+                  <div key={u.id} className="flex items-center gap-3 py-1">
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                       style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
@@ -310,16 +328,16 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>
-                        {user.name}
+                        {u.name}
                       </p>
-                      <p className="text-xs truncate" style={{ color: '#94a3b8' }}>{user.email}</p>
+                      <p className="text-xs truncate" style={{ color: '#94a3b8' }}>{u.email}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full capitalize', planCfg.badge)}>
                         {planCfg.label}
                       </span>
                       <span className="text-xs" style={{ color: '#94a3b8' }}>
-                        {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                   </div>
@@ -330,7 +348,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up" style={{ animationDelay: '180ms' }}>
+      {/* 2-col grid: Apps by Status + Revenue Trend */}
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up"
+        style={{ animationDelay: '180ms' }}
+      >
         {/* Applications by Status */}
         <div
           className="bg-white rounded-xl border border-slate-200 p-6"
@@ -367,7 +389,7 @@ export default function AdminDashboard() {
           style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <TrendingUp className="w-4 h-4" style={{ color: '#94a3b8' }} />
+            <TrendingUp className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
             <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Revenue Trend</h3>
           </div>
           <RevenueSVGChart data={stats?.monthlyRevenue ?? []} />

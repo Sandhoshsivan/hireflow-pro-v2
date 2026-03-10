@@ -154,7 +154,7 @@ export default function AdminUsers() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading users...</p>
         </div>
       </div>
@@ -168,7 +168,10 @@ export default function AdminUsers() {
         subtitle={`${filteredUsers.length} registered user${filteredUsers.length !== 1 ? 's' : ''}`}
         actions={
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: '#94a3b8' }} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+              style={{ color: '#94a3b8' }}
+            />
             <input
               type="text"
               value={search}
@@ -246,7 +249,7 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* Users Table */}
+      {/* Users table */}
       <div
         className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-5 animate-fade-up"
         style={{
@@ -256,8 +259,8 @@ export default function AdminUsers() {
       >
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+            <thead className="bg-slate-50 border-b border-slate-100">
+              <tr>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>User</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Plan</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Role</th>
@@ -272,7 +275,10 @@ export default function AdminUsers() {
                 <tr>
                   <td colSpan={7} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#f1f5f9' }}>
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                        style={{ background: '#f1f5f9' }}
+                      >
                         <Users className="w-5 h-5" style={{ color: '#94a3b8' }} />
                       </div>
                       <p className="text-sm" style={{ color: '#94a3b8' }}>No users match your filters</p>
@@ -289,6 +295,7 @@ export default function AdminUsers() {
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                     style={{ borderBottom: idx < filteredUsers.length - 1 ? '1px solid #f8fafc' : 'none' }}
                   >
+                    {/* User column */}
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <UserAvatar name={user.name} />
@@ -300,6 +307,8 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </td>
+
+                    {/* Plan column */}
                     <td className="px-5 py-3.5">
                       <span
                         className={clsx(
@@ -310,6 +319,8 @@ export default function AdminUsers() {
                         {planCfg.label}
                       </span>
                     </td>
+
+                    {/* Role column */}
                     <td className="px-5 py-3.5">
                       {user.role === 'admin' ? (
                         <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
@@ -320,6 +331,8 @@ export default function AdminUsers() {
                         <span className="text-xs capitalize" style={{ color: '#94a3b8' }}>{user.role}</span>
                       )}
                     </td>
+
+                    {/* Status column */}
                     <td className="px-5 py-3.5">
                       <span
                         className={clsx(
@@ -338,9 +351,13 @@ export default function AdminUsers() {
                         {user.isActive ? 'Active' : 'Blocked'}
                       </span>
                     </td>
+
+                    {/* Apps column */}
                     <td className="px-5 py-3.5 text-sm font-semibold text-right" style={{ color: '#334155' }}>
                       {user.applicationCount ?? 0}
                     </td>
+
+                    {/* Joined column */}
                     <td className="px-5 py-3.5 text-xs" style={{ color: '#94a3b8' }}>
                       {new Date(user.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
@@ -348,11 +365,12 @@ export default function AdminUsers() {
                         year: 'numeric',
                       })}
                     </td>
+
+                    {/* Actions column */}
                     <td className="px-5 py-3.5 text-center">
                       <button
                         onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors hover:bg-slate-200"
-                        style={{ background: '#f1f5f9', color: '#475569' }}
+                        className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         View
@@ -375,10 +393,9 @@ export default function AdminUsers() {
             onClick={() => setSelectedUser(null)}
           />
 
-          {/* Drawer */}
-          <div
-            className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto flex flex-col animate-slide-in-from-right"
-          >
+          {/* Drawer panel */}
+          <div className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto flex flex-col animate-slide-in-from-right">
+
             {/* Gradient header */}
             <div
               className="px-6 py-6 flex-shrink-0"
@@ -394,6 +411,8 @@ export default function AdminUsers() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Avatar + name + email + badges */}
               <div className="flex items-center gap-4">
                 <UserAvatar name={selectedUser.name} size="lg" />
                 <div>
@@ -423,7 +442,9 @@ export default function AdminUsers() {
               </div>
             </div>
 
+            {/* Drawer body */}
             <div className="p-6 flex-1 space-y-6">
+
               {/* Meta info */}
               <div className="space-y-3 pb-5 border-b border-slate-100">
                 <div className="flex items-center gap-3 text-sm">
@@ -459,7 +480,7 @@ export default function AdminUsers() {
                 </div>
               </div>
 
-              {/* Change Plan */}
+              {/* Set Plan dropdown */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold uppercase tracking-wide" style={{ color: '#475569' }}>
                   Set Plan
@@ -505,7 +526,7 @@ export default function AdminUsers() {
                   )}
                   style={selectedUser.role === 'admin' ? {} : { background: '#f1f5f9', color: '#475569' }}
                 >
-                  <Shield className="w-4 h-4" />
+                  <Shield className="w-4 h-4 shrink-0" />
                   {selectedUser.role === 'admin' ? 'Remove Admin Access' : 'Grant Admin Access'}
                   {actionLoading === `admin-${selectedUser.id}` && (
                     <div className="ml-auto w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
@@ -523,7 +544,10 @@ export default function AdminUsers() {
                       : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                   )}
                 >
-                  {selectedUser.isActive ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                  {selectedUser.isActive
+                    ? <Lock className="w-4 h-4 shrink-0" />
+                    : <Unlock className="w-4 h-4 shrink-0" />
+                  }
                   {selectedUser.isActive ? 'Block User' : 'Unblock User'}
                   {actionLoading === `block-${selectedUser.id}` && (
                     <div className="ml-auto w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
@@ -537,7 +561,7 @@ export default function AdminUsers() {
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 hover:bg-slate-200"
                   style={{ background: '#f1f5f9', color: '#475569' }}
                 >
-                  <Key className="w-4 h-4" />
+                  <Key className="w-4 h-4 shrink-0" />
                   Reset Password
                   {actionLoading === `pwd-${selectedUser.id}` && (
                     <div className="ml-auto w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
@@ -550,7 +574,7 @@ export default function AdminUsers() {
                   disabled={actionLoading === `delete-${selectedUser.id}`}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 shrink-0" />
                   Delete User
                   {actionLoading === `delete-${selectedUser.id}` && (
                     <div className="ml-auto w-4 h-4 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />

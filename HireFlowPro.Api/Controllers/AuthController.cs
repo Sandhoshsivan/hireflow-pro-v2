@@ -47,6 +47,16 @@ public class AuthController : ControllerBase
         return Ok(profile);
     }
 
+    // Alias so any frontend code still calling /api/auth/profile continues to work
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfileAlias()
+    {
+        var userId = GetUserId();
+        var profile = await _authService.GetProfileAsync(userId);
+        return Ok(profile);
+    }
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
