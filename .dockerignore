@@ -1,0 +1,22 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+
+# Node.js
+**/node_modules/
+hireflow-ui/dist/
+
+# Git
+.git/
+.gitignore
+
+# Local dev
+**/*.user
+**/*.db
+**/*.db-journal
+**/appsettings.Development.json
+
+# Misc
+**/.DS_Store
+**/Thumbs.db
+hireflow-extension/
