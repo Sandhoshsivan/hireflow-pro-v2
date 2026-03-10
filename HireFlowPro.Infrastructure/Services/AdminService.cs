@@ -11,9 +11,9 @@ namespace HireFlowPro.Infrastructure.Services;
 public class AdminService : IAdminService
 {
     private readonly AppDbContext _db;
-    private readonly AuthService _authService;
+    private readonly IAuthService _authService;
 
-    public AdminService(AppDbContext db, AuthService authService)
+    public AdminService(AppDbContext db, IAuthService authService)
     {
         _db = db;
         _authService = authService;

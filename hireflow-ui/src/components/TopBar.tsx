@@ -8,12 +8,20 @@ interface TopBarProps {
 
 export default function TopBar({ title, subtitle, actions }: TopBarProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-start justify-between mb-7">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#0f172a', letterSpacing: '-0.02em' }}>
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-sm mt-1 font-normal" style={{ color: '#64748b' }}>
+            {subtitle}
+          </p>
+        )}
       </div>
-      {actions && <div className="flex items-center gap-3">{actions}</div>}
+      {actions && (
+        <div className="flex items-center gap-2.5 ml-4 mt-0.5">{actions}</div>
+      )}
     </div>
   );
 }

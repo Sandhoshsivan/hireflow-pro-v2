@@ -1,89 +1,92 @@
-import { create } from 'zustand';
 import { useEffect } from 'react';
-import { X, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
-import clsx from 'clsx';
+import { create } from 'zustand';
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+
+type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 interface Toast {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: ToastType;
   message: string;
 }
 
-interface ToastState {
+interface ToastStore {
   toasts: Toast[];
-  addToast: (type: Toast['type'], message: string) => void;
+  addToast: (type: ToastType, message: string) => void;
   removeToast: (id: string) => void;
 }
 
-export const useToastStore = create<ToastState>((set) => ({
+export const useToastStore = create<ToastStore>((set) => ({
   toasts: [],
   addToast: (type, message) => {
-    const id = crypto.randomUUID();
-    set((state) => ({ toasts: [...state.toasts, { id, type, message }] }));
-    setTimeout(() => {
-      set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
-    }, 4000);
+    const id = Math.random().toString(36).slice(2);
+    set((s) => ({ toasts: [...s.toasts, { id, type, message }] }));
+    setTimeout(() => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 4200);
   },
-  removeToast: (id) =>
-    set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
+  removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));
 
-const icons = {
-  success: CheckCircle,
-  error: XCircle,
-  warning: AlertTriangle,
-  info: Info,
+const CONFIG: Record<ToastType, { icon: React.ComponentType<{ style?: React.CSSProperties }>; border: string; icon_color: string }> = {
+  success: { icon: CheckCircle, border: '#22c55e', icon_color: '#22c55e' },
+  error: { icon: XCircle, border: '#ef4444', icon_color: '#ef4444' },
+  warning: { icon: AlertTriangle, border: '#f59e0b', icon_color: '#f59e0b' },
+  info: { icon: Info, border: '#6366f1', icon_color: '#6366f1' },
 };
 
-const styles = {
-  success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-  error: 'bg-red-50 border-red-200 text-red-800',
-  warning: 'bg-amber-50 border-amber-200 text-amber-800',
-  info: 'bg-blue-50 border-blue-200 text-blue-800',
-};
+function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) {
+  const cfg = CONFIG[toast.type];
+  const Icon = cfg.icon;
 
-function ToastItem({ toast }: { toast: Toast }) {
-  const removeToast = useToastStore((s) => s.removeToast);
-  const Icon = icons[toast.type];
+  useEffect(() => {
+    const t = setTimeout(onRemove, 4200);
+    return () => clearTimeout(t);
+  }, [onRemove]);
 
   return (
     <div
-      className={clsx(
-        'flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg animate-slide-in',
-        styles[toast.type]
-      )}
+      className="animate-toast"
+      style={{
+        display: 'flex', alignItems: 'flex-start', gap: 12,
+        background: '#fff', borderRadius: 12, padding: '14px 16px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06)',
+        borderLeft: `4px solid ${cfg.border}`,
+        minWidth: 300, maxWidth: 380,
+        position: 'relative', overflow: 'hidden',
+      }}
     >
-      <Icon className="w-5 h-5 shrink-0" />
-      <p className="text-sm font-medium flex-1">{toast.message}</p>
-      <button onClick={() => removeToast(toast.id)} className="shrink-0 hover:opacity-70">
-        <X className="w-4 h-4" />
+      <Icon style={{ width: 18, height: 18, color: cfg.icon_color, flexShrink: 0, marginTop: 1 }} />
+      <p style={{ flex: 1, fontSize: '0.875rem', fontWeight: 500, color: '#0f172a', lineHeight: 1.4 }}>
+        {toast.message}
+      </p>
+      <button
+        onClick={onRemove}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#94a3b8', flexShrink: 0 }}
+      >
+        <X style={{ width: 14, height: 14 }} />
       </button>
+      {/* Progress bar */}
+      <div
+        className="animate-shrink"
+        style={{
+          position: 'absolute', bottom: 0, left: 0, height: 2,
+          background: cfg.border, borderRadius: '0 0 0 12px',
+          opacity: 0.4,
+        }}
+      />
     </div>
   );
 }
 
 export default function ToastContainer() {
-  const toasts = useToastStore((s) => s.toasts);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slide-in {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      .animate-slide-in { animation: slide-in 0.3s ease-out; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
-
+  const { toasts, removeToast } = useToastStore();
   if (toasts.length === 0) return null;
-
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80">
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} />
+    <div style={{
+      position: 'fixed', bottom: 24, right: 24,
+      zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10,
+    }}>
+      {toasts.map((t) => (
+        <ToastItem key={t.id} toast={t} onRemove={() => removeToast(t.id)} />
       ))}
     </div>
   );
