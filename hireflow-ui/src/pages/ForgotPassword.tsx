@@ -3,19 +3,6 @@ import { Link } from 'react-router-dom';
 import { Briefcase, Mail, ArrowLeft, CheckCircle, Loader2, ExternalLink, KeyRound } from 'lucide-react';
 import api from '../lib/api';
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px 10px 42px',
-  border: '1px solid #E5E7EB',
-  borderRadius: '8px',
-  fontSize: '0.875rem',
-  color: '#111827',
-  background: '#ffffff',
-  outline: 'none',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
-  boxSizing: 'border-box',
-};
-
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -280,13 +267,7 @@ export default function ForgotPassword() {
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: 6,
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: '#4B5563',
-                  }}>
+                  <label className="form-label">
                     Email address
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -304,18 +285,11 @@ export default function ForgotPassword() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      style={inputStyle}
+                      className="form-input"
+                      style={{ paddingLeft: 42 }}
                       placeholder="you@example.com"
                       required
                       autoComplete="email"
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#1a56db';
-                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = '#E5E7EB';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
                     />
                   </div>
                 </div>
@@ -323,31 +297,8 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    width: '100%',
-                    padding: '11px 20px',
-                    fontSize: '0.9375rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    background: isLoading
-                      ? 'rgba(26,86,219,0.7)'
-                      : 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
-                    borderRadius: 8,
-                    border: 'none',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    transition: 'opacity 0.15s ease',
-                    boxShadow: '0 1px 2px rgba(26,86,219,0.3), 0 4px 12px rgba(26,86,219,0.2)',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isLoading) e.currentTarget.style.opacity = '0.9';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
                 >
                   {isLoading ? (
                     <>

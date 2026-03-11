@@ -20,30 +20,6 @@ function getPasswordStrength(pw: string): { level: 0 | 1 | 2 | 3; label: string;
   return { level: 3, label: 'Strong', color: '#10b981' };
 }
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px 10px 42px',
-  border: '1px solid #E5E7EB',
-  borderRadius: '8px',
-  fontSize: '0.875rem',
-  color: '#111827',
-  background: '#ffffff',
-  outline: 'none',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
-  boxSizing: 'border-box',
-};
-
-const focusHandlers = {
-  onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#1a56db';
-    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
-  },
-  onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#E5E7EB';
-    e.currentTarget.style.boxShadow = 'none';
-  },
-};
-
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -339,7 +315,7 @@ export default function Register() {
 
             {/* Full name */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
+              <label className="form-label">
                 Full name
               </label>
               <div style={{ position: 'relative' }}>
@@ -351,18 +327,18 @@ export default function Register() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  style={inputStyle}
+                  className="form-input"
+                  style={{ paddingLeft: 42 }}
                   placeholder="John Doe"
                   required
                   autoComplete="name"
-                  {...focusHandlers}
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
+              <label className="form-label">
                 Email address
               </label>
               <div style={{ position: 'relative' }}>
@@ -374,18 +350,18 @@ export default function Register() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={inputStyle}
+                  className="form-input"
+                  style={{ paddingLeft: 42 }}
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  {...focusHandlers}
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
+              <label className="form-label">
                 Password
               </label>
               <div style={{ position: 'relative' }}>
@@ -397,12 +373,12 @@ export default function Register() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={inputStyle}
+                  className="form-input"
+                  style={{ paddingLeft: 42 }}
                   placeholder="Create a strong password"
                   required
                   minLength={6}
                   autoComplete="new-password"
-                  {...focusHandlers}
                 />
               </div>
               {/* Strength bar */}
@@ -432,7 +408,7 @@ export default function Register() {
 
             {/* Confirm Password */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
+              <label className="form-label">
                 Confirm password
               </label>
               <div style={{ position: 'relative' }}>
@@ -444,26 +420,15 @@ export default function Register() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="form-input"
                   style={{
-                    ...inputStyle,
-                    borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#E5E7EB',
+                    paddingLeft: 42,
+                    borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : undefined,
                   }}
                   placeholder="Confirm your password"
                   required
                   minLength={6}
                   autoComplete="new-password"
-                  onFocus={(e) => {
-                    if (!passwordsMismatch && !passwordsMatch) {
-                      e.currentTarget.style.borderColor = '#1a56db';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
-                    }
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    if (!passwordsMismatch && !passwordsMatch) {
-                      e.currentTarget.style.borderColor = '#E5E7EB';
-                    }
-                  }}
                 />
               </div>
               {passwordsMismatch && (
@@ -473,30 +438,13 @@ export default function Register() {
 
             {/* Account type */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
+              <label className="form-label">
                 Account type
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                style={{
-                  ...inputStyle,
-                  paddingLeft: '12px',
-                  appearance: 'none',
-                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")",
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 14px center',
-                  paddingRight: 36,
-                  cursor: 'pointer',
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#1a56db';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#E5E7EB';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                className="form-select"
               >
                 <option value="user">Job Seeker</option>
                 <option value="admin">Admin</option>
@@ -525,32 +473,8 @@ export default function Register() {
             <button
               type="submit"
               disabled={isLoading || passwordsMismatch}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                width: '100%',
-                padding: '11px 20px',
-                fontSize: '0.9375rem',
-                fontWeight: 600,
-                color: '#ffffff',
-                background: isLoading || passwordsMismatch
-                  ? 'rgba(26,86,219,0.5)'
-                  : 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
-                borderRadius: 8,
-                border: 'none',
-                cursor: isLoading || passwordsMismatch ? 'not-allowed' : 'pointer',
-                transition: 'opacity 0.15s ease',
-                boxShadow: '0 1px 2px rgba(26,86,219,0.3), 0 4px 12px rgba(26,86,219,0.2)',
-                marginTop: 4,
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading && !passwordsMismatch) e.currentTarget.style.opacity = '0.9';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
+              className="btn-primary"
+              style={{ width: '100%', marginTop: 4 }}
             >
               {isLoading ? (
                 <>

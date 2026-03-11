@@ -11,7 +11,6 @@ import {
   Link2,
   Send,
 } from 'lucide-react';
-import clsx from 'clsx';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
@@ -29,36 +28,11 @@ const statusOptions: ApplicationStatus[] = [
 
 const priorityOptions: Priority[] = ['low', 'medium', 'high'];
 
-/* ── Status badge styling ── */
-const statusColors: Record<string, string> = {
-  saved: 'bg-cyan-50 text-cyan-700 border border-cyan-200',
-  applied: 'bg-blue-50 text-blue-700 border border-blue-200',
-  interview: 'bg-amber-50 text-amber-700 border border-amber-200',
-  offer: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  rejected: 'bg-red-50 text-red-700 border border-red-200',
-  ghosted: 'bg-slate-100 text-slate-500 border border-slate-200',
-};
-
-const statusDots: Record<string, string> = {
-  saved: 'bg-cyan-600',
-  applied: 'bg-blue-600',
-  interview: 'bg-amber-500',
-  offer: 'bg-emerald-600',
-  rejected: 'bg-red-500',
-  ghosted: 'bg-slate-400',
-};
-
-/* ── Priority styling ── */
-const priorityDots: Record<string, string> = {
-  high: 'bg-red-500 shadow-[0_0_0_2px_rgba(220,38,38,.15)]',
-  medium: 'bg-amber-500 shadow-[0_0_0_2px_rgba(217,119,6,.15)]',
-  low: 'bg-emerald-500 shadow-[0_0_0_2px_rgba(5,150,105,.15)]',
-};
-
-const priorityLabels: Record<string, string> = {
-  high: 'text-red-600',
-  medium: 'text-amber-600',
-  low: 'text-slate-400',
+/* ── Priority label colors (CSS variables) ── */
+const priorityLabelColor: Record<string, string> = {
+  high: 'var(--red)',
+  medium: 'var(--amber)',
+  low: 'var(--green)',
 };
 
 /* ── Avatar color from company name (matches Flask) ── */
@@ -311,10 +285,10 @@ export default function Applications() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm text-slate-500 font-medium">Loading applications...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+          <div className="loading-spinner" />
+          <p className="loading-text">Loading applications...</p>
         </div>
       </div>
     );
@@ -445,8 +419,8 @@ export default function Applications() {
                       </td>
                       {/* Status */}
                       <td>
-                        <span className={clsx('badge', `badge-${app.status}`)}>
-                          {'\u2022'} {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                        <span className={`badge badge-${app.status}`}>
+                          {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </span>
                       </td>
                       {/* Applied date */}
@@ -500,7 +474,7 @@ export default function Applications() {
                       {/* Priority */}
                       <td>
                         <span
-                          className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[app.priority])}
+                          className={`priority-dot p-${app.priority}`}
                           title={app.priority}
                         />
                       </td>
@@ -704,86 +678,81 @@ export default function Applications() {
           <>
             {/* Drawer header */}
             <div className="drawer-header">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  {/* Company name - 20px bold */}
-                  <h2 className="text-[20px] font-extrabold text-slate-900 tracking-[-0.5px] leading-tight">
-                    {selectedApp.company}
-                  </h2>
-                  {/* Role + location */}
-                  <p className="text-[13px] text-slate-500 mt-[3px]">
-                    {selectedApp.role}
-                    {selectedApp.location && (
-                      <span className="text-slate-400">{'  \u00B7  '}{selectedApp.location}</span>
-                    )}
-                  </p>
-                  {/* Action row: badge + edit + status dropdown + job link + delete */}
-                  <div className="flex items-center gap-2 flex-wrap mt-3">
-                    {/* Status badge */}
-                    <span
-                      className={clsx(
-                        'inline-flex items-center gap-[5px] text-[11px] font-bold font-mono tracking-[.1px] px-2.5 py-1 rounded-full capitalize whitespace-nowrap',
-                        statusColors[selectedApp.status]
-                      )}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                {/* Company name */}
+                <h2 className="drawer-company">{selectedApp.company}</h2>
+                {/* Role + location */}
+                <p className="drawer-role">
+                  {selectedApp.role}
+                  {selectedApp.location && (
+                    <span className="drawer-role-sep">{'  \u00B7  '}{selectedApp.location}</span>
+                  )}
+                </p>
+                {/* Action row: badge + edit + status dropdown + job link + delete */}
+                <div className="drawer-actions">
+                  {/* Status badge */}
+                  <span className={`badge badge-${selectedApp.status}`} style={{ textTransform: 'capitalize' }}>
+                    {selectedApp.status}
+                  </span>
+                  {/* Edit button */}
+                  <button
+                    onClick={() => {
+                      setSelectedApp(null);
+                      openEdit(selectedApp);
+                    }}
+                    className="drawer-btn-sm"
+                  >
+                    <Pencil style={{ width: 12, height: 12 }} />
+                    Edit
+                  </button>
+                  {/* Quick status dropdown */}
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      value={drawerStatus}
+                      onChange={(e) => handleQuickStatus(e.target.value as ApplicationStatus)}
+                      className="drawer-status-select"
                     >
-                      <span className={clsx('w-[5px] h-[5px] rounded-full', statusDots[selectedApp.status])} />
-                      {selectedApp.status}
-                    </span>
-                    {/* Edit button */}
-                    <button
-                      onClick={() => {
-                        setSelectedApp(null);
-                        openEdit(selectedApp);
+                      {statusOptions.map((s) => (
+                        <option key={s} value={s}>
+                          {s.charAt(0).toUpperCase() + s.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      style={{
+                        position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                        width: 10, height: 10, color: 'var(--text3)', pointerEvents: 'none',
                       }}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                    >
-                      <Pencil className="w-3 h-3" />
-                      Edit
-                    </button>
-                    {/* Quick status dropdown */}
-                    <div className="relative">
-                      <select
-                        value={drawerStatus}
-                        onChange={(e) => handleQuickStatus(e.target.value as ApplicationStatus)}
-                        className="pl-2 pr-5 py-1 text-[12px] border border-slate-200 rounded-lg bg-white cursor-pointer outline-none appearance-none hover:bg-slate-50 transition-colors"
-                      >
-                        {statusOptions.map((s) => (
-                          <option key={s} value={s}>
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-slate-400 pointer-events-none" />
-                    </div>
-                    {/* Job post link */}
-                    {selectedApp.url && (
-                      <a
-                        href={selectedApp.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                      >
-                        <Link2 className="w-3 h-3" />
-                        Job Post
-                      </a>
-                    )}
-                    {/* Delete button */}
-                    <button
-                      onClick={() => handleDelete(selectedApp.id)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
-                    >
-                      Delete
-                    </button>
+                    />
                   </div>
+                  {/* Job post link */}
+                  {selectedApp.url && (
+                    <a
+                      href={selectedApp.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="drawer-btn-sm"
+                    >
+                      <Link2 style={{ width: 12, height: 12 }} />
+                      Job Post
+                    </a>
+                  )}
+                  {/* Delete button */}
+                  <button
+                    onClick={() => handleDelete(selectedApp.id)}
+                    className="drawer-btn-sm drawer-btn-danger"
+                  >
+                    Delete
+                  </button>
                 </div>
-                {/* Close button */}
-                <button
-                  onClick={() => setSelectedApp(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0 -mt-1"
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="drawer-close"
+              >
+                <X style={{ width: 16, height: 16 }} />
+              </button>
             </div>
 
             {/* Scrollable body */}
@@ -801,7 +770,7 @@ export default function Applications() {
                         day: 'numeric',
                         year: 'numeric',
                       })}
-                      <span className="text-slate-400 ml-1">
+                      <span style={{ color: 'var(--text3)', marginLeft: 4 }}>
                         ({daysAgo(selectedApp.appliedDate || selectedApp.createdAt)}d ago)
                       </span>
                     </div>
@@ -824,8 +793,8 @@ export default function Applications() {
                   <div className="info-row">
                     <div className="info-key">Priority</div>
                     <div className="info-val" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[selectedApp.priority])} />
-                      <span className={clsx('capitalize', priorityLabels[selectedApp.priority])}>
+                      <span className={`priority-dot p-${selectedApp.priority}`} />
+                      <span style={{ textTransform: 'capitalize', color: priorityLabelColor[selectedApp.priority] }}>
                         {selectedApp.priority}
                       </span>
                     </div>
@@ -834,10 +803,10 @@ export default function Applications() {
                   {selectedApp.followUpDate && (
                     <div className="info-row">
                       <div className="info-key">Follow-up</div>
-                      <div className={clsx(
-                        'info-val',
-                        isOverdue(selectedApp.followUpDate) ? 'text-amber-600' : ''
-                      )}>
+                      <div
+                        className="info-val"
+                        style={isOverdue(selectedApp.followUpDate) ? { color: 'var(--amber)' } : undefined}
+                      >
                         {new Date(selectedApp.followUpDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -853,9 +822,7 @@ export default function Applications() {
               {selectedApp.notes && (
                 <div className="drawer-section">
                   <div className="drawer-section-label">Notes</div>
-                  <p className="text-[13px] text-slate-500 leading-[1.7] whitespace-pre-wrap">
-                    {selectedApp.notes}
-                  </p>
+                  <p className="drawer-notes">{selectedApp.notes}</p>
                 </div>
               )}
 
@@ -863,45 +830,41 @@ export default function Applications() {
               <div className="drawer-section">
                 <button
                   onClick={() => setTimelineOpen(!timelineOpen)}
-                  className="flex items-center justify-between w-full text-left"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
                   <div className="drawer-section-label" style={{ marginBottom: 0 }}>
                     Timeline
                     {timeline.length > 0 && (
-                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
-                        {timeline.length}
-                      </span>
+                      <span className="drawer-count-badge">{timeline.length}</span>
                     )}
                   </div>
                   <ChevronRight
-                    className={clsx(
-                      'w-4 h-4 text-slate-400 transition-transform duration-200',
-                      timelineOpen && 'rotate-90'
-                    )}
+                    style={{
+                      width: 16, height: 16, color: 'var(--text3)',
+                      transition: 'transform 200ms', transform: timelineOpen ? 'rotate(90deg)' : 'none',
+                    }}
                   />
                 </button>
                 {timelineOpen && (
-                  <div className="mt-3">
+                  <div style={{ marginTop: 12 }}>
                     {timeline.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 py-2">No timeline entries yet</p>
+                      <p style={{ fontSize: 13, color: 'var(--text3)', padding: '8px 0' }}>No timeline entries yet</p>
                     ) : (
-                      <div className="flex flex-col">
+                      <div className="timeline">
                         {timeline.map((entry, idx) => (
-                          <div key={entry.id} className="flex gap-3">
+                          <div key={entry.id} className="tl-item">
                             {/* Left: dot + line */}
-                            <div className="flex flex-col items-center">
-                              <div className="w-2.5 h-2.5 rounded-full bg-blue-600 flex-shrink-0 mt-1 shadow-[0_0_0_3px_rgba(26,86,219,.12)]" />
-                              {idx < timeline.length - 1 && (
-                                <div className="flex-1 w-px bg-slate-200 my-1" />
-                              )}
+                            <div className="tl-left">
+                              <div className="tl-dot" />
+                              {idx < timeline.length - 1 && <div className="tl-line" />}
                             </div>
                             {/* Content */}
-                            <div className="pb-3.5 flex-1">
-                              <p className="text-[13px] font-semibold text-slate-900">{entry.action}</p>
+                            <div className="tl-content">
+                              <p className="tl-action">{entry.action}</p>
                               {entry.details && (
-                                <p className="text-[12px] text-slate-500 mt-0.5">{entry.details}</p>
+                                <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{entry.details}</p>
                               )}
-                              <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                              <p className="tl-time">
                                 {new Date(entry.createdAt).toLocaleString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
@@ -921,21 +884,21 @@ export default function Applications() {
               {/* Add Note to Timeline */}
               <div className="drawer-section">
                 <div className="drawer-section-label">Add Note to Timeline</div>
-                <div className="flex gap-2">
+                <div style={{ display: 'flex', gap: 8 }}>
                   <input
                     type="text"
                     value={timelineNote}
                     onChange={(e) => setTimelineNote(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTimelineNote()}
                     placeholder="e.g. Called recruiter, Sent follow-up..."
-                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-900 placeholder:text-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all duration-150"
+                    className="tl-note-input"
                   />
                   <button
                     onClick={handleAddTimelineNote}
                     disabled={addingNote || !timelineNote.trim()}
-                    className="px-3.5 py-2 text-[13px] font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                    className="tl-note-btn"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    <Send style={{ width: 14, height: 14 }} />
                     Add
                   </button>
                 </div>
@@ -945,48 +908,41 @@ export default function Applications() {
               <div className="drawer-section">
                 <button
                   onClick={() => setContactsOpen(!contactsOpen)}
-                  className="flex items-center justify-between w-full text-left"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
                   <div className="drawer-section-label" style={{ marginBottom: 0 }}>
                     Contacts
                     {contacts.length > 0 && (
-                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
-                        {contacts.length}
-                      </span>
+                      <span className="drawer-count-badge">{contacts.length}</span>
                     )}
                   </div>
                   <ChevronRight
-                    className={clsx(
-                      'w-4 h-4 text-slate-400 transition-transform duration-200',
-                      contactsOpen && 'rotate-90'
-                    )}
+                    style={{
+                      width: 16, height: 16, color: 'var(--text3)',
+                      transition: 'transform 200ms', transform: contactsOpen ? 'rotate(90deg)' : 'none',
+                    }}
                   />
                 </button>
                 {contactsOpen && (
-                  <div className="mt-3">
+                  <div style={{ marginTop: 12 }}>
                     {contacts.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 py-2">No contacts added yet</p>
+                      <p style={{ fontSize: 13, color: 'var(--text3)', padding: '8px 0' }}>No contacts added yet</p>
                     ) : (
-                      <div className="space-y-2">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {contacts.map((c) => {
                           const cColor = avatarColor(c.name);
                           return (
-                            <div
-                              key={c.id}
-                              className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
-                            >
+                            <div key={c.id} className="contact-card">
                               <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold"
+                                className="contact-avatar"
                                 style={{ background: `${cColor}18`, color: cColor }}
                               >
                                 {c.name.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="text-[13px] font-semibold text-slate-900">{c.name}</p>
-                                {c.title && <p className="text-[12px] text-slate-500">{c.title}</p>}
-                                {c.email && (
-                                  <p className="text-[12px] text-blue-600 mt-0.5">{c.email}</p>
-                                )}
+                                <p className="contact-name">{c.name}</p>
+                                {c.title && <p className="contact-title">{c.title}</p>}
+                                {c.email && <p className="contact-email">{c.email}</p>}
                               </div>
                             </div>
                           );

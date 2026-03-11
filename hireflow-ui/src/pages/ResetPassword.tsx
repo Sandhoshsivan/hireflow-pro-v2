@@ -133,7 +133,7 @@ export default function ResetPassword() {
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#374151' }}>
+                  <label className="form-label">
                     New Password
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -145,7 +145,7 @@ export default function ResetPassword() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="input-field"
+                      className="form-input"
                       style={{ paddingLeft: 42 }}
                       placeholder="New password"
                       required
@@ -156,7 +156,7 @@ export default function ResetPassword() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#374151' }}>
+                  <label className="form-label">
                     Confirm Password
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -168,10 +168,10 @@ export default function ResetPassword() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="input-field"
+                      className="form-input"
                       style={{
                         paddingLeft: 42,
-                        borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#E5E7EB',
+                        borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : undefined,
                       }}
                       placeholder="Confirm new password"
                       required
@@ -188,7 +188,7 @@ export default function ResetPassword() {
                   type="submit"
                   disabled={isLoading || passwordsMismatch}
                   className="btn-primary"
-                  style={{ padding: '13px 20px', borderRadius: 10, fontSize: '0.9375rem' }}
+                  style={{ width: '100%' }}
                 >
                   {isLoading ? (
                     <>

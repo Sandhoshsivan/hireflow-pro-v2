@@ -175,16 +175,7 @@ export default function Billing() {
                 Current Plan
               </span>
               {/* Plan badge inline in header */}
-              <span
-                style={{
-                  ...plan.planBadgeStyle,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: '3px 10px',
-                  borderRadius: 20,
-                  fontFamily: "'Fira Code', monospace",
-                }}
-              >
+              <span className={`badge badge-${planKey}`}>
                 {plan.label}
               </span>
             </div>
@@ -354,20 +345,7 @@ export default function Billing() {
                             <span className="td-mono" style={{ textTransform: 'uppercase' }}>{p.currency}</span>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <span
-                              style={{
-                                ...statusCfg.badgeStyle,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 5,
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: '3px 9px',
-                                borderRadius: 20,
-                                fontFamily: "'Fira Code', monospace",
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
+                            <span className={`badge badge-${statusKey}`}>
                               {statusCfg.icon}
                               {statusCfg.label}
                             </span>

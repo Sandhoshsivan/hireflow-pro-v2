@@ -345,7 +345,7 @@ export default function AIAssistant() {
               {!matchResult ? (
                 <>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text2)', marginBottom: 6 }}>
+                    <label className="form-label">
                       Job Description <span style={{ color: 'var(--red)', fontWeight: 400, textTransform: 'none' }}>*</span>
                     </label>
                     <textarea
@@ -353,26 +353,12 @@ export default function AIAssistant() {
                       onChange={(e) => setJobDescription(e.target.value)}
                       placeholder="Paste the full job description here..."
                       rows={6}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: 8,
-                        border: '1px solid var(--border)',
-                        background: 'var(--surf2)',
-                        color: 'var(--text)',
-                        fontSize: 13,
-                        resize: 'vertical',
-                        outline: 'none',
-                        transition: 'border-color var(--dur-fast)',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--blue)'; e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,.1)'; }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      className="form-textarea"
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text2)', marginBottom: 6 }}>
+                    <label className="form-label">
                       Your Resume <span style={{ color: 'var(--text3)', fontWeight: 400, textTransform: 'none' }}>(optional)</span>
                     </label>
                     <textarea
@@ -380,31 +366,17 @@ export default function AIAssistant() {
                       onChange={(e) => setResume(e.target.value)}
                       placeholder="Paste your resume or key skills here..."
                       rows={6}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: 8,
-                        border: '1px solid var(--border)',
-                        background: 'var(--surf2)',
-                        color: 'var(--text)',
-                        fontSize: 13,
-                        resize: 'vertical',
-                        outline: 'none',
-                        transition: 'border-color var(--dur-fast)',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--blue)'; e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,.1)'; }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      className="form-textarea"
                     />
                   </div>
 
                   {upgradeRequired && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 14, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a' }}>
-                      <Sparkles size={16} style={{ color: '#d97706', flexShrink: 0, marginTop: 2 }} />
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 14, borderRadius: 'var(--radius)', background: 'var(--amber-lt)', border: '1px solid var(--amber-md)' }}>
+                      <Sparkles size={16} style={{ color: 'var(--amber)', flexShrink: 0, marginTop: 2 }} />
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: '#92400e', margin: 0 }}>Upgrade Required</p>
-                        <p style={{ fontSize: 12, color: '#b45309', margin: '4px 0 6px' }}>Job match analysis requires a Pro or Premium plan.</p>
-                        <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#92400e', textDecoration: 'underline' }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--amber)', margin: 0 }}>Upgrade Required</p>
+                        <p style={{ fontSize: 12, color: 'var(--text2)', margin: '4px 0 6px' }}>Job match analysis requires a Pro or Premium plan.</p>
+                        <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--amber)', textDecoration: 'underline' }}>
                           View plans <ArrowUpRight size={12} />
                         </a>
                       </div>

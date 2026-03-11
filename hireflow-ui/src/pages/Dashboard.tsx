@@ -27,19 +27,19 @@ const RED = '#dc2626';
 const VIOLET = '#7c3aed';
 const GHOST = '#94a3b8';
 
-const statusBadge: Record<string, string> = {
-  applied: 'bg-blue-50 text-blue-700 border border-blue-200',
-  interview: 'bg-amber-50 text-amber-700 border border-amber-200',
-  offer: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  rejected: 'bg-red-50 text-red-700 border border-red-200',
-  ghosted: 'bg-slate-100 text-slate-500 border border-slate-200',
-  saved: 'bg-cyan-50 text-cyan-700 border border-cyan-200',
+const statusBadgeClass: Record<string, string> = {
+  applied: 'badge badge-applied',
+  interview: 'badge badge-interview',
+  offer: 'badge badge-offer',
+  rejected: 'badge badge-rejected',
+  ghosted: 'badge badge-ghosted',
+  saved: 'badge badge-saved',
 };
 
-const priorityDot: Record<string, string> = {
-  high: 'bg-red-500',
-  medium: 'bg-amber-400',
-  low: 'bg-slate-300',
+const priorityDotClass: Record<string, string> = {
+  high: 'priority-dot p-high',
+  medium: 'priority-dot p-medium',
+  low: 'priority-dot p-low',
 };
 
 /* ------------------------------------------------------------------ */
@@ -160,10 +160,18 @@ export default function Dashboard() {
   /* ---- Loading state ---- */
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: 'var(--text3)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '16rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <div
+            className="animate-spin"
+            style={{
+              width: 32, height: 32,
+              border: '3px solid var(--border)',
+              borderTopColor: 'var(--blue)',
+              borderRadius: '50%',
+            }}
+          />
+          <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text3)' }}>
             Loading dashboard...
           </p>
         </div>
@@ -175,11 +183,7 @@ export default function Dashboard() {
 
   /* ---- Add / Track application button ---- */
   const trackAppButton = (
-    <Link
-      to="/applications"
-      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg transition-all duration-150 hover:opacity-90 hover:shadow-md"
-      style={{ background: BLUE }}
-    >
+    <Link to="/applications" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       <Plus className="w-4 h-4" />
       Track Application
     </Link>
@@ -208,11 +212,7 @@ export default function Dashboard() {
             Add your first job application to get insights, track follow-ups, and manage your
             entire job search pipeline in one place.
           </p>
-          <Link
-            to="/applications"
-            className="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-150 hover:opacity-90 hover:shadow-md"
-            style={{ background: BLUE }}
-          >
+          <Link to="/applications" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <Plus className="w-4 h-4" />
             Add Your First Application
             <ArrowRight className="w-4 h-4" />
@@ -314,8 +314,8 @@ export default function Dashboard() {
 
       {/* -------- ROW 1: Funnel + Sources & Response Rate -------- */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6 animate-fade-up"
-        style={{ animationDelay: '100ms' }}
+        className="grid-2 animate-fade-up"
+        style={{ animationDelay: '100ms', marginBottom: 24 }}
       >
         {/* Application Funnel */}
         <Card>
@@ -439,8 +439,8 @@ export default function Dashboard() {
 
       {/* -------- ROW 2: Recent Applications + Follow-ups -------- */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6 animate-fade-up"
-        style={{ animationDelay: '200ms' }}
+        className="grid-2 animate-fade-up"
+        style={{ animationDelay: '200ms', marginBottom: 24 }}
       >
         {/* Recent Applications */}
         <Card>
@@ -504,22 +504,14 @@ export default function Dashboard() {
                           {app.salary}
                         </span>
                       )}
-                      <span
-                        className={clsx(
-                          'text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize',
-                          statusBadge[app.status],
-                        )}
-                      >
+                      <span className={statusBadgeClass[app.status] ?? 'badge'}>
                         {app.status}
                       </span>
                       <span className="text-[10px] font-mono" style={{ color: 'var(--text3)' }}>
                         {fmtShortDate(app.appliedDate || app.createdAt)}
                       </span>
                       <span
-                        className={clsx(
-                          'w-2 h-2 rounded-full flex-shrink-0',
-                          priorityDot[app.priority] ?? 'bg-slate-300',
-                        )}
+                        className={priorityDotClass[app.priority] ?? 'priority-dot p-low'}
                       />
                     </div>
                   </div>

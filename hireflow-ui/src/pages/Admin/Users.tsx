@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Search, X, Shield, Lock, Unlock, Trash2, Eye, Crown,
-  Mail, Calendar, Briefcase, Key, ChevronDown, Users,
+  Mail, Calendar, Briefcase, Key, Users,
 } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import api from '../../lib/api';
@@ -12,14 +12,6 @@ const planLabels: Record<string, string> = {
   free:    'Free',
   pro:     'Pro',
   premium: 'Premium',
-};
-
-const planBadgeStyle = (plan: string): React.CSSProperties => {
-  if (plan === 'pro')
-    return { background: 'var(--blue-lt)', color: 'var(--blue)', border: '1px solid var(--blue-md)' };
-  if (plan === 'premium')
-    return { background: 'var(--violet-lt)', color: 'var(--violet)', border: '1px solid var(--violet-md)' };
-  return { background: 'var(--bg2)', color: 'var(--text3)', border: '1px solid var(--border2)' };
 };
 
 const avatarGradients = [
@@ -228,31 +220,17 @@ export default function AdminUsers() {
       {/* Filter bar */}
       <div className="filter-bar mb-4">
         {/* Plan filter */}
-        <div style={{ position: 'relative' }}>
-          <select
-            value={planFilter}
-            onChange={(e) => setPlanFilter(e.target.value)}
-            className="input-field"
-            style={{ width: 140, paddingRight: 32 }}
-          >
-            <option value="">All Plans</option>
-            <option value="free">Free</option>
-            <option value="pro">Pro</option>
-            <option value="premium">Premium</option>
-          </select>
-          <ChevronDown
-            style={{
-              position: 'absolute',
-              right: 10,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 13,
-              height: 13,
-              color: 'var(--text3)',
-              pointerEvents: 'none',
-            }}
-          />
-        </div>
+        <select
+          value={planFilter}
+          onChange={(e) => setPlanFilter(e.target.value)}
+          className="form-select"
+          style={{ width: 140 }}
+        >
+          <option value="">All Plans</option>
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="premium">Premium</option>
+        </select>
 
         {/* Blocked only toggle */}
         <button
@@ -330,14 +308,7 @@ export default function AdminUsers() {
 
                     {/* Plan column */}
                     <td>
-                      <span
-                        className="badge"
-                        style={{
-                          ...planBadgeStyle(user.plan),
-                          fontFamily: 'inherit',
-                          textTransform: 'capitalize',
-                        }}
-                      >
+                      <span className={`badge badge-${user.plan}`}>
                         {planLabels[user.plan] ?? user.plan}
                       </span>
                     </td>
@@ -345,15 +316,7 @@ export default function AdminUsers() {
                     {/* Role column */}
                     <td>
                       {user.role === 'admin' ? (
-                        <span
-                          className="badge"
-                          style={{
-                            background: 'var(--amber-lt)',
-                            color: 'var(--amber)',
-                            border: '1px solid var(--amber-md)',
-                            fontFamily: 'inherit',
-                          }}
-                        >
+                        <span className="badge badge-admin">
                           <Shield style={{ width: 11, height: 11 }} />
                           Admin
                         </span>
@@ -366,14 +329,7 @@ export default function AdminUsers() {
 
                     {/* Status column */}
                     <td>
-                      <span
-                        className="badge"
-                        style={
-                          user.isActive
-                            ? { background: 'var(--green-lt)', color: 'var(--green)', border: '1px solid var(--green-md)', fontFamily: 'inherit' }
-                            : { background: 'var(--red-lt)', color: 'var(--red)', border: '1px solid var(--red-md)', fontFamily: 'inherit' }
-                        }
-                      >
+                      <span className={`badge ${user.isActive ? 'badge-active' : 'badge-blocked'}`}>
                         {user.isActive ? 'Active' : 'Blocked'}
                       </span>
                     </td>
@@ -455,24 +411,10 @@ export default function AdminUsers() {
                     {selectedUser.email}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
-                    <span
-                      className="badge"
-                      style={{
-                        ...planBadgeStyle(selectedUser.plan),
-                        fontFamily: 'inherit',
-                        textTransform: 'capitalize',
-                      }}
-                    >
+                    <span className={`badge badge-${selectedUser.plan}`}>
                       {planLabels[selectedUser.plan] ?? selectedUser.plan}
                     </span>
-                    <span
-                      className="badge"
-                      style={
-                        selectedUser.isActive
-                          ? { background: 'var(--green-lt)', color: 'var(--green)', border: '1px solid var(--green-md)', fontFamily: 'inherit' }
-                          : { background: 'var(--red-lt)', color: 'var(--red)', border: '1px solid var(--red-md)', fontFamily: 'inherit' }
-                      }
-                    >
+                    <span className={`badge ${selectedUser.isActive ? 'badge-active' : 'badge-blocked'}`}>
                       {selectedUser.isActive ? 'Active' : 'Blocked'}
                     </span>
                   </div>
@@ -524,31 +466,17 @@ export default function AdminUsers() {
               {/* Set Plan section */}
               <div className="drawer-section">
                 <div className="drawer-section-label">Set Plan</div>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    value={selectedUser.plan}
-                    onChange={(e) => changePlan(selectedUser.id, e.target.value)}
-                    disabled={actionLoading === `plan-${selectedUser.id}`}
-                    className="input-field"
-                    style={{ opacity: actionLoading === `plan-${selectedUser.id}` ? 0.55 : 1 }}
-                  >
-                    <option value="free">Free</option>
-                    <option value="pro">Pro</option>
-                    <option value="premium">Premium</option>
-                  </select>
-                  <ChevronDown
-                    style={{
-                      position: 'absolute',
-                      right: 12,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: 14,
-                      height: 14,
-                      color: 'var(--text3)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                </div>
+                <select
+                  value={selectedUser.plan}
+                  onChange={(e) => changePlan(selectedUser.id, e.target.value)}
+                  disabled={actionLoading === `plan-${selectedUser.id}`}
+                  className="form-select"
+                  style={{ opacity: actionLoading === `plan-${selectedUser.id}` ? 0.55 : 1 }}
+                >
+                  <option value="free">Free</option>
+                  <option value="pro">Pro</option>
+                  <option value="premium">Premium</option>
+                </select>
               </div>
 
               {/* Admin Actions section */}
@@ -560,24 +488,11 @@ export default function AdminUsers() {
                   <button
                     onClick={() => toggleAdmin(selectedUser)}
                     disabled={actionLoading === `admin-${selectedUser.id}`}
-                    className="btn w-full"
-                    style={
-                      selectedUser.role === 'admin'
-                        ? {
-                            justifyContent: 'flex-start',
-                            background: 'var(--amber-lt)',
-                            color: 'var(--amber)',
-                            borderColor: 'var(--amber-md)',
-                            opacity: actionLoading === `admin-${selectedUser.id}` ? 0.55 : 1,
-                          }
-                        : {
-                            justifyContent: 'flex-start',
-                            background: 'var(--bg2)',
-                            color: 'var(--text2)',
-                            borderColor: 'var(--border)',
-                            opacity: actionLoading === `admin-${selectedUser.id}` ? 0.55 : 1,
-                          }
-                    }
+                    className={`btn w-full ${selectedUser.role === 'admin' ? 'btn-danger' : 'btn-secondary'}`}
+                    style={{
+                      justifyContent: 'flex-start',
+                      opacity: actionLoading === `admin-${selectedUser.id}` ? 0.55 : 1,
+                    }}
                   >
                     <Shield style={{ width: 15, height: 15, flexShrink: 0 }} />
                     {selectedUser.role === 'admin' ? 'Remove Admin Access' : 'Grant Admin Access'}
@@ -590,24 +505,11 @@ export default function AdminUsers() {
                   <button
                     onClick={() => toggleBlock(selectedUser)}
                     disabled={actionLoading === `block-${selectedUser.id}`}
-                    className="btn w-full"
-                    style={
-                      selectedUser.isActive
-                        ? {
-                            justifyContent: 'flex-start',
-                            background: 'var(--red-lt)',
-                            color: 'var(--red)',
-                            borderColor: 'rgba(220,38,38,.18)',
-                            opacity: actionLoading === `block-${selectedUser.id}` ? 0.55 : 1,
-                          }
-                        : {
-                            justifyContent: 'flex-start',
-                            background: 'var(--green-lt)',
-                            color: 'var(--green)',
-                            borderColor: 'var(--green-md)',
-                            opacity: actionLoading === `block-${selectedUser.id}` ? 0.55 : 1,
-                          }
-                    }
+                    className={`btn w-full ${selectedUser.isActive ? 'btn-danger' : 'btn-secondary'}`}
+                    style={{
+                      justifyContent: 'flex-start',
+                      opacity: actionLoading === `block-${selectedUser.id}` ? 0.55 : 1,
+                    }}
                   >
                     {selectedUser.isActive
                       ? <Lock style={{ width: 15, height: 15, flexShrink: 0 }} />
@@ -623,12 +525,9 @@ export default function AdminUsers() {
                   <button
                     onClick={() => resetPassword(selectedUser.id)}
                     disabled={actionLoading === `pwd-${selectedUser.id}`}
-                    className="btn w-full"
+                    className="btn btn-secondary w-full"
                     style={{
                       justifyContent: 'flex-start',
-                      background: 'var(--bg2)',
-                      color: 'var(--text2)',
-                      borderColor: 'var(--border)',
                       opacity: actionLoading === `pwd-${selectedUser.id}` ? 0.55 : 1,
                     }}
                   >
