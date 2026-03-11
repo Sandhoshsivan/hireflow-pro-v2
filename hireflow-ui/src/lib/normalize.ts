@@ -41,7 +41,7 @@ export function extractApplications(data: unknown): Application[] {
 // The .NET ApplicationStatsDto uses { byStatus: { Applied: N, ... }, totalApplications: N, responseRate: N }.
 export function normalizeStats(raw: unknown): ApplicationStats {
   if (!raw || typeof raw !== 'object') {
-    return { total: 0, applied: 0, interviews: 0, offers: 0, rejected: 0, ghosted: 0, saved: 0, responseRate: 0 };
+    return { total: 0, applied: 0, interviews: 0, offers: 0, rejected: 0, ghosted: 0, saved: 0, responseRate: 0, byStatus: {}, sources: [], followups: [] };
   }
   const d = raw as Record<string, unknown>;
 
@@ -57,5 +57,18 @@ export function normalizeStats(raw: unknown): ApplicationStats {
   const total = (d.total as number) ?? (d.totalApplications as number) ?? (applied + interviews + offers + rejected + ghosted + saved);
   const responseRate = (d.responseRate as number) ?? 0;
 
-  return { total, applied, interviews, offers, rejected, ghosted, saved, responseRate };
+  // Pass through sources, followups, and byStatus for dashboard charts
+  const sources = Array.isArray(d.sources) ? (d.sources as Array<{ source: string; cnt: number }>) : [];
+  const followups = Array.isArray(d.followups) ? (d.followups as Array<{ id: number; company: string; role: string; followup: string }>) : [];
+  const resolvedByStatus: Record<string, number> = {
+    Applied: applied,
+    Interview: interviews,
+    Offer: offers,
+    Rejected: rejected,
+    Ghosted: ghosted,
+    Saved: saved,
+    ...byStatus,
+  };
+
+  return { total, applied, interviews, offers, rejected, ghosted, saved, responseRate, byStatus: resolvedByStatus, sources, followups };
 }

@@ -88,6 +88,9 @@ export interface ApplicationStats {
   ghosted: number;
   saved: number;
   responseRate: number;
+  byStatus: Record<string, number>;
+  sources: Array<{ source: string; cnt: number }>;
+  followups: Array<{ id: number; company: string; role: string; followup: string }>;
 }
 
 export interface AdminStats {

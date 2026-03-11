@@ -10,22 +10,27 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
   return (
     <div
       style={{
+        height: 64,
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03)',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '1.5rem', // mb-6
-        fontFamily: 'Inter, sans-serif',
+        padding: '0 28px',
+        gap: 16,
+        flexShrink: 0,
+        fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
       {/* Title block */}
-      <div>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <h1
           style={{
-            fontSize: '1.25rem',
+            fontSize: 20,
             fontWeight: 700,
             color: '#0f172a',
-            letterSpacing: '-0.02em',
-            lineHeight: 1.3,
+            letterSpacing: '-0.3px',
+            lineHeight: 1.2,
             margin: 0,
           }}
         >
@@ -34,9 +39,8 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
         {subtitle && (
           <p
             style={{
-              fontSize: '0.875rem',
-              color: '#64748b',
-              marginTop: '2px',
+              fontSize: 12,
+              color: '#94a3b8',
               fontWeight: 400,
               lineHeight: 1.5,
               margin: '2px 0 0 0',
@@ -47,14 +51,13 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
         )}
       </div>
 
-      {/* Actions — right-aligned, vertically centered with title */}
+      {/* Actions -- right-aligned */}
       {actions && (
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            marginLeft: '16px',
+            gap: 8,
             flexShrink: 0,
           }}
         >

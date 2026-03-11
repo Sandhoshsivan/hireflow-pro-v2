@@ -3,19 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
-  ArrowUpDown,
   X,
   Pencil,
   Trash2,
-  MapPin,
-  DollarSign,
-  Globe,
-  ExternalLink,
   Briefcase,
   ChevronDown,
   ChevronRight,
-  Calendar,
-  Tag,
+  Link2,
+  Send,
 } from 'lucide-react';
 import clsx from 'clsx';
 import TopBar from '../components/TopBar';
@@ -35,28 +30,30 @@ const statusOptions: ApplicationStatus[] = [
 
 const priorityOptions: Priority[] = ['low', 'medium', 'high'];
 
+/* ── Status badge styling ── */
 const statusColors: Record<string, string> = {
-  applied: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
-  offer: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-red-100 text-red-700',
-  ghosted: 'bg-slate-100 text-slate-500',
-  saved: 'bg-cyan-100 text-cyan-700',
+  saved: 'bg-cyan-50 text-cyan-700 border border-cyan-200',
+  applied: 'bg-blue-50 text-blue-700 border border-blue-200',
+  interview: 'bg-amber-50 text-amber-700 border border-amber-200',
+  offer: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  rejected: 'bg-red-50 text-red-700 border border-red-200',
+  ghosted: 'bg-slate-100 text-slate-500 border border-slate-200',
 };
 
 const statusDots: Record<string, string> = {
-  applied: 'bg-blue-500',
+  saved: 'bg-cyan-600',
+  applied: 'bg-blue-600',
   interview: 'bg-amber-500',
-  offer: 'bg-emerald-500',
+  offer: 'bg-emerald-600',
   rejected: 'bg-red-500',
   ghosted: 'bg-slate-400',
-  saved: 'bg-cyan-500',
 };
 
+/* ── Priority styling ── */
 const priorityDots: Record<string, string> = {
-  high: 'bg-red-500',
-  medium: 'bg-amber-500',
-  low: 'bg-slate-400',
+  high: 'bg-red-500 shadow-[0_0_0_2px_rgba(220,38,38,.15)]',
+  medium: 'bg-amber-500 shadow-[0_0_0_2px_rgba(217,119,6,.15)]',
+  low: 'bg-emerald-500 shadow-[0_0_0_2px_rgba(5,150,105,.15)]',
 };
 
 const priorityLabels: Record<string, string> = {
@@ -64,6 +61,26 @@ const priorityLabels: Record<string, string> = {
   medium: 'text-amber-600',
   low: 'text-slate-400',
 };
+
+/* ── Avatar color from company name (matches Flask) ── */
+const AVATAR_COLORS = ['#2563EB', '#059669', '#D97706', '#7C3AED', '#DC2626', '#0891B2', '#EC4899'];
+function avatarColor(name: string): string {
+  let h = 0;
+  for (const ch of name || 'X') h = (h * 31 + ch.charCodeAt(0)) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[h];
+}
+
+/* ── Helpers ── */
+function daysAgo(dateStr: string): number {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now.getTime() - d.getTime()) / 86400000);
+}
+
+function isOverdue(dateStr?: string): boolean {
+  if (!dateStr) return false;
+  return new Date(dateStr) <= new Date();
+}
 
 interface FormData {
   company: string;
@@ -102,7 +119,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[.6px] mb-1.5">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
@@ -112,7 +129,7 @@ function FormField({
 }
 
 const inputClass =
-  'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white';
+  'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none bg-slate-50 focus:bg-white transition-all duration-150';
 
 export default function Applications() {
   const [searchParams] = useSearchParams();
@@ -136,6 +153,11 @@ export default function Applications() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [timelineOpen, setTimelineOpen] = useState(true);
   const [contactsOpen, setContactsOpen] = useState(true);
+  const [timelineNote, setTimelineNote] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
+
+  // Quick status in drawer
+  const [drawerStatus, setDrawerStatus] = useState<ApplicationStatus | ''>('');
 
   const addToast = useToastStore((s) => s.addToast);
 
@@ -230,6 +252,8 @@ export default function Applications() {
 
   const openDetail = async (app: Application) => {
     setSelectedApp(app);
+    setDrawerStatus(app.status);
+    setTimelineNote('');
     try {
       const [tlRes, ctRes] = await Promise.all([
         api.get(`/applications/${app.id}/timeline`),
@@ -239,7 +263,7 @@ export default function Applications() {
       setTimeline(rawTimeline.map((t) => ({
         id: t.id as number,
         applicationId: (t.applicationId as number) ?? 0,
-        action: (t.action as string) ?? `${t.fromStatus} → ${t.toStatus}`,
+        action: (t.action as string) ?? `${t.fromStatus} \u2192 ${t.toStatus}`,
         details: (t.details as string) ?? (t.note as string),
         createdAt: t.createdAt as string,
       })));
@@ -259,144 +283,159 @@ export default function Applications() {
     }
   };
 
+  const handleQuickStatus = async (newStatus: ApplicationStatus) => {
+    if (!selectedApp || newStatus === selectedApp.status) return;
+    try {
+      await api.patch(`/applications/${selectedApp.id}/status`, { status: newStatus });
+      addToast('success', `Status updated to ${newStatus}`);
+      setDrawerStatus(newStatus);
+      fetchApps();
+      openDetail({ ...selectedApp, status: newStatus });
+    } catch {
+      addToast('error', 'Failed to update status');
+    }
+  };
+
+  const handleAddTimelineNote = async () => {
+    if (!selectedApp || !timelineNote.trim()) return;
+    setAddingNote(true);
+    try {
+      await api.post(`/applications/${selectedApp.id}/timeline`, { action: timelineNote.trim() });
+      setTimelineNote('');
+      addToast('success', 'Note added');
+      openDetail(selectedApp);
+    } catch {
+      addToast('error', 'Failed to add note');
+    } finally {
+      setAddingNote(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm text-slate-500 font-medium">Loading applications...</p>
         </div>
       </div>
     );
   }
 
-  const allPills = [
-    { label: 'All', value: '' },
-    ...statusOptions.map((s) => ({ label: s.charAt(0).toUpperCase() + s.slice(1), value: s })),
-  ];
-
   return (
     <div>
-      {/* TopBar */}
+      {/* ── Topbar ── */}
       <TopBar
         title="Applications"
-        subtitle={`${apps.length} ${apps.length === 1 ? 'application' : 'applications'} tracked`}
+        subtitle={`${apps.length} application${apps.length !== 1 ? 's' : ''} tracked`}
         actions={
-          <button
-            onClick={openAdd}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
-          >
-            <Plus className="w-4 h-4" />
-            Add Application
-          </button>
+          <div className="flex items-center gap-2.5">
+            {/* Filter bar container */}
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-[10px] px-2 py-[5px]">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search company, role..."
+                  className="w-[200px] pl-8 pr-3 py-[7px] bg-white border border-slate-200 rounded-lg text-[13px] text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all duration-150"
+                />
+              </div>
+              {/* Vertical divider */}
+              <div className="w-px h-5 bg-slate-200 flex-shrink-0" />
+              {/* Status dropdown */}
+              <div className="relative">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-[126px] pl-3 pr-7 py-[7px] bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none appearance-none cursor-pointer transition-all duration-150"
+                >
+                  <option value="">All Status</option>
+                  {statusOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+              </div>
+              {/* Sort dropdown */}
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-[136px] pl-3 pr-7 py-[7px] bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none appearance-none cursor-pointer transition-all duration-150"
+                >
+                  <option value="createdAt_desc">Newest First</option>
+                  <option value="createdAt_asc">Oldest First</option>
+                  <option value="company_asc">Company A-Z</option>
+                  <option value="company_desc">Company Z-A</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+            {/* Track Job button */}
+            <button
+              onClick={openAdd}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 active:scale-[.98] transition-all duration-150 shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Track Job
+            </button>
+          </div>
         }
       />
 
-      {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search company or role..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white"
-            />
-          </div>
-
-          {/* Status Pills */}
-          <div className="flex gap-1.5 flex-wrap">
-            {allPills.map((pill) => (
-              <button
-                key={pill.value}
-                onClick={() => setFilterStatus(pill.value)}
-                className={clsx(
-                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  filterStatus === pill.value
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                )}
-              >
-                {pill.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort dropdown */}
-          <div className="relative">
-            <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer text-slate-700"
-            >
-              <option value="createdAt_desc">Newest First</option>
-              <option value="createdAt_asc">Oldest First</option>
-              <option value="company_asc">Company A-Z</option>
-              <option value="company_desc">Company Z-A</option>
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-          </div>
-
-          {/* Result count */}
-          <span className="text-xs text-slate-400 font-medium ml-auto whitespace-nowrap">
-            {apps.length} {apps.length === 1 ? 'result' : 'results'}
-          </span>
-        </div>
-      </div>
-
-      {/* Table */}
+      {/* ── Table ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-[#FAFBFC] border-b border-slate-200">
+                <th className="text-left px-5 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]" style={{ width: '28%' }}>
                   Company / Role
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
                   Status
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
+                  Applied
+                </th>
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
                   Salary
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
                   Source
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Date
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
+                  Location
                 </th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
+                  Follow-up
+                </th>
+                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
                   Priority
                 </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-4 py-[11px] sticky top-0 z-[2]" style={{ width: 60 }} />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {apps.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <div className="flex flex-col items-center justify-center py-20">
                       <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
                         <Briefcase className="w-8 h-8 text-slate-400" />
                       </div>
-                      <h3 className="text-base font-semibold text-slate-700 mb-1">No applications yet</h3>
+                      <h3 className="text-base font-semibold text-slate-700 mb-1">No applications found</h3>
                       <p className="text-sm text-slate-400 mb-6 text-center max-w-xs">
-                        Start tracking your job applications to get organized and land your dream role.
+                        Try a different filter or add a new application
                       </p>
                       <button
                         onClick={openAdd}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity"
-                        style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                         Add your first application
@@ -405,105 +444,146 @@ export default function Applications() {
                   </td>
                 </tr>
               ) : (
-                apps.map((app) => (
-                  <tr
-                    key={app.id}
-                    onClick={() => openDetail(app)}
-                    className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
-                  >
-                    {/* Company / Role */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-indigo-700">
+                apps.map((app, idx) => {
+                  const color = avatarColor(app.company);
+                  return (
+                    <tr
+                      key={app.id}
+                      onClick={() => openDetail(app)}
+                      className={clsx(
+                        'border-b border-slate-200 last:border-b-0 cursor-pointer transition-colors duration-[120ms] group',
+                        idx % 2 === 1 && 'bg-[#FAFBFC]',
+                        'hover:bg-blue-50'
+                      )}
+                    >
+                      {/* Company / Role */}
+                      <td className="px-5 py-3 align-middle">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-8 h-8 rounded-[7px] flex items-center justify-center flex-shrink-0 text-[13px] font-extrabold"
+                            style={{ background: `${color}18`, color }}
+                          >
                             {app.company.charAt(0).toUpperCase()}
-                          </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-semibold text-slate-900 tracking-[-0.1px] truncate">
+                              {app.company}
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5 truncate">{app.role}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">{app.company}</p>
-                          <p className="text-xs text-slate-500">{app.role}</p>
-                        </div>
-                      </div>
-                    </td>
-                    {/* Status */}
-                    <td className="px-4 py-3">
-                      <span
-                        className={clsx(
-                          'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
-                          statusColors[app.status]
-                        )}
-                      >
-                        <span className={clsx('w-1.5 h-1.5 rounded-full', statusDots[app.status])} />
-                        {app.status}
-                      </span>
-                    </td>
-                    {/* Salary */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-slate-600">{app.salary || '—'}</span>
-                    </td>
-                    {/* Location */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-slate-600">{app.location || '—'}</span>
-                    </td>
-                    {/* Source */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-slate-600">{app.source || '—'}</span>
-                    </td>
-                    {/* Date */}
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-slate-500">
-                        {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </td>
-                    {/* Priority */}
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className={clsx('w-2 h-2 rounded-full', priorityDots[app.priority])} title={app.priority} />
-                        <span className={clsx('text-xs font-medium capitalize', priorityLabels[app.priority])}>
-                          {app.priority}
+                        {/* Left accent on hover */}
+                        <style>{`
+                          tr:hover > td:first-child {
+                            box-shadow: inset 3px 0 0 #1a56db;
+                          }
+                        `}</style>
+                      </td>
+                      {/* Status */}
+                      <td className="px-4 py-3 align-middle">
+                        <span
+                          className={clsx(
+                            'inline-flex items-center gap-[5px] text-[11px] font-bold font-mono tracking-[.1px] px-2.5 py-1 rounded-full capitalize whitespace-nowrap',
+                            statusColors[app.status]
+                          )}
+                        >
+                          <span className={clsx('w-[5px] h-[5px] rounded-full flex-shrink-0', statusDots[app.status])} />
+                          {app.status}
                         </span>
-                      </div>
-                    </td>
-                    {/* Actions — appear on row hover */}
-                    <td className="px-4 py-3 text-right">
-                      <div
-                        className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() => openEdit(app)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                          title="Edit"
+                      </td>
+                      {/* Applied date */}
+                      <td className="px-4 py-3 align-middle">
+                        <span className="text-[11px] font-mono text-slate-500">
+                          {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </td>
+                      {/* Salary */}
+                      <td className="px-4 py-3 align-middle">
+                        <span className="text-[12px] font-mono font-semibold text-emerald-600">
+                          {app.salary || <span className="text-slate-300 font-normal">&mdash;</span>}
+                        </span>
+                      </td>
+                      {/* Source */}
+                      <td className="px-4 py-3 align-middle">
+                        <span className="text-[11px] font-mono text-slate-500">
+                          {app.source || <span className="text-slate-300">&mdash;</span>}
+                        </span>
+                      </td>
+                      {/* Location */}
+                      <td className="px-4 py-3 align-middle">
+                        <span className="text-[12px] text-slate-400">
+                          {app.location || <span className="text-slate-300">&mdash;</span>}
+                        </span>
+                      </td>
+                      {/* Follow-up */}
+                      <td className="px-4 py-3 align-middle">
+                        <span
+                          className={clsx(
+                            'text-[11px] font-mono',
+                            app.followUpDate
+                              ? isOverdue(app.followUpDate)
+                                ? 'text-amber-600 font-semibold'
+                                : 'text-slate-400'
+                              : 'text-slate-300'
+                          )}
                         >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(app.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete"
+                          {app.followUpDate
+                            ? new Date(app.followUpDate).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })
+                            : '\u2014'}
+                        </span>
+                      </td>
+                      {/* Priority */}
+                      <td className="px-4 py-3 align-middle">
+                        <span
+                          className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[app.priority])}
+                          title={app.priority}
+                        />
+                      </td>
+                      {/* Actions */}
+                      <td className="px-4 py-3 align-middle">
+                        <div
+                          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <button
+                            onClick={() => openEdit(app)}
+                            className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(app.id)}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* ── Add / Edit Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
             {/* Top gradient bar */}
-            <div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-500 flex-shrink-0" />
+            <div className="h-1 bg-gradient-to-r from-blue-600 to-violet-600 flex-shrink-0" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 flex-shrink-0">
@@ -523,7 +603,7 @@ export default function Applications() {
               </button>
             </div>
 
-            {/* Body — scrollable form */}
+            {/* Body */}
             <div className="overflow-y-auto flex-1 px-6 py-5">
               <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
@@ -650,8 +730,7 @@ export default function Applications() {
               <button
                 onClick={handleSave}
                 disabled={saving || !form.company || !form.role}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving...' : editingApp ? 'Update Application' : 'Create Application'}
               </button>
@@ -660,154 +739,190 @@ export default function Applications() {
         </div>
       )}
 
-      {/* Detail Drawer */}
+      {/* ── Detail Drawer ── */}
       {selectedApp && (
         <div className="fixed inset-0 z-40 flex justify-end">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-[rgba(9,16,29,.2)] backdrop-blur-[2px]"
             onClick={() => setSelectedApp(null)}
           />
           {/* Panel */}
-          <div className="relative w-full max-w-xl bg-white shadow-2xl flex flex-col animate-slide-in-from-right">
-            {/* Top gradient bar */}
-            <div className="h-1 bg-gradient-to-r from-indigo-500 to-violet-500 flex-shrink-0" />
-
-            {/* Sticky header */}
-            <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-5 flex-shrink-0 z-10">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  {/* Company avatar */}
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-bold text-indigo-700">
-                      {selectedApp.company.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900">{selectedApp.company}</h2>
-                    <p className="text-sm text-slate-500">{selectedApp.role}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Status badge */}
-                  <span
-                    className={clsx(
-                      'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
-                      statusColors[selectedApp.status]
+          <div className="relative w-[480px] max-w-[95vw] bg-white shadow-[-8px_0_40px_rgba(0,0,0,.08)] border-l border-slate-200 flex flex-col animate-slide-in-from-right">
+            {/* Drawer header with gradient bg */}
+            <div className="flex-shrink-0 px-[22px] pt-5 pb-4 border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  {/* Company name - 20px bold */}
+                  <h2 className="text-[20px] font-extrabold text-slate-900 tracking-[-0.5px] leading-tight">
+                    {selectedApp.company}
+                  </h2>
+                  {/* Role + location */}
+                  <p className="text-[13px] text-slate-500 mt-[3px]">
+                    {selectedApp.role}
+                    {selectedApp.location && (
+                      <span className="text-slate-400">{'  \u00B7  '}{selectedApp.location}</span>
                     )}
-                  >
-                    <span className={clsx('w-1.5 h-1.5 rounded-full', statusDots[selectedApp.status])} />
-                    {selectedApp.status}
-                  </span>
-                  {/* Close */}
-                  <button
-                    onClick={() => setSelectedApp(null)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  </p>
+                  {/* Action row: badge + edit + status dropdown + job link + delete */}
+                  <div className="flex items-center gap-2 flex-wrap mt-3">
+                    {/* Status badge */}
+                    <span
+                      className={clsx(
+                        'inline-flex items-center gap-[5px] text-[11px] font-bold font-mono tracking-[.1px] px-2.5 py-1 rounded-full capitalize whitespace-nowrap',
+                        statusColors[selectedApp.status]
+                      )}
+                    >
+                      <span className={clsx('w-[5px] h-[5px] rounded-full', statusDots[selectedApp.status])} />
+                      {selectedApp.status}
+                    </span>
+                    {/* Edit button */}
+                    <button
+                      onClick={() => {
+                        setSelectedApp(null);
+                        openEdit(selectedApp);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </button>
+                    {/* Quick status dropdown */}
+                    <div className="relative">
+                      <select
+                        value={drawerStatus}
+                        onChange={(e) => handleQuickStatus(e.target.value as ApplicationStatus)}
+                        className="pl-2 pr-5 py-1 text-[12px] border border-slate-200 rounded-lg bg-white cursor-pointer outline-none appearance-none hover:bg-slate-50 transition-colors"
+                      >
+                        {statusOptions.map((s) => (
+                          <option key={s} value={s}>
+                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-slate-400 pointer-events-none" />
+                    </div>
+                    {/* Job post link */}
+                    {selectedApp.url && (
+                      <a
+                        href={selectedApp.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                        <Link2 className="w-3 h-3" />
+                        Job Post
+                      </a>
+                    )}
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDelete(selectedApp.id)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
+                {/* Close button */}
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0 -mt-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
             {/* Scrollable body */}
-            <div className="overflow-y-auto flex-1 p-6 space-y-6">
-              {/* Info grid cards */}
-              <div className="grid grid-cols-2 gap-3">
-                {selectedApp.salary && (
-                  <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                    <DollarSign className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Salary</p>
-                      <p className="text-sm font-semibold text-slate-900">{selectedApp.salary}</p>
-                    </div>
-                  </div>
-                )}
-                {selectedApp.location && (
-                  <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                    <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Location</p>
-                      <p className="text-sm font-semibold text-slate-900">{selectedApp.location}</p>
-                    </div>
-                  </div>
-                )}
-                {selectedApp.source && (
-                  <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                    <Globe className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Source</p>
-                      <p className="text-sm font-semibold text-slate-900">{selectedApp.source}</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                  <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400 font-medium">Applied</p>
-                    <p className="text-sm font-semibold text-slate-900">
+            <div className="overflow-y-auto flex-1">
+              {/* Details section */}
+              <div className="px-[22px] py-4 border-b border-slate-200">
+                <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">Details</h4>
+                <div className="grid grid-cols-2">
+                  {/* Applied */}
+                  <div className="py-2.5 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Applied</p>
+                    <p className="text-[13px] font-medium text-slate-900 mt-[3px]">
                       {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
+                      <span className="text-slate-400 ml-1">
+                        ({daysAgo(selectedApp.appliedDate || selectedApp.createdAt)}d ago)
+                      </span>
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                  <Tag className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400 font-medium">Priority</p>
-                    <p className={clsx('text-sm font-semibold capitalize', priorityLabels[selectedApp.priority])}>
-                      {selectedApp.priority}
+                  {/* Salary */}
+                  <div className="py-2.5 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Salary</p>
+                    <p className="text-[13px] font-medium text-emerald-600 mt-[3px]">
+                      {selectedApp.salary || '\u2014'}
                     </p>
                   </div>
-                </div>
-                {selectedApp.url && (
-                  <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl">
-                    <ExternalLink className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Job Link</p>
-                      <a
-                        href={selectedApp.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline"
-                      >
-                        Open listing
-                      </a>
+                  {/* Source */}
+                  <div className="py-2.5 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Source</p>
+                    <p className="text-[13px] font-medium text-slate-900 mt-[3px]">
+                      {selectedApp.source || '\u2014'}
+                    </p>
+                  </div>
+                  {/* Priority */}
+                  <div className="py-2.5 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Priority</p>
+                    <p className="text-[13px] font-medium mt-[3px] flex items-center gap-1.5">
+                      <span className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[selectedApp.priority])} />
+                      <span className={clsx('capitalize', priorityLabels[selectedApp.priority])}>
+                        {selectedApp.priority}
+                      </span>
+                    </p>
+                  </div>
+                  {/* Follow-up (if exists) */}
+                  {selectedApp.followUpDate && (
+                    <div className="py-2.5">
+                      <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Follow-up</p>
+                      <p className={clsx(
+                        'text-[13px] font-medium mt-[3px]',
+                        isOverdue(selectedApp.followUpDate) ? 'text-amber-600' : 'text-slate-900'
+                      )}>
+                        {new Date(selectedApp.followUpDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </p>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {/* Notes section */}
               {selectedApp.notes && (
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Notes</h4>
-                  <p className="text-sm text-slate-700 bg-slate-50 rounded-xl p-4 leading-relaxed">
+                <div className="px-[22px] py-4 border-b border-slate-200">
+                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">Notes</h4>
+                  <p className="text-[13px] text-slate-500 leading-[1.7] whitespace-pre-wrap">
                     {selectedApp.notes}
                   </p>
                 </div>
               )}
 
-              {/* Timeline (collapsible) */}
-              <div>
+              {/* Timeline section */}
+              <div className="px-[22px] py-4 border-b border-slate-200">
                 <button
                   onClick={() => setTimelineOpen(!timelineOpen)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400">
                     Timeline
                     {timeline.length > 0 && (
-                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-xs font-medium normal-case">
+                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
                         {timeline.length}
                       </span>
                     )}
                   </h4>
                   <ChevronRight
                     className={clsx(
-                      'w-4 h-4 text-slate-400 transition-transform',
+                      'w-4 h-4 text-slate-400 transition-transform duration-200',
                       timelineOpen && 'rotate-90'
                     )}
                   />
@@ -815,19 +930,25 @@ export default function Applications() {
                 {timelineOpen && (
                   <div className="mt-3">
                     {timeline.length === 0 ? (
-                      <p className="text-sm text-slate-400 py-2">No timeline entries yet</p>
+                      <p className="text-[13px] text-slate-400 py-2">No timeline entries yet</p>
                     ) : (
-                      <div className="space-y-3 relative">
-                        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-slate-200" />
-                        {timeline.map((entry) => (
-                          <div key={entry.id} className="flex gap-3 text-sm pl-1">
-                            <div className="w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-white ring-1 ring-indigo-200 mt-0.5 shrink-0 z-10" />
-                            <div className="pb-2">
-                              <p className="font-semibold text-slate-900">{entry.action}</p>
-                              {entry.details && (
-                                <p className="text-slate-500 text-xs mt-0.5">{entry.details}</p>
+                      <div className="flex flex-col">
+                        {timeline.map((entry, idx) => (
+                          <div key={entry.id} className="flex gap-3">
+                            {/* Left: dot + line */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-2.5 h-2.5 rounded-full bg-blue-600 flex-shrink-0 mt-1 shadow-[0_0_0_3px_rgba(26,86,219,.12)]" />
+                              {idx < timeline.length - 1 && (
+                                <div className="flex-1 w-px bg-slate-200 my-1" />
                               )}
-                              <p className="text-xs text-slate-400 mt-1">
+                            </div>
+                            {/* Content */}
+                            <div className="pb-3.5 flex-1">
+                              <p className="text-[13px] font-semibold text-slate-900">{entry.action}</p>
+                              {entry.details && (
+                                <p className="text-[12px] text-slate-500 mt-0.5">{entry.details}</p>
+                              )}
+                              <p className="text-[11px] font-mono text-slate-400 mt-0.5">
                                 {new Date(entry.createdAt).toLocaleString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
@@ -844,23 +965,48 @@ export default function Applications() {
                 )}
               </div>
 
+              {/* Add Note to Timeline */}
+              <div className="px-[22px] py-4 border-b border-slate-200">
+                <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">
+                  Add Note to Timeline
+                </h4>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={timelineNote}
+                    onChange={(e) => setTimelineNote(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTimelineNote()}
+                    placeholder="e.g. Called recruiter, Sent follow-up..."
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-900 placeholder:text-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all duration-150"
+                  />
+                  <button
+                    onClick={handleAddTimelineNote}
+                    disabled={addingNote || !timelineNote.trim()}
+                    className="px-3.5 py-2 text-[13px] font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    Add
+                  </button>
+                </div>
+              </div>
+
               {/* Contacts (collapsible) */}
-              <div>
+              <div className="px-[22px] py-4">
                 <button
                   onClick={() => setContactsOpen(!contactsOpen)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400">
                     Contacts
                     {contacts.length > 0 && (
-                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-xs font-medium normal-case">
+                      <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
                         {contacts.length}
                       </span>
                     )}
                   </h4>
                   <ChevronRight
                     className={clsx(
-                      'w-4 h-4 text-slate-400 transition-transform',
+                      'w-4 h-4 text-slate-400 transition-transform duration-200',
                       contactsOpen && 'rotate-90'
                     )}
                   />
@@ -868,54 +1014,37 @@ export default function Applications() {
                 {contactsOpen && (
                   <div className="mt-3">
                     {contacts.length === 0 ? (
-                      <p className="text-sm text-slate-400 py-2">No contacts added yet</p>
+                      <p className="text-[13px] text-slate-400 py-2">No contacts added yet</p>
                     ) : (
                       <div className="space-y-2">
-                        {contacts.map((c) => (
-                          <div
-                            key={c.id}
-                            className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                              <span className="text-xs font-bold text-indigo-700">
+                        {contacts.map((c) => {
+                          const cColor = avatarColor(c.name);
+                          return (
+                            <div
+                              key={c.id}
+                              className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
+                            >
+                              <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold"
+                                style={{ background: `${cColor}18`, color: cColor }}
+                              >
                                 {c.name.charAt(0).toUpperCase()}
-                              </span>
+                              </div>
+                              <div>
+                                <p className="text-[13px] font-semibold text-slate-900">{c.name}</p>
+                                {c.title && <p className="text-[12px] text-slate-500">{c.title}</p>}
+                                {c.email && (
+                                  <p className="text-[12px] text-blue-600 mt-0.5">{c.email}</p>
+                                )}
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">{c.name}</p>
-                              {c.title && <p className="text-xs text-slate-500">{c.title}</p>}
-                              {c.email && (
-                                <p className="text-xs text-indigo-600 mt-0.5">{c.email}</p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Footer: Edit + Delete */}
-            <div className="flex gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
-              <button
-                onClick={() => {
-                  setSelectedApp(null);
-                  openEdit(selectedApp);
-                }}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
-              >
-                <Pencil className="w-4 h-4" />
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(selectedApp.id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </button>
             </div>
           </div>
         </div>
