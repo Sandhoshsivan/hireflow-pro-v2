@@ -393,7 +393,7 @@ export default function Applications() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#FAFBFC] border-b border-slate-200">
+              <tr className="bg-[#F6F7F9] border-b border-slate-200">
                 <th className="text-left px-5 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]" style={{ width: '28%' }}>
                   Company / Role
                 </th>
@@ -452,7 +452,7 @@ export default function Applications() {
                       onClick={() => openDetail(app)}
                       className={clsx(
                         'border-b border-slate-200 last:border-b-0 cursor-pointer transition-colors duration-[120ms] group',
-                        idx % 2 === 1 && 'bg-[#FAFBFC]',
+                        idx % 2 === 1 && 'bg-[#F6F7F9]',
                         'hover:bg-blue-50'
                       )}
                     >

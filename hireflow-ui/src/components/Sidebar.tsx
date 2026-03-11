@@ -147,16 +147,16 @@ function SidebarNavItem({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              padding: '9px 12px',
+              gap: 8,
+              padding: '7px 10px',
               borderRadius: 8,
               fontSize: 13,
               fontWeight: active ? 600 : 500,
               marginBottom: 1,
               transition: 'all 100ms ease',
               borderLeft: active ? '2px solid #1a56db' : '2px solid transparent',
-              background: active ? '#eff6ff' : hovered ? '#f1f5f9' : 'transparent',
-              color: active ? '#1a56db' : hovered ? '#0f172a' : '#4b5563',
+              background: active ? '#EBF2FF' : hovered ? '#EDEEF2' : 'transparent',
+              color: active ? '#1a56db' : hovered ? '#0f172a' : '#4B5563',
               cursor: 'pointer',
             }}
           >
@@ -285,11 +285,11 @@ export default function Sidebar() {
         display: 'flex',
         flexDirection: 'column',
         flexShrink: 0,
-        borderRight: '1px solid #e2e8f0',
+        borderRight: '1px solid #E5E7EB',
         position: 'relative',
         zIndex: 10,
         overflow: 'hidden',
-        background: '#ffffff',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%)',
         fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
@@ -302,7 +302,7 @@ export default function Sidebar() {
           paddingLeft: 16,
           paddingRight: 16,
           gap: 10,
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #E5E7EB',
           flexShrink: 0,
         }}
       >
@@ -315,7 +315,7 @@ export default function Sidebar() {
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            background: '#1a56db',
+            background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)',
             boxShadow: '0 2px 8px rgba(26,86,219,0.3)',
           }}
         >
@@ -332,10 +332,10 @@ export default function Sidebar() {
         </div>
 
         <div style={{ lineHeight: 1 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px' }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px' }}>
             Hire
           </span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#1a56db', letterSpacing: '-0.4px' }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#1a56db', letterSpacing: '-0.4px' }}>
             Flow
           </span>
           <span
@@ -386,7 +386,7 @@ export default function Sidebar() {
                 paddingRight: 12,
                 marginBottom: 6,
                 marginTop: si === 0 ? 0 : 20,
-                color: section.adminOnly ? '#dc2626' : '#94a3b8',
+                color: section.adminOnly ? '#dc2626' : '#9CA3AF',
                 lineHeight: 1,
               }}
             >
@@ -415,7 +415,7 @@ export default function Sidebar() {
           paddingRight: 10,
           paddingBottom: 12,
           paddingTop: 10,
-          borderTop: '1px solid #e2e8f0',
+          borderTop: '1px solid #E5E7EB',
           flexShrink: 0,
         }}
       >
@@ -429,14 +429,14 @@ export default function Sidebar() {
             gap: 9,
             padding: '10px',
             borderRadius: 10,
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
+            background: '#EDEEF2',
+            border: '1px solid #E5E7EB',
             cursor: 'pointer',
             transition: 'background 100ms',
             textAlign: 'left',
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f8fafc'; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#E4E6EC'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#EDEEF2'; }}
         >
           {/* Avatar */}
           <div

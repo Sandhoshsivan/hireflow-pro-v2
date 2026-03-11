@@ -90,16 +90,7 @@ function fmtFollowupDate(iso: string) {
 /* ================================================================== */
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={clsx('rounded-xl transition-shadow duration-200 hover:shadow-md', className)}
-      style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%)',
-        border: '1px solid #E5E7EB',
-        borderRadius: 12,
-        boxShadow: '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)',
-        overflow: 'hidden',
-      }}
-    >
+    <div className={clsx('card', className)}>
       {children}
     </div>
   );
@@ -117,22 +108,10 @@ function CardHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div
-      style={{
-        padding: '14px 20px',
-        borderBottom: '1px solid #E5E7EB',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-        background: '#FFFFFF',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-        <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
-        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#111827', letterSpacing: '-0.1px' }}>
-          {title}
-        </h3>
+    <div className="card-header">
+      <div className="card-title">
+        <span className="card-icon">{icon}</span>
+        <h3>{title}</h3>
       </div>
       {action}
     </div>
@@ -184,7 +163,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: GHOST }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--text3)' }}>
             Loading dashboard...
           </p>
         </div>
@@ -222,10 +201,10 @@ export default function Dashboard() {
           >
             <Briefcase className="w-10 h-10" style={{ color: BLUE }} />
           </div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#0f172a' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
             Start tracking your job search
           </h2>
-          <p className="text-sm text-center max-w-sm mb-8" style={{ color: '#64748b' }}>
+          <p className="text-sm text-center max-w-sm mb-8" style={{ color: 'var(--text2)' }}>
             Add your first job application to get insights, track follow-ups, and manage your
             entire job search pipeline in one place.
           </p>
@@ -319,40 +298,16 @@ export default function Dashboard() {
 
       <div style={{ padding: 28 }}>
       {/* -------- KPI CARDS (4 columns) -------- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-fade-up">
-        {kpis.map((kpi, idx) => (
+      <div className="kpi-grid">
+        {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="rounded-xl cursor-default transition-all duration-200"
-            style={{
-              background: 'white',
-              border: '1px solid #E5E7EB',
-              borderLeft: `3px solid ${kpi.borderColor}`,
-              borderRadius: 12,
-              padding: '18px 18px 16px 18px',
-              boxShadow: '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)',
-              animationDelay: `${idx * 60}ms`,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = '';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)';
-            }}
+            className="kpi-card"
+            style={{ '--kc': kpi.borderColor } as React.CSSProperties}
           >
-            <p
-              style={{ fontSize: 32, fontWeight: 800, color: '#111827', lineHeight: 1, letterSpacing: '-1.5px', marginBottom: 6 }}
-            >
-              {kpi.value}
-            </p>
-            <p style={{ fontSize: 12, color: '#4B5563', fontWeight: 600, letterSpacing: '-0.1px' }}>
-              {kpi.label}
-            </p>
-            <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
-              {kpi.sub}
-            </p>
+            <p className="kpi-num">{kpi.value}</p>
+            <p className="kpi-label">{kpi.label}</p>
+            <p className="kpi-sub">{kpi.sub}</p>
           </div>
         ))}
       </div>
@@ -369,19 +324,14 @@ export default function Dashboard() {
             iconColor={BLUE}
             title="Application Funnel"
           />
-          <div className="px-6 pb-6">
+          <div className="card-body">
             <div className="space-y-3">
               {funnelData.map((f) => (
-                <div key={f.key} className="flex items-center gap-3">
-                  <span
-                    className="text-[11px] font-semibold w-[68px] flex-shrink-0 text-right"
-                    style={{ color: '#475569' }}
-                  >
-                    {f.label}
-                  </span>
-                  <div className="flex-1 h-6 rounded-md bg-slate-100 overflow-hidden relative">
+                <div key={f.key} className="bar-row">
+                  <span className="bar-label">{f.label}</span>
+                  <div className="bar-track">
                     <div
-                      className="h-full rounded-md flex items-center transition-all duration-700 ease-out"
+                      className="bar-fill"
                       style={{
                         width: `${Math.max((f.val / maxFunnel) * 100, f.val > 0 ? 8 : 0)}%`,
                         background: f.color,
@@ -393,12 +343,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <span
-                    className="text-[11px] font-semibold w-9 text-right flex-shrink-0"
-                    style={{ color: GHOST }}
-                  >
-                    {f.pct}%
-                  </span>
+                  <span className="bar-pct">{f.pct}%</span>
                 </div>
               ))}
             </div>
@@ -412,7 +357,7 @@ export default function Dashboard() {
             iconColor={BLUE}
             title="Sources & Response Rate"
           />
-          <div className="px-6 pb-6">
+          <div className="card-body">
             <div className="flex gap-6 items-start">
               {/* Left: big response rate + pills */}
               <div className="flex-shrink-0 text-center">
@@ -424,7 +369,7 @@ export default function Dashboard() {
                 </div>
                 <div
                   className="text-[10px] font-bold uppercase tracking-wider mt-1"
-                  style={{ color: GHOST }}
+                  style={{ color: 'var(--text3)' }}
                 >
                   Response Rate
                 </div>
@@ -454,27 +399,22 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <div
                   className="text-[10px] font-bold uppercase tracking-wider mb-2.5"
-                  style={{ color: GHOST }}
+                  style={{ color: 'var(--text3)' }}
                 >
                   By Source
                 </div>
                 {sources.length === 0 ? (
-                  <p className="text-xs text-center py-4" style={{ color: GHOST }}>
+                  <p className="text-xs text-center py-4" style={{ color: 'var(--text3)' }}>
                     No source data yet
                   </p>
                 ) : (
                   <div className="space-y-2.5">
                     {sources.map((s) => (
-                      <div key={s.source} className="flex items-center gap-2.5">
-                        <span
-                          className="text-[11px] font-medium w-16 flex-shrink-0 truncate text-right"
-                          style={{ color: '#475569' }}
-                        >
-                          {s.source || 'Other'}
-                        </span>
-                        <div className="flex-1 h-5 rounded bg-slate-100 overflow-hidden relative">
+                      <div key={s.source} className="bar-row">
+                        <span className="bar-label">{s.source || 'Other'}</span>
+                        <div className="bar-track">
                           <div
-                            className="h-full rounded flex items-center transition-all duration-700 ease-out"
+                            className="bar-fill"
                             style={{
                               width: `${Math.max((s.cnt / maxSource) * 100, 8)}%`,
                               background: BLUE,
@@ -486,12 +426,7 @@ export default function Dashboard() {
                             </span>
                           </div>
                         </div>
-                        <span
-                          className="text-[11px] font-medium w-6 text-right flex-shrink-0"
-                          style={{ color: GHOST }}
-                        >
-                          {s.cnt}
-                        </span>
+                        <span className="bar-pct">{s.cnt}</span>
                       </div>
                     ))}
                   </div>
@@ -526,8 +461,8 @@ export default function Dashboard() {
           />
           {recentApps.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 px-6">
-              <Briefcase className="w-8 h-8 mb-2" style={{ color: '#cbd5e1' }} />
-              <p className="text-sm" style={{ color: GHOST }}>
+              <Briefcase className="w-8 h-8 mb-2" style={{ color: 'var(--border)' }} />
+              <p className="text-sm" style={{ color: 'var(--text3)' }}>
                 No applications yet
               </p>
             </div>
@@ -551,11 +486,11 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <p
                         className="text-[13px] font-semibold truncate"
-                        style={{ color: '#0f172a' }}
+                        style={{ color: 'var(--text)' }}
                       >
                         {app.company}
                       </p>
-                      <p className="text-[11px] truncate" style={{ color: '#64748b' }}>
+                      <p className="text-[11px] truncate" style={{ color: 'var(--text2)' }}>
                         {app.role}
                       </p>
                     </div>
@@ -577,7 +512,7 @@ export default function Dashboard() {
                       >
                         {app.status}
                       </span>
-                      <span className="text-[10px] font-mono" style={{ color: GHOST }}>
+                      <span className="text-[10px] font-mono" style={{ color: 'var(--text3)' }}>
                         {fmtShortDate(app.appliedDate || app.createdAt)}
                       </span>
                       <span
@@ -601,16 +536,16 @@ export default function Dashboard() {
             iconColor={AMBER}
             title="Follow-ups & Reminders"
           />
-          <div className="px-6 pb-6">
+          <div className="card-body">
             {followups.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center mb-3">
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                 </div>
-                <p className="text-sm font-semibold mb-1" style={{ color: '#334155' }}>
+                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
                   All caught up!
                 </p>
-                <p className="text-xs text-center" style={{ color: GHOST }}>
+                <p className="text-xs text-center" style={{ color: 'var(--text3)' }}>
                   No pending follow-ups
                 </p>
               </div>
@@ -627,10 +562,10 @@ export default function Dashboard() {
                     }}
                   >
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold truncate" style={{ color: '#0f172a' }}>
+                      <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--text)' }}>
                         {f.company}
                       </p>
-                      <p className="text-[11px] truncate" style={{ color: '#64748b' }}>
+                      <p className="text-[11px] truncate" style={{ color: 'var(--text2)' }}>
                         {f.role}
                       </p>
                     </div>

@@ -3,70 +3,51 @@ import {
   Users, Briefcase, DollarSign, TrendingUp, RefreshCw,
   UserCheck, Crown,
 } from 'lucide-react';
-import clsx from 'clsx';
 import TopBar from '../../components/TopBar';
 import api from '../../lib/api';
 import type { AdminStats } from '../../types';
 
-const planConfig: Record<string, { label: string; bar: string; badge: string }> = {
-  free:    { label: 'Free',    bar: 'bg-slate-400',    badge: 'bg-slate-100 text-slate-600' },
-  pro:     { label: 'Pro',     bar: 'bg-blue-600',   badge: 'bg-blue-100 text-blue-700' },
-  premium: { label: 'Premium', bar: 'bg-violet-500',   badge: 'bg-violet-100 text-violet-700' },
+const planColors: Record<string, string> = {
+  free:    'var(--text3)',
+  pro:     'var(--blue)',
+  premium: 'var(--violet)',
 };
 
-const statusConfig: Record<string, { label: string; bar: string }> = {
-  saved:     { label: 'Saved',     bar: 'bg-cyan-500' },
-  applied:   { label: 'Applied',   bar: 'bg-blue-500' },
-  interview: { label: 'Interview', bar: 'bg-amber-500' },
-  offer:     { label: 'Offer',     bar: 'bg-emerald-500' },
-  rejected:  { label: 'Rejected',  bar: 'bg-red-500' },
-  ghosted:   { label: 'Ghosted',   bar: 'bg-slate-400' },
+const planLabels: Record<string, string> = {
+  free:    'Free',
+  pro:     'Pro',
+  premium: 'Premium',
 };
 
-function HBar({
-  label,
-  value,
-  max,
-  barClass,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  barClass: string;
-}) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className="flex items-center gap-3">
-      <span
-        className="text-xs font-medium w-20 capitalize truncate shrink-0"
-        style={{ color: '#475569' }}
-      >
-        {label}
-      </span>
-      <div
-        className="flex-1 h-5 rounded-lg overflow-hidden"
-        style={{ background: '#f1f5f9' }}
-      >
-        <div
-          className={clsx('h-full rounded-lg transition-all duration-700', barClass)}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span
-        className="text-xs font-semibold w-10 text-right shrink-0"
-        style={{ color: '#0f172a' }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
+const statusColors: Record<string, string> = {
+  saved:     'var(--cyan)',
+  applied:   'var(--blue)',
+  interview: 'var(--amber)',
+  offer:     'var(--green)',
+  rejected:  'var(--red)',
+  ghosted:   'var(--text3)',
+};
+
+const statusLabels: Record<string, string> = {
+  saved:     'Saved',
+  applied:   'Applied',
+  interview: 'Interview',
+  offer:     'Offer',
+  rejected:  'Rejected',
+  ghosted:   'Ghosted',
+};
+
+const planBadgeStyle = (plan: string): React.CSSProperties => {
+  if (plan === 'pro')     return { background: 'var(--blue-lt)',   color: 'var(--blue)',   border: '1px solid var(--blue-md)' };
+  if (plan === 'premium') return { background: 'var(--violet-lt)', color: 'var(--violet)', border: '1px solid var(--violet-md)' };
+  return { background: 'var(--bg2)', color: 'var(--text3)', border: '1px solid var(--border2)' };
+};
 
 function RevenueSVGChart({ data }: { data: Array<{ month: string; amount: number }> }) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-sm" style={{ color: '#94a3b8' }}>No revenue data yet</p>
+      <div className="empty-state" style={{ padding: '32px 20px' }}>
+        <div className="empty-text">No revenue data yet</div>
       </div>
     );
   }
@@ -80,11 +61,11 @@ function RevenueSVGChart({ data }: { data: Array<{ month: string; amount: number
   const spacing = (width - 40) / Math.max(data.length, 1);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height + 10}`} className="w-full">
+    <svg viewBox={`0 0 ${width} ${height + 10}`} style={{ width: '100%' }}>
       <defs>
         <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1a56db" />
-          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.6" />
+          <stop offset="0%" stopColor="var(--blue)" />
+          <stop offset="100%" stopColor="var(--violet)" stopOpacity="0.6" />
         </linearGradient>
       </defs>
       {data.map((d, i) => {
@@ -97,7 +78,7 @@ function RevenueSVGChart({ data }: { data: Array<{ month: string; amount: number
               x={x} y={y}
               width={barWidth} height={barH}
               rx={4} fill="url(#revGrad)"
-              className="hover:opacity-80 transition-opacity cursor-pointer"
+              style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
             >
               <title>{`${d.month}: $${d.amount}`}</title>
             </rect>
@@ -105,7 +86,7 @@ function RevenueSVGChart({ data }: { data: Array<{ month: string; amount: number
               x={x + barWidth / 2}
               y={height + 8}
               textAnchor="middle"
-              style={{ fontSize: 8, fill: '#94a3b8' }}
+              style={{ fontSize: 8, fill: 'var(--text3)' }}
             >
               {d.month.slice(-5)}
             </text>
@@ -141,10 +122,20 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading admin data...</p>
+      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              border: '3px solid var(--border)',
+              borderTopColor: 'var(--blue)',
+              borderRadius: '50%',
+              margin: '0 auto 12px',
+            }}
+            className="animate-spin"
+          />
+          <div style={{ fontSize: 13, color: 'var(--text3)' }}>Loading admin data...</div>
         </div>
       </div>
     );
@@ -164,33 +155,25 @@ export default function AdminDashboard() {
       label: 'Total Users',
       value: (stats?.totalUsers ?? 0).toLocaleString(),
       sub: `${stats?.activeUsers ?? 0} active`,
-      icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      color: 'var(--blue)',
     },
     {
       label: 'Total Applications',
       value: (stats?.totalApplications ?? 0).toLocaleString(),
       sub: 'Across all users',
-      icon: Briefcase,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      color: 'var(--blue)',
     },
     {
       label: 'Total Revenue',
       value: `$${(stats?.revenue ?? 0).toLocaleString()}`,
       sub: 'Lifetime earnings',
-      icon: DollarSign,
-      iconBg: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
+      color: 'var(--green)',
     },
     {
       label: 'Active Pro/Premium',
       value: activePaidUsers.toLocaleString(),
       sub: `${usersByPlan['free'] ?? 0} on free tier`,
-      icon: Crown,
-      iconBg: 'bg-violet-50',
-      iconColor: 'text-violet-600',
+      color: 'var(--violet)',
     },
   ];
 
@@ -201,206 +184,277 @@ export default function AdminDashboard() {
         subtitle="Platform overview and metrics"
         actions={
           <button
+            className="btn btn-secondary"
             onClick={() => loadStats(true)}
             disabled={refreshing}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg transition-colors hover:bg-slate-50 disabled:opacity-50"
           >
-            <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
+            <RefreshCw
+              style={{
+                width: 14,
+                height: 14,
+                animation: refreshing ? 'spin 0.7s linear infinite' : undefined,
+              }}
+            />
             Refresh
           </button>
         }
       />
 
       {/* 4 KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 animate-fade-up">
-        {kpis.map((kpi, idx) => (
+      <div className="kpi-grid">
+        {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200"
-            style={{
-              boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-              animationDelay: `${idx * 60}ms`,
-            }}
+            className="kpi-card"
+            style={{ '--kc': kpi.color } as React.CSSProperties}
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-medium" style={{ color: '#64748b' }}>{kpi.label}</span>
-              <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', kpi.iconBg)}>
-                <kpi.icon className={clsx('w-4 h-4', kpi.iconColor)} />
-              </div>
-            </div>
-            <p
-              className="text-2xl font-bold mb-0.5"
-              style={{ color: '#0f172a', letterSpacing: '-0.02em' }}
-            >
-              {kpi.value}
-            </p>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>{kpi.sub}</p>
+            <div className="kpi-num">{kpi.value}</div>
+            <div className="kpi-label">{kpi.label}</div>
+            <div className="kpi-sub">{kpi.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* 2-col grid: Users by Plan + Recent Signups */}
-      <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5 animate-fade-up"
-        style={{ animationDelay: '120ms' }}
-      >
+      {/* Row 1: Users by Plan + Recent Signups */}
+      <div className="grid-2 mb-4 stagger-1">
+
         {/* Users by Plan */}
-        <div
-          className="bg-white rounded-xl border border-slate-200 p-6"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
-        >
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Users by Plan</h3>
-            <span className="text-xs" style={{ color: '#94a3b8' }}>{totalPlanUsers} total</span>
-          </div>
-
-          {/* Stacked progress bar */}
-          <div className="flex h-2.5 rounded-full overflow-hidden my-4" style={{ background: '#f1f5f9' }}>
-            {Object.entries(usersByPlan).map(([plan, count]) => {
-              const pct = totalPlanUsers > 0 ? (count / totalPlanUsers) * 100 : 0;
-              return (
-                <div
-                  key={plan}
-                  className={clsx('h-full transition-all duration-700', planConfig[plan]?.bar ?? 'bg-slate-400')}
-                  style={{ width: `${pct}%` }}
-                  title={`${planConfig[plan]?.label ?? plan}: ${count} users (${Math.round(pct)}%)`}
-                />
-              );
-            })}
-          </div>
-
-          {/* Per-plan breakdown rows */}
-          <div className="space-y-3">
-            {Object.entries(usersByPlan).map(([plan, count]) => {
-              const pct = totalPlanUsers > 0 ? Math.round((count / totalPlanUsers) * 100) : 0;
-              const cfg = planConfig[plan] ?? { label: plan, bar: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600' };
-              return (
-                <div key={plan} className="flex items-center gap-3">
-                  <span className="text-xs w-16 capitalize shrink-0" style={{ color: '#475569' }}>
-                    {cfg.label}
-                  </span>
-                  <div className="flex-1 h-5 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
-                    <div
-                      className={clsx('h-full rounded-lg transition-all duration-700', cfg.bar)}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-semibold w-6 text-right" style={{ color: '#0f172a' }}>
-                      {count}
-                    </span>
-                    <span className="text-xs w-8 text-right" style={{ color: '#94a3b8' }}>
-                      {pct}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Recent Signups */}
-        <div
-          className="bg-white rounded-xl border border-slate-200 p-6"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
-        >
-          <div className="flex items-center gap-2 mb-5">
-            <UserCheck className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Recent Signups</h3>
-          </div>
-
-          {(stats?.recentSignups ?? []).length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <p className="text-sm" style={{ color: '#94a3b8' }}>No recent signups</p>
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <Users style={{ width: 15, height: 15, color: 'var(--text3)' }} />
+              Users by Plan
             </div>
-          ) : (
-            <div className="space-y-3">
-              {(stats?.recentSignups ?? []).map((u) => {
-                const initials = u.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-                const planCfg = planConfig[u.plan] ?? planConfig.free;
+            <span style={{ fontSize: 12, color: 'var(--text3)' }}>{totalPlanUsers} total</span>
+          </div>
+          <div className="card-body">
+            {/* Stacked progress bar */}
+            <div
+              style={{
+                display: 'flex',
+                height: 8,
+                borderRadius: 20,
+                overflow: 'hidden',
+                background: 'var(--bg2)',
+                marginBottom: 16,
+              }}
+            >
+              {Object.entries(usersByPlan).map(([plan, count]) => {
+                const pct = totalPlanUsers > 0 ? (count / totalPlanUsers) * 100 : 0;
                 return (
-                  <div key={u.id} className="flex items-center gap-3 py-1">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #1a56db, #7c3aed)' }}
-                    >
-                      {initials}
+                  <div
+                    key={plan}
+                    style={{
+                      width: `${pct}%`,
+                      background: planColors[plan] ?? 'var(--text3)',
+                      transition: 'width 0.7s var(--ease)',
+                    }}
+                    title={`${planLabels[plan] ?? plan}: ${count} users (${Math.round(pct)}%)`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Per-plan bar chart */}
+            <div className="bar-chart">
+              {Object.entries(usersByPlan).map(([plan, count]) => {
+                const pct = totalPlanUsers > 0 ? Math.round((count / totalPlanUsers) * 100) : 0;
+                return (
+                  <div className="bar-row" key={plan}>
+                    <div className="bar-label" style={{ textAlign: 'left' }}>
+                      {planLabels[plan] ?? plan}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>
-                        {u.name}
-                      </p>
-                      <p className="text-xs truncate" style={{ color: '#94a3b8' }}>{u.email}</p>
+                    <div className="bar-track">
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width: `${pct}%`,
+                          background: planColors[plan] ?? 'var(--text3)',
+                        }}
+                      />
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full capitalize', planCfg.badge)}>
-                        {planCfg.label}
-                      </span>
-                      <span className="text-xs" style={{ color: '#94a3b8' }}>
-                        {new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
+                    <div className="bar-pct">{pct}%</div>
                   </div>
                 );
               })}
             </div>
-          )}
+          </div>
+        </div>
+
+        {/* Recent Signups */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <UserCheck style={{ width: 15, height: 15, color: 'var(--text3)' }} />
+              Recent Signups
+            </div>
+          </div>
+          <div className="card-body">
+            {(stats?.recentSignups ?? []).length === 0 ? (
+              <div className="empty-state" style={{ padding: '24px 20px' }}>
+                <div className="empty-text">No recent signups</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {(stats?.recentSignups ?? []).map((u) => {
+                  const initials = u.name
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+                  return (
+                    <div
+                      key={u.id}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+                    >
+                      {/* Avatar */}
+                      <div
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, var(--blue), var(--violet))',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: 'white',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {initials}
+                      </div>
+                      {/* Name + email */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          className="truncate"
+                          style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}
+                        >
+                          {u.name}
+                        </div>
+                        <div
+                          className="truncate"
+                          style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}
+                        >
+                          {u.email}
+                        </div>
+                      </div>
+                      {/* Plan badge + date */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: 4,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: 20,
+                            textTransform: 'capitalize',
+                            ...planBadgeStyle(u.plan),
+                          }}
+                        >
+                          {planLabels[u.plan] ?? u.plan}
+                        </span>
+                        <span style={{ fontSize: 10, color: 'var(--text3)' }}>
+                          {new Date(u.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 2-col grid: Apps by Status + Revenue Trend */}
-      <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up"
-        style={{ animationDelay: '180ms' }}
-      >
+      {/* Row 2: Applications by Status + Revenue Trend */}
+      <div className="grid-2 stagger-2">
+
         {/* Applications by Status */}
-        <div
-          className="bg-white rounded-xl border border-slate-200 p-6"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
-        >
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold mb-0.5" style={{ color: '#0f172a' }}>
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <Briefcase style={{ width: 15, height: 15, color: 'var(--text3)' }} />
               Applications by Status
-            </h3>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>
-              {stats?.totalApplications ?? 0} total applications
-            </p>
-          </div>
-          {Object.keys(appsByStatus).length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: '#94a3b8' }}>No application data</p>
-          ) : (
-            <div className="space-y-3">
-              {Object.entries(appsByStatus).map(([status, count]) => (
-                <HBar
-                  key={status}
-                  label={statusConfig[status]?.label ?? status}
-                  value={count}
-                  max={maxStatusApps}
-                  barClass={statusConfig[status]?.bar ?? 'bg-slate-400'}
-                />
-              ))}
             </div>
-          )}
+            <span style={{ fontSize: 12, color: 'var(--text3)' }}>
+              {stats?.totalApplications ?? 0} total
+            </span>
+          </div>
+          <div className="card-body">
+            {Object.keys(appsByStatus).length === 0 ? (
+              <div className="empty-state" style={{ padding: '24px 20px' }}>
+                <div className="empty-text">No application data</div>
+              </div>
+            ) : (
+              <div className="bar-chart">
+                {Object.entries(appsByStatus).map(([status, count]) => {
+                  const pct = maxStatusApps > 0 ? Math.round((count / maxStatusApps) * 100) : 0;
+                  return (
+                    <div className="bar-row" key={status}>
+                      <div className="bar-label" style={{ textAlign: 'left' }}>
+                        {statusLabels[status] ?? status}
+                      </div>
+                      <div className="bar-track">
+                        <div
+                          className="bar-fill"
+                          style={{
+                            width: `${pct}%`,
+                            background: statusColors[status] ?? 'var(--text3)',
+                          }}
+                        />
+                      </div>
+                      <div className="bar-pct">{count}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Revenue Trend */}
-        <div
-          className="bg-white rounded-xl border border-slate-200 p-6"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
-        >
-          <div className="flex items-center gap-2 mb-5">
-            <TrendingUp className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>Revenue Trend</h3>
-          </div>
-          <RevenueSVGChart data={stats?.monthlyRevenue ?? []} />
-          {(stats?.monthlyRevenue ?? []).length > 0 && (
-            <div className="pt-3 mt-1 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs" style={{ color: '#94a3b8' }}>Total revenue</span>
-              <span className="text-xs font-semibold" style={{ color: '#475569' }}>
-                ${(stats?.monthlyRevenue ?? []).reduce((s, m) => s + m.amount, 0).toLocaleString()}
-              </span>
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <TrendingUp style={{ width: 15, height: 15, color: 'var(--text3)' }} />
+              Revenue Trend
             </div>
-          )}
+          </div>
+          <div className="card-body">
+            <RevenueSVGChart data={stats?.monthlyRevenue ?? []} />
+            {(stats?.monthlyRevenue ?? []).length > 0 && (
+              <div
+                style={{
+                  paddingTop: 12,
+                  marginTop: 4,
+                  borderTop: '1px solid var(--border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ fontSize: 12, color: 'var(--text3)' }}>Total revenue</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)' }}>
+                  ${(stats?.monthlyRevenue ?? [])
+                    .reduce((s, m) => s + m.amount, 0)
+                    .toLocaleString()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

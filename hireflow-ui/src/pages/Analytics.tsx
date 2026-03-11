@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application } from '../types';
-import { BarChart2, TrendingUp, Layers, Zap, PieChart, Activity, Globe, Flag } from 'lucide-react';
+import { BarChart2, PieChart, Activity, Globe, Flag } from 'lucide-react';
 import { extractApplications } from '../lib/normalize';
 
 type DateRange = '30' | '90' | 'all';
@@ -28,10 +28,10 @@ const kpiBorderColors = ['#1a56db', '#059669', '#d97706', '#7c3aed'];
 function EmptyChart({ message = 'Add applications to see data' }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-3">
-      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-        <BarChart2 className="w-5 h-5 text-slate-400" />
+      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#EDEEF2' }}>
+        <BarChart2 className="w-5 h-5" style={{ color: '#9CA3AF' }} />
       </div>
-      <p className="text-sm font-medium text-slate-400" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{message}</p>
+      <p className="text-sm font-medium" style={{ color: '#9CA3AF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{message}</p>
     </div>
   );
 }
@@ -49,28 +49,21 @@ function StatusBar({
 }) {
   const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
   return (
-    <div className="flex items-center gap-3">
-      <span
-        className="text-xs font-medium w-20 shrink-0 truncate"
-        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-      >
-        {label}
-      </span>
-      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+    <div className="bar-row">
+      <span className="bar-label">{label}</span>
+      <div className="bar-track">
         <div
-          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          className="bar-fill"
           style={{ width: `${pct}%`, backgroundColor: hex, minWidth: value > 0 ? '32px' : '0' }}
         >
           {value > 0 && (
-            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', lineHeight: 1 }}>{value}</span>
           )}
         </div>
       </div>
-      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
-        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {total > 0 ? Math.round((value / total) * 100) : 0}%
-        </span>
-      </div>
+      <span className="bar-pct">
+        {total > 0 ? Math.round((value / total) * 100) : 0}%
+      </span>
     </div>
   );
 }
@@ -86,28 +79,21 @@ function SourceBar({
 }) {
   const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
   return (
-    <div className="flex items-center gap-3">
-      <span
-        className="text-xs font-medium w-20 shrink-0 truncate"
-        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-      >
-        {label}
-      </span>
-      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+    <div className="bar-row">
+      <span className="bar-label">{label}</span>
+      <div className="bar-track">
         <div
-          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          className="bar-fill"
           style={{ width: `${pct}%`, backgroundColor: '#1a56db', minWidth: value > 0 ? '32px' : '0' }}
         >
           {value > 0 && (
-            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', lineHeight: 1 }}>{value}</span>
           )}
         </div>
       </div>
-      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
-        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {total > 0 ? Math.round((value / total) * 100) : 0}%
-        </span>
-      </div>
+      <span className="bar-pct">
+        {total > 0 ? Math.round((value / total) * 100) : 0}%
+      </span>
     </div>
   );
 }
@@ -125,28 +111,21 @@ function PriorityBar({
 }) {
   const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
   return (
-    <div className="flex items-center gap-3">
-      <span
-        className="text-xs font-medium w-20 shrink-0 truncate"
-        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-      >
-        {label}
-      </span>
-      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+    <div className="bar-row">
+      <span className="bar-label">{label}</span>
+      <div className="bar-track">
         <div
-          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          className="bar-fill"
           style={{ width: `${pct}%`, backgroundColor: hex, minWidth: value > 0 ? '32px' : '0' }}
         >
           {value > 0 && (
-            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', lineHeight: 1 }}>{value}</span>
           )}
         </div>
       </div>
-      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
-        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {total > 0 ? Math.round((value / total) * 100) : 0}%
-        </span>
-      </div>
+      <span className="bar-pct">
+        {total > 0 ? Math.round((value / total) * 100) : 0}%
+      </span>
     </div>
   );
 }
@@ -192,11 +171,11 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
           <g key={step.y}>
             <line
               x1={paddingX} y1={step.y} x2={width - paddingX} y2={step.y}
-              stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4"
+              stroke="#E5E7EB" strokeWidth="1" strokeDasharray="4 4"
             />
             <text
               x={paddingX - 8} y={step.y + 4} textAnchor="end"
-              style={{ fontSize: 9, fill: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              style={{ fontSize: 9, fill: '#9CA3AF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {step.label}
             </text>
@@ -220,7 +199,7 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
               x={p.x}
               y={height + 32}
               textAnchor="middle"
-              style={{ fontSize: 9, fill: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              style={{ fontSize: 9, fill: '#9CA3AF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {p.label.length > 7 ? p.label.slice(5) : p.label}
             </text>
@@ -232,23 +211,14 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
   );
 }
 
-function CardHeader({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle: string }) {
+function CardHeader({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) {
   return (
-    <div className="flex items-start gap-3 mb-5">
-      <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: '#eff6ff' }}
-      >
-        <Icon className="w-4 h-4" style={{ color: '#1a56db' }} />
+    <div className="card-header">
+      <div className="card-title">
+        <span className="card-icon"><Icon size={15} /></span>
+        {title}
       </div>
-      <div>
-        <h3 className="text-sm font-semibold" style={{ color: '#0f172a', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {title}
-        </h3>
-        <p className="text-xs mt-0.5" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {subtitle}
-        </p>
-      </div>
+      {subtitle && <span style={{ fontSize: 11, color: '#9CA3AF' }}>{subtitle}</span>}
     </div>
   );
 }
@@ -359,33 +329,21 @@ export default function Analytics() {
     {
       label: 'Total Applications',
       value: total,
-      icon: Layers,
-      iconBg: '#eff6ff',
-      iconColor: '#1a56db',
       sub: dateRange === 'all' ? 'All time' : `Last ${dateRange} days`,
     },
     {
       label: 'Response Rate',
       value: `${responseRate}%`,
-      icon: TrendingUp,
-      iconBg: responseRate >= 30 ? '#ecfdf5' : responseRate >= 15 ? '#fffbeb' : '#f8fafc',
-      iconColor: responseRate >= 30 ? '#059669' : responseRate >= 15 ? '#d97706' : '#94a3b8',
       sub: `${responded} responses received`,
     },
     {
       label: 'Best Source',
       value: topSource,
-      icon: BarChart2,
-      iconBg: '#fffbeb',
-      iconColor: '#d97706',
       sub: sourceCounts[0] ? `${sourceCounts[0].value} applications` : 'No source data',
     },
     {
       label: 'Most Active Month',
       value: mostActiveMonth,
-      icon: Zap,
-      iconBg: '#f5f3ff',
-      iconColor: '#7c3aed',
       sub: total > 0 ? 'By application count' : 'No data yet',
     },
   ];
@@ -396,9 +354,9 @@ export default function Analytics() {
         <div className="flex flex-col items-center gap-3">
           <div
             className="w-8 h-8 rounded-full animate-spin"
-            style={{ border: '3px solid #e2e8f0', borderTopColor: '#1a56db' }}
+            style={{ border: '3px solid #E5E7EB', borderTopColor: '#1a56db' }}
           />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p className="text-sm font-medium" style={{ color: '#9CA3AF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Loading analytics...
           </p>
         </div>
@@ -408,30 +366,13 @@ export default function Analytics() {
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Staggered fadeSlideUp animation keyframes */}
-      <style>{`
-        @keyframes fadeSlideUp {
-          from {
-            opacity: 0;
-            transform: translateY(16px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .anim-fade-slide-up {
-          animation: fadeSlideUp 0.5s ease-out both;
-        }
-      `}</style>
-
       <TopBar
         title="Analytics"
         subtitle="Insights into your job search performance"
         actions={
           <div
             className="flex items-center rounded-lg p-1 gap-0.5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
+            style={{ background: 'white', border: '1px solid #E5E7EB' }}
           >
             {rangeOptions.map((opt) => (
               <button
@@ -446,7 +387,7 @@ export default function Analytics() {
                 style={
                   dateRange === opt.value
                     ? { background: '#1a56db', color: 'white', fontFamily: "'Plus Jakarta Sans', sans-serif" }
-                    : { color: '#64748b', fontFamily: "'Plus Jakarta Sans', sans-serif" }
+                    : { color: '#4B5563', fontFamily: "'Plus Jakarta Sans', sans-serif" }
                 }
               >
                 {opt.label}
@@ -458,42 +399,16 @@ export default function Analytics() {
 
       <div style={{ padding: 28 }}>
       {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+      <div className="kpi-grid">
         {kpis.map((kpi, index) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl p-5 hover:shadow-md transition-all duration-200 cursor-default anim-fade-slide-up"
-            style={{
-              borderLeft: `3px solid ${kpiBorderColors[index]}`,
-              border: `1px solid #e2e8f0`,
-              borderLeftWidth: '3px',
-              borderLeftColor: kpiBorderColors[index],
-              boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-              animationDelay: `${index * 100}ms`,
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            className="kpi-card"
+            style={{ '--kc': kpiBorderColors[index] } as React.CSSProperties}
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-medium" style={{ color: '#64748b' }}>
-                {kpi.label}
-              </span>
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: kpi.iconBg }}
-              >
-                <kpi.icon className="w-4 h-4" style={{ color: kpi.iconColor }} />
-              </div>
-            </div>
-            <p
-              className="font-bold mb-0.5 tracking-tight"
-              style={{ color: '#0f172a', letterSpacing: '-0.02em', fontSize: '32px', lineHeight: '1.1' }}
-            >
-              {kpi.value}
-            </p>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>
-              {kpi.sub}
-            </p>
+            <p className="kpi-num">{kpi.value}</p>
+            <p className="kpi-label">{kpi.label}</p>
+            <p className="kpi-sub">{kpi.sub}</p>
           </div>
         ))}
       </div>
@@ -501,118 +416,102 @@ export default function Analytics() {
       {/* Charts 2x2 grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* 1. Applications by Status */}
-        <div
-          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
-          style={{
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-          }}
-        >
-          <CardHeader
-            icon={PieChart}
-            title="Applications by Status"
-            subtitle={`${total} total in selected range`}
-          />
-          {total === 0 ? (
-            <EmptyChart />
-          ) : (
-            <div className="space-y-3">
-              {statusCounts.map((s) => (
-                <StatusBar
-                  key={s.key}
-                  label={s.label}
-                  value={s.value}
-                  total={statusTotal}
-                  hex={s.hex}
-                />
-              ))}
-            </div>
-          )}
+        <div className="card">
+          <div className="card-body">
+            <CardHeader
+              icon={PieChart}
+              title="Applications by Status"
+              subtitle={`${total} total in selected range`}
+            />
+            {total === 0 ? (
+              <EmptyChart />
+            ) : (
+              <div className="space-y-3">
+                {statusCounts.map((s) => (
+                  <StatusBar
+                    key={s.key}
+                    label={s.label}
+                    value={s.value}
+                    total={statusTotal}
+                    hex={s.hex}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 2. Monthly Trend */}
-        <div
-          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
-          style={{
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-          }}
-        >
-          <CardHeader
-            icon={Activity}
-            title="Monthly Applications Trend"
-            subtitle="Applications submitted per month (last 6)"
-          />
-          <MonthlyTrendSVG data={monthlyData} />
+        <div className="card">
+          <div className="card-body">
+            <CardHeader
+              icon={Activity}
+              title="Monthly Applications Trend"
+              subtitle="Applications submitted per month (last 6)"
+            />
+            <MonthlyTrendSVG data={monthlyData} />
+          </div>
         </div>
 
         {/* 3. Top Sources */}
-        <div
-          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
-          style={{
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-          }}
-        >
-          <CardHeader
-            icon={Globe}
-            title="Top Sources"
-            subtitle="Where you're finding opportunities (top 5)"
-          />
-          {topSourcesTop5.length === 0 ? (
-            <EmptyChart message="No source data yet" />
-          ) : (
-            <div className="space-y-3">
-              {topSourcesTop5.map((s) => (
-                <SourceBar
-                  key={s.label}
-                  label={s.label}
-                  value={s.value}
-                  total={sourceTotal}
-                />
-              ))}
-            </div>
-          )}
+        <div className="card">
+          <div className="card-body">
+            <CardHeader
+              icon={Globe}
+              title="Top Sources"
+              subtitle="Where you're finding opportunities (top 5)"
+            />
+            {topSourcesTop5.length === 0 ? (
+              <EmptyChart message="No source data yet" />
+            ) : (
+              <div className="space-y-3">
+                {topSourcesTop5.map((s) => (
+                  <SourceBar
+                    key={s.label}
+                    label={s.label}
+                    value={s.value}
+                    total={sourceTotal}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 4. Priority Breakdown */}
-        <div
-          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
-          style={{
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-          }}
-        >
-          <CardHeader
-            icon={Flag}
-            title="Priority Breakdown"
-            subtitle="How you're prioritizing applications"
-          />
-          {total === 0 ? (
-            <EmptyChart />
-          ) : (
-            <div className="space-y-4">
-              {priorityCounts.map((p) => (
-                <PriorityBar
-                  key={p.label}
-                  label={p.label}
-                  value={p.value}
-                  total={priorityTotal}
-                  hex={p.hex}
-                />
-              ))}
-              <div className="pt-3" style={{ borderTop: '1px solid #f1f5f9' }}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs" style={{ color: '#94a3b8' }}>
-                    Total tracked
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: '#475569' }}>
-                    {total} application{total !== 1 ? 's' : ''}
-                  </span>
+        <div className="card">
+          <div className="card-body">
+            <CardHeader
+              icon={Flag}
+              title="Priority Breakdown"
+              subtitle="How you're prioritizing applications"
+            />
+            {total === 0 ? (
+              <EmptyChart />
+            ) : (
+              <div className="space-y-4">
+                {priorityCounts.map((p) => (
+                  <PriorityBar
+                    key={p.label}
+                    label={p.label}
+                    value={p.value}
+                    total={priorityTotal}
+                    hex={p.hex}
+                  />
+                ))}
+                <div className="pt-3" style={{ borderTop: '1px solid #EDEEF2' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs" style={{ color: '#9CA3AF' }}>
+                      Total tracked
+                    </span>
+                    <span className="text-xs font-semibold" style={{ color: '#4B5563' }}>
+                      {total} application{total !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
       </div>{/* /padding wrapper */}

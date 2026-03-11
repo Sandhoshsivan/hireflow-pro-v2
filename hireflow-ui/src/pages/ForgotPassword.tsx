@@ -6,10 +6,10 @@ import api from '../lib/api';
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px 10px 42px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #E5E7EB',
   borderRadius: '8px',
   fontSize: '0.875rem',
-  color: '#0f172a',
+  color: '#111827',
   background: '#ffffff',
   outline: 'none',
   transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -43,7 +43,7 @@ export default function ForgotPassword() {
       minHeight: '100vh',
       display: 'flex',
       fontFamily: 'Inter, sans-serif',
-      background: '#0f172a',
+      background: '#111827',
       position: 'relative',
       overflow: 'hidden',
     }}>
@@ -103,7 +103,7 @@ export default function ForgotPassword() {
             width: 36,
             height: 36,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+            background: 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -124,7 +124,7 @@ export default function ForgotPassword() {
           background: '#ffffff',
           borderRadius: 16,
           padding: '36px 36px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid #E5E7EB',
           boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
         }}>
           {sent ? (
@@ -148,7 +148,7 @@ export default function ForgotPassword() {
               <h3 style={{
                 fontSize: '1.25rem',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#111827',
                 marginBottom: 8,
                 letterSpacing: '-0.02em',
               }}>
@@ -156,12 +156,12 @@ export default function ForgotPassword() {
               </h3>
               <p style={{
                 fontSize: '0.9375rem',
-                color: '#64748b',
+                color: '#4B5563',
                 lineHeight: 1.65,
                 marginBottom: 28,
               }}>
                 We sent a password reset link to{' '}
-                <span style={{ fontWeight: 600, color: '#0f172a' }}>{email}</span>.
+                <span style={{ fontWeight: 600, color: '#111827' }}>{email}</span>.
                 Check your inbox and spam folder.
               </p>
 
@@ -189,7 +189,7 @@ export default function ForgotPassword() {
                     href={resetLink}
                     style={{
                       fontSize: '0.8125rem',
-                      color: '#64748b',
+                      color: '#4B5563',
                       wordBreak: 'break-all',
                       display: 'flex',
                       alignItems: 'flex-start',
@@ -214,14 +214,14 @@ export default function ForgotPassword() {
                   padding: '10px 20px',
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: '#4B5563',
                   background: '#ffffff',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #E5E7EB',
                   borderRadius: 8,
                   cursor: 'pointer',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#F6F7F9'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
               >
                 Try a different email
@@ -249,13 +249,13 @@ export default function ForgotPassword() {
                 <h2 style={{
                   fontSize: '1.375rem',
                   fontWeight: 700,
-                  color: '#0f172a',
+                  color: '#111827',
                   marginBottom: 6,
                   letterSpacing: '-0.02em',
                 }}>
                   Reset your password
                 </h2>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.875rem', color: '#4B5563', lineHeight: 1.6 }}>
                   Enter your email and we'll send you a secure reset link right away.
                 </p>
               </div>
@@ -285,7 +285,7 @@ export default function ForgotPassword() {
                     marginBottom: 6,
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: '#64748b',
+                    color: '#4B5563',
                   }}>
                     Email address
                   </label>
@@ -297,7 +297,7 @@ export default function ForgotPassword() {
                       transform: 'translateY(-50%)',
                       width: 16,
                       height: 16,
-                      color: '#94a3b8',
+                      color: '#9CA3AF',
                       pointerEvents: 'none',
                     }} />
                     <input
@@ -313,7 +313,7 @@ export default function ForgotPassword() {
                         e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                       }}
                       onBlur={(e) => {
-                        e.currentTarget.style.borderColor = '#e2e8f0';
+                        e.currentTarget.style.borderColor = '#E5E7EB';
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     />
@@ -335,7 +335,7 @@ export default function ForgotPassword() {
                     color: '#ffffff',
                     background: isLoading
                       ? 'rgba(26,86,219,0.7)'
-                      : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+                      : 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
                     borderRadius: 8,
                     border: 'none',
                     cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -373,12 +373,12 @@ export default function ForgotPassword() {
               gap: 6,
               fontSize: '0.875rem',
               fontWeight: 500,
-              color: '#64748b',
+              color: '#4B5563',
               textDecoration: 'none',
               transition: 'color 0.15s ease',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#94a3b8'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#64748b'; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#9CA3AF'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4B5563'; }}
           >
             <ArrowLeft style={{ width: 14, height: 14 }} />
             Back to Sign In

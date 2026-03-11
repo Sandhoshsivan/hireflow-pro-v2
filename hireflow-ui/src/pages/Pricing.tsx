@@ -1,26 +1,24 @@
 import { useState } from 'react';
-import { Check, X, Crown, Zap, Star, Loader2 } from 'lucide-react';
-import clsx from 'clsx';
+import { Loader2 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import { useAuthStore } from '../lib/auth';
 import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
+
+interface PlanFeature {
+  text: string;
+  included: boolean;
+}
 
 interface PlanDef {
   key: string;
   name: string;
   price: number;
   period: string;
-  tagline: string;
-  badge?: { label: string };
-  highlighted: boolean;
-  accentColor: string;
-  accentBg: string;
-  accentBorder: string;
-  icon: React.ReactNode;
+  desc: string;
+  popular: boolean;
   ctaLabel: string;
-  ctaStyle: React.CSSProperties;
-  features: Array<{ text: string; included: boolean }>;
+  features: PlanFeature[];
 }
 
 const plans: PlanDef[] = [
@@ -29,14 +27,9 @@ const plans: PlanDef[] = [
     name: 'Free',
     price: 0,
     period: 'forever',
-    tagline: 'Get started with the basics',
-    highlighted: false,
-    accentColor: '#64748b',
-    accentBg: '#f8fafc',
-    accentBorder: '#e2e8f0',
-    icon: <Star className="w-5 h-5 text-slate-500" />,
+    desc: 'Get started with the basics',
+    popular: false,
     ctaLabel: 'Get Started',
-    ctaStyle: { background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' },
     features: [
       { text: 'Up to 20 applications', included: true },
       { text: 'Basic status tracking', included: true },
@@ -54,19 +47,9 @@ const plans: PlanDef[] = [
     name: 'Pro',
     price: 9.99,
     period: 'per month',
-    tagline: 'For serious job seekers',
-    badge: { label: 'Most Popular' },
-    highlighted: true,
-    accentColor: '#1a56db',
-    accentBg: '#eff6ff',
-    accentBorder: '#bfdbfe',
-    icon: <Zap className="w-5 h-5 text-blue-600" />,
+    desc: 'For serious job seekers',
+    popular: true,
     ctaLabel: 'Upgrade to Pro',
-    ctaStyle: {
-      background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
-      color: 'white',
-      boxShadow: '0 4px 14px rgba(26,86,219,0.4)',
-    },
     features: [
       { text: 'Unlimited applications', included: true },
       { text: 'Advanced status tracking', included: true },
@@ -84,19 +67,9 @@ const plans: PlanDef[] = [
     name: 'Premium',
     price: 19.99,
     period: 'per month',
-    tagline: 'Everything, unlimited',
-    badge: { label: 'Best Value' },
-    highlighted: false,
-    accentColor: '#7c3aed',
-    accentBg: '#f5f3ff',
-    accentBorder: '#ddd6fe',
-    icon: <Crown className="w-5 h-5 text-violet-600" />,
+    desc: 'Everything, unlimited',
+    popular: false,
     ctaLabel: 'Upgrade to Premium',
-    ctaStyle: {
-      background: 'linear-gradient(135deg, #7c3aed 0%, #1a56db 100%)',
-      color: 'white',
-      boxShadow: '0 4px 14px rgba(124,58,237,0.35)',
-    },
     features: [
       { text: 'Unlimited applications', included: true },
       { text: 'Advanced status tracking', included: true },
@@ -108,6 +81,25 @@ const plans: PlanDef[] = [
       { text: 'API access', included: true },
       { text: 'Dedicated support', included: true },
     ],
+  },
+];
+
+const faqs = [
+  {
+    q: 'Can I cancel my subscription at any time?',
+    a: 'Yes, you can cancel at any time. Your plan stays active until the end of the current billing period with no further charges.',
+  },
+  {
+    q: 'What happens to my data if I downgrade?',
+    a: 'Your data is always safe. If you downgrade to Free, applications beyond the 20-item limit become read-only until you reduce or re-upgrade.',
+  },
+  {
+    q: 'Is there a free trial for paid plans?',
+    a: 'All paid plans include a 14-day free trial. No credit card required to start — upgrade whenever you\'re ready.',
+  },
+  {
+    q: 'Do you offer team or recruiter plans?',
+    a: 'Team plans are on the roadmap. Contact us at support@hireflow.app and we\'ll set you up early.',
   },
 ];
 
@@ -132,6 +124,8 @@ export default function Pricing() {
     }
   };
 
+  const currentPlanName = plans.find((p) => p.key === currentPlan)?.name ?? 'Free';
+
   return (
     <div>
       <TopBar
@@ -139,173 +133,121 @@ export default function Pricing() {
         subtitle="Choose the plan that fits your job search"
       />
 
-      {/* Current plan banner */}
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50 mb-8"
-      >
-        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#1a56db' }} />
-        <p className="text-sm" style={{ color: '#1e40af' }}>
-          You are currently on the{' '}
-          <span className="font-semibold capitalize">{currentPlan}</span> plan.
-          {currentPlan === 'free' && ' Upgrade to unlock all features.'}
-        </p>
-      </div>
+      <div className="page-content">
+        {/* Current plan banner */}
+        <div className="plan-banner">
+          <span>💼</span>
+          <span>
+            You are currently on the <strong>{currentPlanName}</strong> plan.
+            {currentPlan === 'free' && ' Upgrade to unlock all features.'}
+          </span>
+        </div>
 
-      {/* 3-column pricing grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto animate-fade-up">
-        {plans.map((plan, idx) => {
-          const isCurrent = currentPlan === plan.key;
-          const isLoading = loadingPlan === plan.key;
+        {/* 3-column pricing grid */}
+        <div className="pricing-grid animate-fade-up">
+          {plans.map((plan) => {
+            const isCurrent = currentPlan === plan.key;
+            const isLoading = loadingPlan === plan.key;
 
-          return (
-            <div
-              key={plan.key}
-              className={clsx(
-                'relative bg-white flex flex-col rounded-2xl border transition-all duration-200',
-                plan.highlighted ? 'scale-[1.03]' : ''
-              )}
-              style={{
-                border: `1px solid ${plan.highlighted ? plan.accentColor + '60' : '#e2e8f0'}`,
-                boxShadow: plan.highlighted
-                  ? '0 8px 30px rgba(26,86,219,0.15), 0 1px 3px rgba(15,23,42,0.08)'
-                  : '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-                animationDelay: `${idx * 80}ms`,
-              }}
-            >
-              {/* Badge: Most Popular / Best Value */}
-              {plan.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
-                  <span
-                    className="text-xs font-bold px-3.5 py-1.5 rounded-full"
-                    style={
-                      plan.key === 'pro'
-                        ? { background: '#1a56db', color: 'white' }
-                        : { background: '#f5f3ff', color: '#5b21b6' }
-                    }
-                  >
-                    {plan.badge.label}
-                  </span>
-                </div>
-              )}
+            return (
+              <div
+                key={plan.key}
+                className={[
+                  'pricing-card',
+                  plan.popular ? 'pricing-popular' : '',
+                  isCurrent ? 'is-current' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {/* Most Popular badge — Pro only */}
+                {plan.popular && (
+                  <div className="pricing-badge-pop">MOST POPULAR</div>
+                )}
 
-              {/* Top gradient bar for Pro */}
-              {plan.highlighted && (
-                <div
-                  className="h-1 rounded-t-2xl"
-                  style={{ background: 'linear-gradient(to right, #1a56db, #7c3aed)' }}
-                />
-              )}
-
-              {/* Subtle tinted bg overlay for highlighted */}
-              {plan.highlighted && (
-                <div
-                  className="absolute inset-0 rounded-2xl pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, rgba(26,86,219,0.03) 0%, transparent 60%)' }}
-                />
-              )}
-
-              <div className="relative p-7 flex flex-col flex-1">
-                {/* Header: icon + plan name + tagline */}
-                <div className="flex items-center gap-2.5 mb-5">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: plan.accentBg }}
-                  >
-                    {plan.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold" style={{ color: '#0f172a' }}>{plan.name}</h3>
-                    <p className="text-xs" style={{ color: '#94a3b8' }}>{plan.tagline}</p>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black" style={{ color: '#0f172a' }}>
-                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
-                    </span>
-                    {plan.price > 0 && (
-                      <span className="text-sm font-medium" style={{ color: '#94a3b8' }}>{plan.period}</span>
-                    )}
+                {/* Card header */}
+                <div className="pricing-header">
+                  <div className="pricing-name">{plan.name}</div>
+                  <div className="pricing-amount">
+                    {plan.price === 0 ? 'Free' : `$${plan.price}`}
                   </div>
                   {plan.price > 0 && (
-                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
-                      Billed monthly · Cancel anytime
-                    </p>
+                    <div className="pricing-period">{plan.period}</div>
                   )}
+                  <div className="pricing-desc">{plan.desc}</div>
                 </div>
 
                 {/* Feature list */}
-                <ul className="space-y-3 mb-8 flex-1">
+                <div className="pricing-features">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                          style={{ background: '#dcfce7' }}
-                        >
-                          <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[3]" />
-                        </div>
-                      ) : (
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                          style={{ background: '#f1f5f9' }}
-                        >
-                          <X className="w-2.5 h-2.5 stroke-[3]" style={{ color: '#94a3b8' }} />
-                        </div>
-                      )}
-                      <span
-                        className="text-sm"
-                        style={{ color: feature.included ? '#334155' : '#94a3b8' }}
-                      >
-                        {feature.text}
+                    <div
+                      key={i}
+                      className={`pf-item ${feature.included ? 'pf-yes' : 'pf-no'}`}
+                    >
+                      <span className="pf-icon">
+                        {feature.included ? '✓' : '✕'}
                       </span>
-                    </li>
+                      {feature.text}
+                    </div>
                   ))}
-                </ul>
+                </div>
 
-                {/* CTA Button */}
-                {isCurrent ? (
-                  <button
-                    disabled
-                    className="w-full py-3 rounded-xl text-sm font-semibold cursor-not-allowed border"
-                    style={{ background: '#f8fafc', color: '#94a3b8', borderColor: '#e2e8f0' }}
-                  >
-                    Current Plan
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleUpgrade(plan.key)}
-                    disabled={isLoading}
-                    className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-150 flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98]"
-                    style={{
-                      ...plan.ctaStyle,
-                      opacity: isLoading ? 0.7 : 1,
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      plan.ctaLabel
-                    )}
-                  </button>
-                )}
+                {/* CTA footer */}
+                <div className="pricing-footer">
+                  {isCurrent ? (
+                    <button
+                      disabled
+                      className="btn btn-outline pricing-btn"
+                      style={{ opacity: 0.55, cursor: 'not-allowed' }}
+                    >
+                      Current Plan
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleUpgrade(plan.key)}
+                      disabled={isLoading}
+                      className={`btn ${plan.popular ? 'btn-primary' : 'btn-outline'} pricing-btn`}
+                      style={isLoading ? { opacity: 0.7, cursor: 'not-allowed' } : undefined}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2
+                            style={{
+                              width: 14,
+                              height: 14,
+                              animation: 'spin 0.7s linear infinite',
+                              display: 'inline-block',
+                            }}
+                          />
+                          Processing...
+                        </>
+                      ) : (
+                        plan.ctaLabel
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      {/* Footer note */}
-      <p className="text-center text-xs mt-10" style={{ color: '#94a3b8' }}>
-        All plans include a 14-day free trial on paid features. No credit card required to start.
-        Prices in USD.
-      </p>
+        {/* Footnote */}
+        <p className="pricing-footnote" style={{ marginTop: 16 }}>
+          All plans include a 14-day free trial on paid features. No credit card required to start. Prices in USD.
+        </p>
+
+        {/* FAQ section */}
+        <div className="faq-section">
+          <div className="faq-section-title">Frequently Asked Questions</div>
+          {faqs.map((faq, i) => (
+            <div key={i} className="faq-item">
+              <div className="faq-q">{faq.q}</div>
+              <div className="faq-a">{faq.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

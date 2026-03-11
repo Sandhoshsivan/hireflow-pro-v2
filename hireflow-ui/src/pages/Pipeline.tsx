@@ -1,61 +1,16 @@
 import { useEffect, useState } from 'react';
-import {
-  Clock,
-  DollarSign,
-  X,
-  MapPin,
-  ExternalLink,
-  Tag,
-  Briefcase,
-  AlertCircle,
-  Calendar,
-} from 'lucide-react';
-import clsx from 'clsx';
+import { X } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application, ApplicationStatus } from '../types';
 import { extractApplications } from '../lib/normalize';
 
-const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  saved: '#06b6d4',
-  applied: '#3b82f6',
-  interview: '#f59e0b',
-  offer: '#10b981',
-  rejected: '#ef4444',
-  ghosted: '#94a3b8',
-};
-
-const STATUS_BG_LIGHT: Record<ApplicationStatus, string> = {
-  saved: 'rgba(6,182,212,0.04)',
-  applied: 'rgba(59,130,246,0.04)',
-  interview: 'rgba(245,158,11,0.04)',
-  offer: 'rgba(16,185,129,0.04)',
-  rejected: 'rgba(239,68,68,0.04)',
-  ghosted: 'rgba(148,163,184,0.04)',
-};
-
-const statusBadge: Record<ApplicationStatus, string> = {
-  saved: 'bg-cyan-100 text-cyan-700',
-  applied: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
-  offer: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-red-100 text-red-700',
-  ghosted: 'bg-slate-100 text-slate-500',
-};
-
-const priorityDots: Record<string, string> = {
-  high: '#ef4444',
-  medium: '#f59e0b',
-  low: '#cbd5e1',
-};
-
-const columns: { status: ApplicationStatus; label: string }[] = [
-  { status: 'saved', label: 'Saved' },
-  { status: 'applied', label: 'Applied' },
-  { status: 'interview', label: 'Interview' },
-  { status: 'offer', label: 'Offer' },
-  { status: 'rejected', label: 'Rejected' },
-  { status: 'ghosted', label: 'Ghosted' },
+const columns: { status: ApplicationStatus; label: string; color: string }[] = [
+  { status: 'saved', label: 'Saved', color: 'var(--cyan)' },
+  { status: 'applied', label: 'Applied', color: 'var(--blue)' },
+  { status: 'interview', label: 'Interview', color: 'var(--amber)' },
+  { status: 'offer', label: 'Offer', color: 'var(--green)' },
+  { status: 'rejected', label: 'Rejected', color: 'var(--red)' },
 ];
 
 function hasUpcomingFollowUp(app: Application): boolean {
@@ -63,99 +18,15 @@ function hasUpcomingFollowUp(app: Application): boolean {
   return new Date(app.followUpDate) <= new Date(Date.now() + 3 * 86400000);
 }
 
-function KanbanCard({
-  app,
-  onClick,
-}: {
-  app: Application;
-  onClick: () => void;
-}) {
-  const upcoming = hasUpcomingFollowUp(app);
-  const dueDate = app.followUpDate ? new Date(app.followUpDate) : null;
-  const daysLeft = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / 86400000) : null;
-
-  let followUpLabel = '';
-  if (upcoming && dueDate) {
-    if (daysLeft === 0) followUpLabel = 'Follow up today';
-    else if (daysLeft === 1) followUpLabel = 'Follow up tomorrow';
-    else
-      followUpLabel = `Follow up ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-  }
-
-  const priorityColor = priorityDots[app.priority] ?? '#cbd5e1';
-
-  return (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all duration-150 group"
-      style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}
-    >
-      {/* Top row: avatar + details + priority dot */}
-      <div className="flex items-start gap-2.5">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
-        >
-          {app.company.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p
-            className="text-sm font-semibold leading-tight group-hover:text-blue-700 transition-colors truncate"
-            style={{ color: '#0f172a' }}
-          >
-            {app.company}
-          </p>
-          <p className="text-xs truncate mt-0.5" style={{ color: '#94a3b8' }}>
-            {app.role}
-          </p>
-        </div>
-        <span
-          className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
-          style={{ background: priorityColor }}
-          title={`${app.priority} priority`}
-        />
-      </div>
-
-      {/* Follow-up strip */}
-      {upcoming && (
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-50 border border-amber-200 my-2">
-          <Clock className="w-3 h-3 text-amber-500 flex-shrink-0" />
-          <span className="text-xs font-medium text-amber-700">{followUpLabel}</span>
-        </div>
-      )}
-
-      {/* Footer: source tag + date */}
-      <div className={clsx('flex items-center justify-between gap-2', upcoming ? '' : 'mt-3')}>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {app.source && (
-            <span
-              className="inline-flex items-center gap-1 text-xs rounded-md px-1.5 py-0.5"
-              style={{ background: '#f1f5f9', color: '#64748b' }}
-            >
-              <Tag className="w-2.5 h-2.5" />
-              {app.source}
-            </span>
-          )}
-        </div>
-        <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>
-          {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })}
-        </span>
-      </div>
-    </div>
-  );
+function priorityClass(p: string): string {
+  if (p === 'high') return 'p-high';
+  if (p === 'medium') return 'p-medium';
+  if (p === 'low') return 'p-low';
+  return '';
 }
 
-function EmptyColumn() {
-  return (
-    <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
-      <p className="text-xs" style={{ color: '#94a3b8' }}>
-        No applications
-      </p>
-    </div>
-  );
+function statusLabel(s: ApplicationStatus): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 export default function Pipeline() {
@@ -186,13 +57,11 @@ export default function Pipeline() {
   if (loading) {
     return (
       <div>
-        <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-            <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
-              Loading your pipeline...
-            </p>
+        <TopBar title="Pipeline" />
+        <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 28, height: 28, border: '3px solid var(--border)', borderTopColor: 'var(--blue)', borderRadius: '50%', margin: '0 auto 12px' }} className="animate-spin" />
+            <div style={{ fontSize: 13, color: 'var(--text3)' }}>Loading pipeline...</div>
           </div>
         </div>
       </div>
@@ -202,24 +71,14 @@ export default function Pipeline() {
   if (error) {
     return (
       <div>
-        <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
-        <div className="flex flex-col items-center justify-center h-64">
-          <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-4">
-            <AlertCircle className="w-7 h-7 text-red-400" />
+        <TopBar title="Pipeline" />
+        <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.5 }}>!</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>Failed to load pipeline</div>
+            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 16 }}>There was an error fetching your applications.</div>
+            <button className="btn-primary" onClick={() => window.location.reload()}>Try again</button>
           </div>
-          <h3 className="text-base font-semibold mb-1" style={{ color: '#334155' }}>
-            Failed to load pipeline
-          </h3>
-          <p className="text-sm mb-5" style={{ color: '#94a3b8' }}>
-            There was an error fetching your applications.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg"
-            style={{ background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)' }}
-          >
-            Try again
-          </button>
         </div>
       </div>
     );
@@ -227,284 +86,174 @@ export default function Pipeline() {
 
   return (
     <div>
-      <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
+      <TopBar
+        title="Pipeline"
+        actions={
+          <button className="btn-primary">{'\uFF0B'} Track Job</button>
+        }
+      />
 
-      {/* Kanban Board */}
-      <div className="overflow-x-auto pb-6 -mx-2 px-2">
-        <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
-          {grouped.map((col, colIdx) => {
-            const accentColor = STATUS_COLORS[col.status];
-            const bgLight = STATUS_BG_LIGHT[col.status];
-            return (
-              <div
-                key={col.status}
-                className="flex flex-col"
-                style={{
-                  minWidth: 260,
-                  maxWidth: 280,
-                  animationDelay: `${colIdx * 60}ms`,
-                }}
-              >
-                {/* Column Header */}
-                <div
-                  className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center justify-between mb-3"
-                  style={{
-                    borderLeft: `4px solid ${accentColor}`,
-                    boxShadow: '0 1px 3px rgba(15,23,42,0.06)',
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: accentColor }}
-                    />
-                    <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                      {col.label}
-                    </span>
-                  </div>
-                  <span
-                    className={clsx(
-                      'text-xs font-bold px-2 py-0.5 rounded-full',
-                      col.apps.length > 0 ? statusBadge[col.status] : 'bg-slate-100 text-slate-400'
-                    )}
-                  >
-                    {col.apps.length}
-                  </span>
-                </div>
-
-                {/* Cards container */}
-                <div
-                  className="space-y-2 flex-1 rounded-xl p-2"
-                  style={{ background: bgLight, minHeight: 400 }}
-                >
-                  {col.apps.length === 0 ? (
-                    <EmptyColumn />
-                  ) : (
-                    col.apps.map((app) => (
-                      <KanbanCard
-                        key={app.id}
-                        app={app}
-                        onClick={() => setSelectedApp(app)}
-                      />
-                    ))
-                  )}
-                </div>
+      <div className="page-content" style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+        <div className="kanban-wrap" id="kanban-board">
+          {grouped.map((col) => (
+            <div className="kan-col" key={col.status}>
+              <div className="kan-col-header">
+                <div className="kan-col-title" style={{ color: col.color }}>{col.label}</div>
+                <span className="kan-col-count">{col.apps.length}</span>
               </div>
-            );
-          })}
+
+              {col.apps.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '20px 10px',
+                  color: 'var(--text3)',
+                  fontSize: 12,
+                  border: '1px dashed var(--border)',
+                  borderRadius: 'var(--radius)',
+                  marginTop: 4,
+                }}>
+                  Empty
+                </div>
+              ) : (
+                col.apps.map((app) => (
+                  <div
+                    className="kan-card"
+                    key={app.id}
+                    onClick={() => setSelectedApp(app)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
+                      <div className="kan-card-co truncate">{app.company}</div>
+                      {app.priority && (
+                        <span className={`priority-dot ${priorityClass(app.priority)}`} title={`${app.priority} priority`} />
+                      )}
+                    </div>
+                    <div className="kan-card-role">{app.role}</div>
+                    {app.location && (
+                      <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 4 }}>
+                        📍 {app.location}
+                      </div>
+                    )}
+                    <div className="kan-card-foot">
+                      <div className="kan-card-sal">{app.salary || ''}</div>
+                      <div className="kan-card-date">
+                        {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </div>
+                    </div>
+                    {hasUpcomingFollowUp(app) && (
+                      <div style={{
+                        marginTop: 8,
+                        fontSize: 10,
+                        background: 'var(--amber-lt)',
+                        color: 'var(--amber)',
+                        borderRadius: 4,
+                        padding: '2px 7px',
+                        display: 'inline-block',
+                        fontWeight: 600,
+                      }}>
+                        ⏰ Follow-up due
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Card Detail Modal */}
+      {/* Detail Modal */}
       {selectedApp && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(4px)' }}
+          className="modal-overlay open"
           onClick={() => setSelectedApp(null)}
         >
-          <div
-            className="bg-white rounded-2xl max-w-md w-full overflow-hidden"
-            style={{ boxShadow: '0 25px 60px rgba(15,23,42,0.25), 0 8px 24px rgba(15,23,42,0.12)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Gradient top bar */}
-            <div
-              className="h-1 w-full"
-              style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
-            />
-
-            {/* Header */}
-            <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
-                >
-                  {selectedApp.company.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="text-base font-bold" style={{ color: '#0f172a' }}>
-                    {selectedApp.company}
-                  </h2>
-                  <p className="text-sm" style={{ color: '#64748b' }}>
-                    {selectedApp.role}
-                  </p>
-                </div>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">{selectedApp.company}</div>
+                <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{selectedApp.role}</div>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                <span
-                  className={clsx(
-                    'text-xs font-semibold px-2.5 py-1 rounded-full capitalize',
-                    statusBadge[selectedApp.status]
-                  )}
-                >
-                  {selectedApp.status}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className={`badge badge-${statusLabel(selectedApp.status)}`}>
+                  {statusLabel(selectedApp.status)}
                 </span>
-                <button
-                  onClick={() => setSelectedApp(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
-                  style={{ color: '#94a3b8' }}
-                >
-                  <X className="w-4 h-4" />
+                <button className="btn btn-ghost btn-icon" onClick={() => setSelectedApp(null)} style={{ color: 'var(--text3)' }}>
+                  <X size={16} />
                 </button>
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="modal-body">
+              <div className="info-grid">
                 {selectedApp.salary && (
-                  <div
-                    className="flex items-center gap-2.5 p-3 rounded-xl"
-                    style={{ background: '#f8fafc' }}
-                  >
-                    <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                        Salary
-                      </p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                        {selectedApp.salary}
-                      </p>
-                    </div>
+                  <div className="info-row">
+                    <div className="info-key">Salary</div>
+                    <div className="info-val" style={{ color: 'var(--green)', fontFamily: "'Fira Code', monospace", fontWeight: 600 }}>{selectedApp.salary}</div>
                   </div>
                 )}
                 {selectedApp.location && (
-                  <div
-                    className="flex items-center gap-2.5 p-3 rounded-xl"
-                    style={{ background: '#f8fafc' }}
-                  >
-                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                        Location
-                      </p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                        {selectedApp.location}
-                      </p>
-                    </div>
+                  <div className="info-row">
+                    <div className="info-key">Location</div>
+                    <div className="info-val">{selectedApp.location}</div>
                   </div>
                 )}
-                <div
-                  className="flex items-center gap-2.5 p-3 rounded-xl"
-                  style={{ background: '#f8fafc' }}
-                >
-                  <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                  <div>
-                    <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                      Applied
-                    </p>
-                    <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                      {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString(
-                        'en-US',
-                        { month: 'short', day: 'numeric', year: 'numeric' }
-                      )}
-                    </p>
+                <div className="info-row">
+                  <div className="info-key">Applied</div>
+                  <div className="info-val" style={{ fontFamily: "'Fira Code', monospace", fontSize: 12 }}>
+                    {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
                 {selectedApp.source && (
-                  <div
-                    className="flex items-center gap-2.5 p-3 rounded-xl"
-                    style={{ background: '#f8fafc' }}
-                  >
-                    <Tag className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                        Source
-                      </p>
-                      <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-                        {selectedApp.source}
-                      </p>
+                  <div className="info-row">
+                    <div className="info-key">Source</div>
+                    <div className="info-val">{selectedApp.source}</div>
+                  </div>
+                )}
+                {selectedApp.priority && (
+                  <div className="info-row">
+                    <div className="info-key">Priority</div>
+                    <div className="info-val" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span className={`priority-dot ${priorityClass(selectedApp.priority)}`} />
+                      <span style={{ textTransform: 'capitalize' }}>{selectedApp.priority}</span>
                     </div>
                   </div>
                 )}
                 {selectedApp.url && (
-                  <div
-                    className="flex items-center gap-2.5 p-3 rounded-xl"
-                    style={{ background: '#f8fafc' }}
-                  >
-                    <ExternalLink className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                        Job Link
-                      </p>
-                      <a
-                        href={selectedApp.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold hover:underline"
-                        style={{ color: '#1a56db' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Open listing
+                  <div className="info-row">
+                    <div className="info-key">Job Link</div>
+                    <div className="info-val">
+                      <a href={selectedApp.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue)', fontWeight: 600, fontSize: 12 }} onClick={(e) => e.stopPropagation()}>
+                        Open listing →
                       </a>
-                    </div>
-                  </div>
-                )}
-                {selectedApp.priority && (
-                  <div
-                    className="flex items-center gap-2.5 p-3 rounded-xl"
-                    style={{ background: '#f8fafc' }}
-                  >
-                    <Briefcase className="w-4 h-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                    <div>
-                      <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                        Priority
-                      </p>
-                      <p
-                        className="text-sm font-semibold capitalize"
-                        style={{ color: '#0f172a' }}
-                      >
-                        {selectedApp.priority}
-                      </p>
                     </div>
                   </div>
                 )}
               </div>
 
               {selectedApp.notes && (
-                <div>
-                  <p
-                    className="text-xs font-semibold uppercase tracking-wide mb-2"
-                    style={{ color: '#94a3b8' }}
-                  >
-                    Notes
-                  </p>
-                  <p
-                    className="text-sm leading-relaxed p-4 rounded-xl"
-                    style={{ color: '#334155', background: '#f8fafc' }}
-                  >
+                <div style={{ marginTop: 16 }}>
+                  <div className="info-key" style={{ marginBottom: 6 }}>Notes</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text2)', background: 'var(--bg)', padding: '12px 14px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                     {selectedApp.notes}
-                  </p>
+                  </div>
                 </div>
               )}
 
               {hasUpcomingFollowUp(selectedApp) && selectedApp.followUpDate && (
-                <div className="flex items-center gap-2.5 p-3 rounded-xl border border-amber-200 bg-amber-50">
-                  <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-amber-600">Follow-up due</p>
-                    <p className="text-sm font-semibold text-amber-800">
-                      {new Date(selectedApp.followUpDate).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </p>
+                <div className="followup-card" style={{ marginTop: 16 }}>
+                  <div className="followup-title">⏰ Follow-up due</div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)' }}>
+                    {new Date(selectedApp.followUpDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Footer */}
-            <div className="px-5 pb-5">
-              <button
-                onClick={() => setSelectedApp(null)}
-                className="w-full py-2.5 text-sm font-semibold rounded-xl transition-colors hover:bg-slate-200"
-                style={{ background: '#f1f5f9', color: '#475569' }}
-              >
-                Close
-              </button>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setSelectedApp(null)}>Close</button>
             </div>
           </div>
         </div>

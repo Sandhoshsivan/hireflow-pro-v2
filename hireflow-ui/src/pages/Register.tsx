@@ -10,7 +10,7 @@ const BRAND_PERKS = [
 ];
 
 function getPasswordStrength(pw: string): { level: 0 | 1 | 2 | 3; label: string; color: string } {
-  if (pw.length === 0) return { level: 0, label: '', color: '#e2e8f0' };
+  if (pw.length === 0) return { level: 0, label: '', color: '#E5E7EB' };
   let score = 0;
   if (pw.length >= 8) score++;
   if (/[A-Z]/.test(pw) || /[0-9]/.test(pw)) score++;
@@ -23,10 +23,10 @@ function getPasswordStrength(pw: string): { level: 0 | 1 | 2 | 3; label: string;
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px 10px 42px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #E5E7EB',
   borderRadius: '8px',
   fontSize: '0.875rem',
-  color: '#0f172a',
+  color: '#111827',
   background: '#ffffff',
   outline: 'none',
   transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -39,7 +39,7 @@ const focusHandlers = {
     e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
   },
   onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#e2e8f0';
+    e.currentTarget.style.borderColor = '#E5E7EB';
     e.currentTarget.style.boxShadow = 'none';
   },
 };
@@ -79,7 +79,7 @@ export default function Register() {
         style={{
           width: '45%',
           minHeight: '100vh',
-          background: '#0f172a',
+          background: '#111827',
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '48px 52px',
@@ -131,7 +131,7 @@ export default function Register() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -151,7 +151,7 @@ export default function Register() {
               padding: '2px 5px',
               borderRadius: 4,
               background: 'rgba(255,255,255,0.07)',
-              color: '#64748b',
+              color: '#4B5563',
               border: '1px solid rgba(255,255,255,0.08)',
               letterSpacing: '0.04em',
             }}>v2</span>
@@ -179,7 +179,7 @@ export default function Register() {
             </h1>
             <p style={{
               fontSize: '0.9375rem',
-              color: '#94a3b8',
+              color: '#9CA3AF',
               lineHeight: 1.7,
               maxWidth: 340,
             }}>
@@ -204,7 +204,7 @@ export default function Register() {
                 }}>
                   <Icon style={{ width: 15, height: 15, color: '#60a5fa' }} />
                 </div>
-                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#cbd5e1', lineHeight: 1.5 }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#D1D5DB', lineHeight: 1.5 }}>
                   {text}
                 </span>
               </div>
@@ -222,7 +222,7 @@ export default function Register() {
           }}>
             <p style={{
               fontSize: '0.875rem',
-              color: '#94a3b8',
+              color: '#9CA3AF',
               lineHeight: 1.7,
               fontStyle: 'italic',
               marginBottom: 16,
@@ -246,8 +246,8 @@ export default function Register() {
                 S
               </div>
               <div>
-                <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#e2e8f0', lineHeight: 1.3 }}>Sarah K.</p>
-                <p style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.3 }}>Software Engineer at Meta</p>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#E5E7EB', lineHeight: 1.3 }}>Sarah K.</p>
+                <p style={{ fontSize: '0.75rem', color: '#4B5563', lineHeight: 1.3 }}>Software Engineer at Meta</p>
               </div>
             </div>
           </div>
@@ -275,14 +275,14 @@ export default function Register() {
               width: 34,
               height: 34,
               borderRadius: 9,
-              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
               <Briefcase style={{ width: 17, height: 17, color: '#fff' }} />
             </div>
-            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>
               HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
             </span>
           </div>
@@ -292,13 +292,13 @@ export default function Register() {
             <h2 style={{
               fontSize: '1.625rem',
               fontWeight: 700,
-              color: '#0f172a',
+              color: '#111827',
               letterSpacing: '-0.025em',
               marginBottom: 6,
             }}>
               Create your account
             </h2>
-            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+            <p style={{ fontSize: '0.875rem', color: '#4B5563' }}>
               Join thousands of professionals landing better jobs
             </p>
           </div>
@@ -339,13 +339,13 @@ export default function Register() {
 
             {/* Full name */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                 Full name
               </label>
               <div style={{ position: 'relative' }}>
                 <User style={{
                   position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
-                  width: 15, height: 15, color: '#94a3b8', pointerEvents: 'none',
+                  width: 15, height: 15, color: '#9CA3AF', pointerEvents: 'none',
                 }} />
                 <input
                   type="text"
@@ -362,13 +362,13 @@ export default function Register() {
 
             {/* Email */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                 Email address
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail style={{
                   position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
-                  width: 15, height: 15, color: '#94a3b8', pointerEvents: 'none',
+                  width: 15, height: 15, color: '#9CA3AF', pointerEvents: 'none',
                 }} />
                 <input
                   type="email"
@@ -385,13 +385,13 @@ export default function Register() {
 
             {/* Password */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                 Password
               </label>
               <div style={{ position: 'relative' }}>
                 <Lock style={{
                   position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
-                  width: 15, height: 15, color: '#94a3b8', pointerEvents: 'none',
+                  width: 15, height: 15, color: '#9CA3AF', pointerEvents: 'none',
                 }} />
                 <input
                   type="password"
@@ -416,7 +416,7 @@ export default function Register() {
                           flex: 1,
                           height: 3,
                           borderRadius: 99,
-                          background: strength.level >= i ? strength.color : '#e2e8f0',
+                          background: strength.level >= i ? strength.color : '#E5E7EB',
                           transition: 'background 0.2s ease',
                         }}
                       />
@@ -432,13 +432,13 @@ export default function Register() {
 
             {/* Confirm Password */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                 Confirm password
               </label>
               <div style={{ position: 'relative' }}>
                 <Lock style={{
                   position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
-                  width: 15, height: 15, color: '#94a3b8', pointerEvents: 'none',
+                  width: 15, height: 15, color: '#9CA3AF', pointerEvents: 'none',
                 }} />
                 <input
                   type="password"
@@ -446,7 +446,7 @@ export default function Register() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   style={{
                     ...inputStyle,
-                    borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#e2e8f0',
+                    borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#E5E7EB',
                   }}
                   placeholder="Confirm your password"
                   required
@@ -461,7 +461,7 @@ export default function Register() {
                   onBlur={(e) => {
                     e.currentTarget.style.boxShadow = 'none';
                     if (!passwordsMismatch && !passwordsMatch) {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.borderColor = '#E5E7EB';
                     }
                   }}
                 />
@@ -473,7 +473,7 @@ export default function Register() {
 
             {/* Account type */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                 Account type
               </label>
               <select
@@ -494,7 +494,7 @@ export default function Register() {
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                 }}
                 onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.borderColor = '#E5E7EB';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
@@ -513,7 +513,7 @@ export default function Register() {
                 required
                 style={{ marginTop: 2, width: 15, height: 15, accentColor: '#1a56db', cursor: 'pointer', flexShrink: 0 }}
               />
-              <label htmlFor="terms" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer', userSelect: 'none', lineHeight: 1.55 }}>
+              <label htmlFor="terms" style={{ fontSize: '0.8125rem', color: '#4B5563', cursor: 'pointer', userSelect: 'none', lineHeight: 1.55 }}>
                 I agree to the{' '}
                 <span style={{ fontWeight: 600, color: '#1a56db' }}>Terms of Service</span>
                 {' '}and{' '}
@@ -537,7 +537,7 @@ export default function Register() {
                 color: '#ffffff',
                 background: isLoading || passwordsMismatch
                   ? 'rgba(26,86,219,0.5)'
-                  : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+                  : 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
                 borderRadius: 8,
                 border: 'none',
                 cursor: isLoading || passwordsMismatch ? 'not-allowed' : 'pointer',
@@ -570,13 +570,13 @@ export default function Register() {
             gap: 12,
             margin: '24px 0',
           }}>
-            <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
+            <span style={{ fontSize: '0.75rem', color: '#9CA3AF', fontWeight: 500 }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
           </div>
 
           {/* Login link */}
-          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#4B5563' }}>
             Already have an account?{' '}
             <Link to="/login" style={{ fontWeight: 600, color: '#1a56db', textDecoration: 'none' }}>
               Sign in

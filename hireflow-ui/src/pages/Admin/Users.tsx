@@ -3,39 +3,73 @@ import {
   Search, X, Shield, Lock, Unlock, Trash2, Eye, Crown,
   Mail, Calendar, Briefcase, Key, ChevronDown, Users,
 } from 'lucide-react';
-import clsx from 'clsx';
 import TopBar from '../../components/TopBar';
 import api from '../../lib/api';
 import { useToastStore } from '../../components/Toast';
 import type { User } from '../../types';
 
-const planConfig: Record<string, { label: string; badge: string; dot: string }> = {
-  free:    { label: 'Free',    badge: 'bg-slate-100 text-slate-600 border-slate-200',    dot: 'bg-slate-400' },
-  pro:     { label: 'Pro',     badge: 'bg-blue-100 text-blue-700 border-blue-200', dot: 'bg-blue-600' },
-  premium: { label: 'Premium', badge: 'bg-violet-100 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
+const planLabels: Record<string, string> = {
+  free:    'Free',
+  pro:     'Pro',
+  premium: 'Premium',
 };
+
+const planBadgeStyle = (plan: string): React.CSSProperties => {
+  if (plan === 'pro')
+    return { background: 'var(--blue-lt)', color: 'var(--blue)', border: '1px solid var(--blue-md)' };
+  if (plan === 'premium')
+    return { background: 'var(--violet-lt)', color: 'var(--violet)', border: '1px solid var(--violet-md)' };
+  return { background: 'var(--bg2)', color: 'var(--text3)', border: '1px solid var(--border2)' };
+};
+
+const avatarGradients = [
+  ['#60a5fa', '#2563eb'],
+  ['#a78bfa', '#7c3aed'],
+  ['#60a5fa', '#2563eb'],
+  ['#34d399', '#059669'],
+  ['#fbbf24', '#d97706'],
+  ['#f87171', '#dc2626'],
+];
 
 function UserAvatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   const initials = name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-  const gradients = [
-    'from-blue-400 to-blue-600',
-    'from-violet-400 to-violet-600',
-    'from-blue-400 to-blue-600',
-    'from-emerald-400 to-emerald-600',
-    'from-amber-400 to-amber-600',
-    'from-rose-400 to-rose-600',
-  ];
-  const colorIdx = name.charCodeAt(0) % gradients.length;
+  const [c1, c2] = avatarGradients[name.charCodeAt(0) % avatarGradients.length];
+  const isLg = size === 'lg';
   return (
     <div
-      className={clsx(
-        'rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br shrink-0',
-        gradients[colorIdx],
-        size === 'lg' ? 'w-14 h-14 text-xl rounded-2xl' : 'w-9 h-9 text-xs'
-      )}
+      style={{
+        width: isLg ? 52 : 34,
+        height: isLg ? 52 : 34,
+        borderRadius: isLg ? 12 : '50%',
+        background: `linear-gradient(135deg, ${c1}, ${c2})`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 800,
+        fontSize: isLg ? 18 : 12,
+        color: 'white',
+        flexShrink: 0,
+      }}
     >
       {initials}
     </div>
+  );
+}
+
+function Spinner({ color = 'var(--text3)' }: { color?: string }) {
+  return (
+    <div
+      className="animate-spin"
+      style={{
+        marginLeft: 'auto',
+        width: 14,
+        height: 14,
+        border: '2px solid transparent',
+        borderTopColor: color,
+        borderRadius: '50%',
+        flexShrink: 0,
+      }}
+    />
   );
 }
 
@@ -152,10 +186,20 @@ export default function AdminUsers() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading users...</p>
+      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              border: '3px solid var(--border)',
+              borderTopColor: 'var(--blue)',
+              borderRadius: '50%',
+              margin: '0 auto 12px',
+            }}
+            className="animate-spin"
+          />
+          <div style={{ fontSize: 13, color: 'var(--text3)' }}>Loading users...</div>
         </div>
       </div>
     );
@@ -167,48 +211,29 @@ export default function AdminUsers() {
         title="Users"
         subtitle={`${filteredUsers.length} registered user${filteredUsers.length !== 1 ? 's' : ''}`}
         actions={
-          <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style={{ color: '#94a3b8' }}
-            />
+          <div className="search-wrap">
+            <Search className="search-icon" style={{ width: 14, height: 14 }} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search users..."
-              className="pl-9 pr-4 py-2 rounded-lg text-sm outline-none w-56"
-              style={{
-                border: '1px solid #e2e8f0',
-                background: 'white',
-                color: '#0f172a',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#1a56db';
-                e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e2e8f0';
-                e.target.style.boxShadow = 'none';
-              }}
+              className="input-field search-input"
+              style={{ width: 220 }}
             />
           </div>
         }
       />
 
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-5 animate-fade-up">
+      <div className="filter-bar mb-4">
         {/* Plan filter */}
-        <div className="relative">
+        <div style={{ position: 'relative' }}>
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className="pl-4 pr-8 py-2 rounded-lg text-sm outline-none appearance-none cursor-pointer"
-            style={{
-              border: '1px solid #e2e8f0',
-              background: 'white',
-              color: '#475569',
-            }}
+            className="input-field"
+            style={{ width: 140, paddingRight: 32 }}
           >
             <option value="">All Plans</option>
             <option value="free">Free</option>
@@ -216,23 +241,30 @@ export default function AdminUsers() {
             <option value="premium">Premium</option>
           </select>
           <ChevronDown
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
-            style={{ color: '#94a3b8' }}
+            style={{
+              position: 'absolute',
+              right: 10,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 13,
+              height: 13,
+              color: 'var(--text3)',
+              pointerEvents: 'none',
+            }}
           />
         </div>
 
         {/* Blocked only toggle */}
         <button
           onClick={() => setBlockedOnly((b) => !b)}
-          className={clsx(
-            'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors',
+          className="btn btn-sm"
+          style={
             blockedOnly
-              ? 'bg-red-50 border-red-200 text-red-700'
-              : 'bg-white border-slate-200 hover:bg-slate-50'
-          )}
-          style={blockedOnly ? {} : { color: '#475569' }}
+              ? { background: 'var(--red-lt)', color: 'var(--red)', borderColor: 'rgba(220,38,38,.18)' }
+              : { background: 'var(--white)', color: 'var(--text2)', borderColor: 'var(--border)' }
+          }
         >
-          <Lock className="w-3.5 h-3.5" />
+          <Lock style={{ width: 13, height: 13 }} />
           Blocked only
         </button>
 
@@ -240,139 +272,137 @@ export default function AdminUsers() {
         {(search || planFilter || blockedOnly) && (
           <button
             onClick={() => { setSearch(''); setPlanFilter(''); setBlockedOnly(false); }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors"
-            style={{ color: '#94a3b8' }}
+            className="btn-ghost btn btn-sm"
           >
-            <X className="w-3.5 h-3.5" />
+            <X style={{ width: 13, height: 13 }} />
             Clear filters
           </button>
         )}
       </div>
 
       {/* Users table */}
-      <div
-        className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-5 animate-fade-up"
-        style={{
-          boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-          animationDelay: '60ms',
-        }}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-100">
+      <div className="card mb-4" style={{ overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>User</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Plan</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Role</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Status</th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Apps</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Joined</th>
-                <th className="text-center px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Actions</th>
+                <th>User</th>
+                <th>Plan</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Apps</th>
+                <th>Joined</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center">
-                    <div className="flex flex-col items-center gap-3">
+                  <td colSpan={7}>
+                    <div className="empty-state">
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                        style={{ background: '#f1f5f9' }}
+                        className="empty-icon"
+                        style={{ fontSize: 32, marginBottom: 10 }}
                       >
-                        <Users className="w-5 h-5" style={{ color: '#94a3b8' }} />
+                        <Users style={{ width: 32, height: 32, color: 'var(--text3)', margin: '0 auto', display: 'block' }} />
                       </div>
-                      <p className="text-sm" style={{ color: '#94a3b8' }}>No users match your filters</p>
+                      <div className="empty-text">No users match your filters</div>
                     </div>
                   </td>
                 </tr>
               )}
-              {filteredUsers.map((user, idx) => {
-                const planCfg = planConfig[user.plan] ?? planConfig.free;
+              {filteredUsers.map((user) => {
                 return (
                   <tr
                     key={user.id}
                     onClick={() => setSelectedUser(user)}
-                    className="hover:bg-slate-50 transition-colors cursor-pointer"
-                    style={{ borderBottom: idx < filteredUsers.length - 1 ? '1px solid #f8fafc' : 'none' }}
                   >
                     {/* User column */}
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <UserAvatar name={user.name} />
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>
-                            {user.name}
-                          </p>
-                          <p className="text-xs truncate" style={{ color: '#94a3b8' }}>{user.email}</p>
+                        <div style={{ minWidth: 0 }}>
+                          <div className="td-company truncate">{user.name}</div>
+                          <div className="td-role truncate">{user.email}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* Plan column */}
-                    <td className="px-5 py-3.5">
+                    <td>
                       <span
-                        className={clsx(
-                          'text-xs font-semibold px-2.5 py-1 rounded-full border capitalize',
-                          planCfg.badge
-                        )}
+                        className="badge"
+                        style={{
+                          ...planBadgeStyle(user.plan),
+                          fontFamily: 'inherit',
+                          textTransform: 'capitalize',
+                        }}
                       >
-                        {planCfg.label}
+                        {planLabels[user.plan] ?? user.plan}
                       </span>
                     </td>
 
                     {/* Role column */}
-                    <td className="px-5 py-3.5">
+                    <td>
                       {user.role === 'admin' ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                          <Shield className="w-3 h-3" />
+                        <span
+                          className="badge"
+                          style={{
+                            background: 'var(--amber-lt)',
+                            color: 'var(--amber)',
+                            border: '1px solid var(--amber-md)',
+                            fontFamily: 'inherit',
+                          }}
+                        >
+                          <Shield style={{ width: 11, height: 11 }} />
                           Admin
                         </span>
                       ) : (
-                        <span className="text-xs capitalize" style={{ color: '#94a3b8' }}>{user.role}</span>
+                        <span style={{ fontSize: 12, color: 'var(--text3)', textTransform: 'capitalize' }}>
+                          {user.role}
+                        </span>
                       )}
                     </td>
 
                     {/* Status column */}
-                    <td className="px-5 py-3.5">
+                    <td>
                       <span
-                        className={clsx(
-                          'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full',
+                        className="badge"
+                        style={
                           user.isActive
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-red-50 text-red-700'
-                        )}
+                            ? { background: 'var(--green-lt)', color: 'var(--green)', border: '1px solid var(--green-md)', fontFamily: 'inherit' }
+                            : { background: 'var(--red-lt)', color: 'var(--red)', border: '1px solid var(--red-md)', fontFamily: 'inherit' }
+                        }
                       >
-                        <span
-                          className={clsx(
-                            'w-1.5 h-1.5 rounded-full',
-                            user.isActive ? 'bg-emerald-500' : 'bg-red-500'
-                          )}
-                        />
                         {user.isActive ? 'Active' : 'Blocked'}
                       </span>
                     </td>
 
                     {/* Apps column */}
-                    <td className="px-5 py-3.5 text-sm font-semibold text-right" style={{ color: '#334155' }}>
-                      {user.applicationCount ?? 0}
+                    <td style={{ textAlign: 'right' }}>
+                      <span className="td-mono" style={{ fontWeight: 700, color: 'var(--text)' }}>
+                        {user.applicationCount ?? 0}
+                      </span>
                     </td>
 
                     {/* Joined column */}
-                    <td className="px-5 py-3.5 text-xs" style={{ color: '#94a3b8' }}>
-                      {new Date(user.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                    <td>
+                      <span className="td-mono">
+                        {new Date(user.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
                     </td>
 
                     {/* Actions column */}
-                    <td className="px-5 py-3.5 text-center">
+                    <td style={{ textAlign: 'center' }}>
                       <button
                         onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }}
-                        className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors"
+                        className="btn btn-sm btn-secondary"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye style={{ width: 13, height: 13 }} />
                         View
                       </button>
                     </td>
@@ -385,55 +415,63 @@ export default function AdminUsers() {
       </div>
 
       {/* User Detail Drawer */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-40 flex justify-end">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => setSelectedUser(null)}
-          />
-
-          {/* Drawer panel */}
-          <div className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto flex flex-col animate-slide-in-from-right">
-
-            {/* Gradient header */}
+      <div
+        className={`drawer-overlay${selectedUser ? ' open' : ''}`}
+        onClick={() => setSelectedUser(null)}
+      />
+      <div className={`drawer${selectedUser ? ' open' : ''}`}>
+        {selectedUser && (
+          <>
+            {/* Gradient header area */}
             <div
-              className="px-6 py-6 flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)' }}
+              className="drawer-header"
+              style={{
+                background: 'linear-gradient(135deg, var(--blue-lt) 0%, var(--violet-lt) 100%)',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 16,
+              }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <h2 className="text-base font-semibold" style={{ color: '#0f172a' }}>User Details</h2>
+              {/* Title row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>User Details</span>
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
-                  style={{ color: '#64748b' }}
+                  className="btn btn-ghost btn-icon"
+                  style={{ width: 30, height: 30 }}
                 >
-                  <X className="w-4 h-4" />
+                  <X style={{ width: 14, height: 14 }} />
                 </button>
               </div>
 
               {/* Avatar + name + email + badges */}
-              <div className="flex items-center gap-4">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <UserAvatar name={selectedUser.name} size="lg" />
                 <div>
-                  <h3 className="text-lg font-bold" style={{ color: '#0f172a' }}>{selectedUser.name}</h3>
-                  <p className="text-sm" style={{ color: '#64748b' }}>{selectedUser.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
+                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.3px' }}>
+                    {selectedUser.name}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
+                    {selectedUser.email}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
                     <span
-                      className={clsx(
-                        'text-xs font-semibold px-2.5 py-0.5 rounded-full border',
-                        planConfig[selectedUser.plan]?.badge ?? 'bg-slate-100 text-slate-600 border-slate-200'
-                      )}
+                      className="badge"
+                      style={{
+                        ...planBadgeStyle(selectedUser.plan),
+                        fontFamily: 'inherit',
+                        textTransform: 'capitalize',
+                      }}
                     >
-                      {planConfig[selectedUser.plan]?.label ?? selectedUser.plan}
+                      {planLabels[selectedUser.plan] ?? selectedUser.plan}
                     </span>
                     <span
-                      className={clsx(
-                        'text-xs font-semibold px-2.5 py-0.5 rounded-full',
+                      className="badge"
+                      style={
                         selectedUser.isActive
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-red-100 text-red-700'
-                      )}
+                          ? { background: 'var(--green-lt)', color: 'var(--green)', border: '1px solid var(--green-md)', fontFamily: 'inherit' }
+                          : { background: 'var(--red-lt)', color: 'var(--red)', border: '1px solid var(--red-md)', fontFamily: 'inherit' }
+                      }
                     >
                       {selectedUser.isActive ? 'Active' : 'Blocked'}
                     </span>
@@ -443,148 +481,187 @@ export default function AdminUsers() {
             </div>
 
             {/* Drawer body */}
-            <div className="p-6 flex-1 space-y-6">
+            <div className="drawer-body">
 
-              {/* Meta info */}
-              <div className="space-y-3 pb-5 border-b border-slate-100">
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-                  <span className="truncate" style={{ color: '#475569' }}>{selectedUser.email}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-                  <span style={{ color: '#475569' }}>
-                    Member since{' '}
-                    {new Date(selectedUser.createdAt).toLocaleDateString('en-US', {
-                      month: 'long', day: 'numeric', year: 'numeric',
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Briefcase className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-                  <span style={{ color: '#475569' }}>
-                    <span className="font-semibold" style={{ color: '#0f172a' }}>
-                      {selectedUser.applicationCount ?? 0}
-                    </span>{' '}
-                    applications tracked
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Crown className="w-4 h-4 shrink-0" style={{ color: '#94a3b8' }} />
-                  <span style={{ color: '#475569' }}>
-                    Role:{' '}
-                    <span className="font-semibold capitalize" style={{ color: '#0f172a' }}>
-                      {selectedUser.role}
+              {/* Meta info section */}
+              <div className="drawer-section">
+                <div className="drawer-section-label">User Info</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                    <Mail style={{ width: 14, height: 14, color: 'var(--text3)', flexShrink: 0 }} />
+                    <span className="truncate" style={{ color: 'var(--text2)' }}>{selectedUser.email}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                    <Calendar style={{ width: 14, height: 14, color: 'var(--text3)', flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text2)' }}>
+                      Member since{' '}
+                      {new Date(selectedUser.createdAt).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric',
+                      })}
                     </span>
-                  </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                    <Briefcase style={{ width: 14, height: 14, color: 'var(--text3)', flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text2)' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text)' }}>
+                        {selectedUser.applicationCount ?? 0}
+                      </span>{' '}
+                      applications tracked
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                    <Crown style={{ width: 14, height: 14, color: 'var(--text3)', flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text2)' }}>
+                      Role:{' '}
+                      <span style={{ fontWeight: 700, color: 'var(--text)', textTransform: 'capitalize' }}>
+                        {selectedUser.role}
+                      </span>
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Set Plan dropdown */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wide" style={{ color: '#475569' }}>
-                  Set Plan
-                </label>
-                <div className="relative">
+              {/* Set Plan section */}
+              <div className="drawer-section">
+                <div className="drawer-section-label">Set Plan</div>
+                <div style={{ position: 'relative' }}>
                   <select
                     value={selectedUser.plan}
                     onChange={(e) => changePlan(selectedUser.id, e.target.value)}
                     disabled={actionLoading === `plan-${selectedUser.id}`}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none appearance-none disabled:opacity-50 cursor-pointer"
-                    style={{
-                      border: '1px solid #e2e8f0',
-                      background: 'white',
-                      color: '#334155',
-                    }}
+                    className="input-field"
+                    style={{ opacity: actionLoading === `plan-${selectedUser.id}` ? 0.55 : 1 }}
                   >
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
                     <option value="premium">Premium</option>
                   </select>
                   <ChevronDown
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                    style={{ color: '#94a3b8' }}
+                    style={{
+                      position: 'absolute',
+                      right: 12,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 14,
+                      height: 14,
+                      color: 'var(--text3)',
+                      pointerEvents: 'none',
+                    }}
                   />
                 </div>
               </div>
 
-              {/* Admin Actions */}
-              <div className="space-y-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>
-                  Admin Actions
-                </p>
+              {/* Admin Actions section */}
+              <div className="drawer-section">
+                <div className="drawer-section-label">Admin Actions</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-                {/* Toggle Admin */}
-                <button
-                  onClick={() => toggleAdmin(selectedUser)}
-                  disabled={actionLoading === `admin-${selectedUser.id}`}
-                  className={clsx(
-                    'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50',
-                    selectedUser.role === 'admin'
-                      ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                      : 'hover:bg-slate-200'
-                  )}
-                  style={selectedUser.role === 'admin' ? {} : { background: '#f1f5f9', color: '#475569' }}
-                >
-                  <Shield className="w-4 h-4 shrink-0" />
-                  {selectedUser.role === 'admin' ? 'Remove Admin Access' : 'Grant Admin Access'}
-                  {actionLoading === `admin-${selectedUser.id}` && (
-                    <div className="ml-auto w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                  )}
-                </button>
+                  {/* Toggle Admin */}
+                  <button
+                    onClick={() => toggleAdmin(selectedUser)}
+                    disabled={actionLoading === `admin-${selectedUser.id}`}
+                    className="btn w-full"
+                    style={
+                      selectedUser.role === 'admin'
+                        ? {
+                            justifyContent: 'flex-start',
+                            background: 'var(--amber-lt)',
+                            color: 'var(--amber)',
+                            borderColor: 'var(--amber-md)',
+                            opacity: actionLoading === `admin-${selectedUser.id}` ? 0.55 : 1,
+                          }
+                        : {
+                            justifyContent: 'flex-start',
+                            background: 'var(--bg2)',
+                            color: 'var(--text2)',
+                            borderColor: 'var(--border)',
+                            opacity: actionLoading === `admin-${selectedUser.id}` ? 0.55 : 1,
+                          }
+                    }
+                  >
+                    <Shield style={{ width: 15, height: 15, flexShrink: 0 }} />
+                    {selectedUser.role === 'admin' ? 'Remove Admin Access' : 'Grant Admin Access'}
+                    {actionLoading === `admin-${selectedUser.id}` && (
+                      <Spinner color="currentColor" />
+                    )}
+                  </button>
 
-                {/* Toggle Block */}
-                <button
-                  onClick={() => toggleBlock(selectedUser)}
-                  disabled={actionLoading === `block-${selectedUser.id}`}
-                  className={clsx(
-                    'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50',
-                    selectedUser.isActive
-                      ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                      : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                  )}
-                >
-                  {selectedUser.isActive
-                    ? <Lock className="w-4 h-4 shrink-0" />
-                    : <Unlock className="w-4 h-4 shrink-0" />
-                  }
-                  {selectedUser.isActive ? 'Block User' : 'Unblock User'}
-                  {actionLoading === `block-${selectedUser.id}` && (
-                    <div className="ml-auto w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                  )}
-                </button>
+                  {/* Toggle Block */}
+                  <button
+                    onClick={() => toggleBlock(selectedUser)}
+                    disabled={actionLoading === `block-${selectedUser.id}`}
+                    className="btn w-full"
+                    style={
+                      selectedUser.isActive
+                        ? {
+                            justifyContent: 'flex-start',
+                            background: 'var(--red-lt)',
+                            color: 'var(--red)',
+                            borderColor: 'rgba(220,38,38,.18)',
+                            opacity: actionLoading === `block-${selectedUser.id}` ? 0.55 : 1,
+                          }
+                        : {
+                            justifyContent: 'flex-start',
+                            background: 'var(--green-lt)',
+                            color: 'var(--green)',
+                            borderColor: 'var(--green-md)',
+                            opacity: actionLoading === `block-${selectedUser.id}` ? 0.55 : 1,
+                          }
+                    }
+                  >
+                    {selectedUser.isActive
+                      ? <Lock style={{ width: 15, height: 15, flexShrink: 0 }} />
+                      : <Unlock style={{ width: 15, height: 15, flexShrink: 0 }} />
+                    }
+                    {selectedUser.isActive ? 'Block User' : 'Unblock User'}
+                    {actionLoading === `block-${selectedUser.id}` && (
+                      <Spinner color="currentColor" />
+                    )}
+                  </button>
 
-                {/* Reset Password */}
-                <button
-                  onClick={() => resetPassword(selectedUser.id)}
-                  disabled={actionLoading === `pwd-${selectedUser.id}`}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 hover:bg-slate-200"
-                  style={{ background: '#f1f5f9', color: '#475569' }}
-                >
-                  <Key className="w-4 h-4 shrink-0" />
-                  Reset Password
-                  {actionLoading === `pwd-${selectedUser.id}` && (
-                    <div className="ml-auto w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                  )}
-                </button>
+                  {/* Reset Password */}
+                  <button
+                    onClick={() => resetPassword(selectedUser.id)}
+                    disabled={actionLoading === `pwd-${selectedUser.id}`}
+                    className="btn w-full"
+                    style={{
+                      justifyContent: 'flex-start',
+                      background: 'var(--bg2)',
+                      color: 'var(--text2)',
+                      borderColor: 'var(--border)',
+                      opacity: actionLoading === `pwd-${selectedUser.id}` ? 0.55 : 1,
+                    }}
+                  >
+                    <Key style={{ width: 15, height: 15, flexShrink: 0 }} />
+                    Reset Password
+                    {actionLoading === `pwd-${selectedUser.id}` && (
+                      <Spinner color="var(--text3)" />
+                    )}
+                  </button>
 
-                {/* Delete User */}
-                <button
-                  onClick={() => deleteUser(selectedUser)}
-                  disabled={actionLoading === `delete-${selectedUser.id}`}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200"
-                >
-                  <Trash2 className="w-4 h-4 shrink-0" />
-                  Delete User
-                  {actionLoading === `delete-${selectedUser.id}` && (
-                    <div className="ml-auto w-4 h-4 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />
-                  )}
-                </button>
+                  {/* Delete User */}
+                  <button
+                    onClick={() => deleteUser(selectedUser)}
+                    disabled={actionLoading === `delete-${selectedUser.id}`}
+                    className="btn btn-danger w-full"
+                    style={{
+                      justifyContent: 'flex-start',
+                      opacity: actionLoading === `delete-${selectedUser.id}` ? 0.55 : 1,
+                    }}
+                  >
+                    <Trash2 style={{ width: 15, height: 15, flexShrink: 0 }} />
+                    Delete User
+                    {actionLoading === `delete-${selectedUser.id}` && (
+                      <Spinner color="var(--red)" />
+                    )}
+                  </button>
+                </div>
               </div>
+
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

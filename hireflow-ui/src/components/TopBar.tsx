@@ -12,7 +12,8 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
       style={{
         height: 64,
         background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03)',
+        borderBottom: '1px solid #E5E7EB',
+        boxShadow: '0 1px 0 #E5E7EB, 0 2px 8px rgba(0,0,0,.03)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -26,9 +27,9 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <h1
           style={{
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: 700,
-            color: '#0f172a',
+            color: '#111827',
             letterSpacing: '-0.3px',
             lineHeight: 1.2,
             margin: 0,
@@ -40,7 +41,7 @@ export default function TopBar({ title, subtitle, actions }: TopBarProps) {
           <p
             style={{
               fontSize: 12,
-              color: '#94a3b8',
+              color: '#9CA3AF',
               fontWeight: 400,
               lineHeight: 1.5,
               margin: '2px 0 0 0',

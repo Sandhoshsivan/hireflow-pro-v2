@@ -12,10 +12,10 @@ const BRAND_FEATURES = [
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px 10px 42px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #E5E7EB',
   borderRadius: '8px',
   fontSize: '0.875rem',
-  color: '#0f172a',
+  color: '#111827',
   background: '#ffffff',
   outline: 'none',
   transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -48,7 +48,7 @@ export default function Login() {
         style={{
           width: '45%',
           minHeight: '100vh',
-          background: '#0f172a',
+          background: '#111827',
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '48px 52px',
@@ -100,7 +100,7 @@ export default function Login() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -120,7 +120,7 @@ export default function Login() {
               padding: '2px 5px',
               borderRadius: 4,
               background: 'rgba(255,255,255,0.07)',
-              color: '#64748b',
+              color: '#4B5563',
               border: '1px solid rgba(255,255,255,0.08)',
               letterSpacing: '0.04em',
             }}>v2</span>
@@ -148,7 +148,7 @@ export default function Login() {
             </h1>
             <p style={{
               fontSize: '0.9375rem',
-              color: '#94a3b8',
+              color: '#9CA3AF',
               lineHeight: 1.7,
               maxWidth: 340,
             }}>
@@ -173,7 +173,7 @@ export default function Login() {
                 }}>
                   <CheckCircle style={{ width: 12, height: 12, color: '#60a5fa' }} />
                 </div>
-                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#cbd5e1', lineHeight: 1.5 }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#D1D5DB', lineHeight: 1.5 }}>
                   {text}
                 </span>
               </div>
@@ -191,7 +191,7 @@ export default function Login() {
           }}>
             <p style={{
               fontSize: '0.875rem',
-              color: '#94a3b8',
+              color: '#9CA3AF',
               lineHeight: 1.7,
               fontStyle: 'italic',
               marginBottom: 16,
@@ -215,8 +215,8 @@ export default function Login() {
                 A
               </div>
               <div>
-                <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#e2e8f0', lineHeight: 1.3 }}>Alex M.</p>
-                <p style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.3 }}>Software Engineer at Google</p>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#E5E7EB', lineHeight: 1.3 }}>Alex M.</p>
+                <p style={{ fontSize: '0.75rem', color: '#4B5563', lineHeight: 1.3 }}>Software Engineer at Google</p>
               </div>
             </div>
           </div>
@@ -243,14 +243,14 @@ export default function Login() {
               width: 34,
               height: 34,
               borderRadius: 9,
-              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
               <Briefcase style={{ width: 17, height: 17, color: '#fff' }} />
             </div>
-            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>
               HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
             </span>
           </div>
@@ -260,13 +260,13 @@ export default function Login() {
             <h2 style={{
               fontSize: '1.625rem',
               fontWeight: 700,
-              color: '#0f172a',
+              color: '#111827',
               letterSpacing: '-0.025em',
               marginBottom: 6,
             }}>
               Welcome back
             </h2>
-            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+            <p style={{ fontSize: '0.875rem', color: '#4B5563' }}>
               Sign in to your account to continue
             </p>
           </div>
@@ -312,7 +312,7 @@ export default function Login() {
                 marginBottom: 6,
                 fontSize: '0.8125rem',
                 fontWeight: 600,
-                color: '#64748b',
+                color: '#4B5563',
               }}>
                 Email address
               </label>
@@ -324,7 +324,7 @@ export default function Login() {
                   transform: 'translateY(-50%)',
                   width: 16,
                   height: 16,
-                  color: '#94a3b8',
+                  color: '#9CA3AF',
                   pointerEvents: 'none',
                 }} />
                 <input
@@ -340,7 +340,7 @@ export default function Login() {
                     e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.borderColor = '#E5E7EB';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
@@ -350,7 +350,7 @@ export default function Login() {
             {/* Password field */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#64748b' }}>
+                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#4B5563' }}>
                   Password
                 </label>
                 <Link
@@ -368,7 +368,7 @@ export default function Login() {
                   transform: 'translateY(-50%)',
                   width: 16,
                   height: 16,
-                  color: '#94a3b8',
+                  color: '#9CA3AF',
                   pointerEvents: 'none',
                 }} />
                 <input
@@ -384,7 +384,7 @@ export default function Login() {
                     e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.borderColor = '#E5E7EB';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
@@ -400,7 +400,7 @@ export default function Login() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 style={{ width: 15, height: 15, accentColor: '#1a56db', cursor: 'pointer' }}
               />
-              <label htmlFor="remember" style={{ fontSize: '0.875rem', color: '#64748b', cursor: 'pointer', userSelect: 'none' }}>
+              <label htmlFor="remember" style={{ fontSize: '0.875rem', color: '#4B5563', cursor: 'pointer', userSelect: 'none' }}>
                 Remember me for 30 days
               </label>
             </div>
@@ -421,7 +421,7 @@ export default function Login() {
                 color: '#ffffff',
                 background: isLoading
                   ? 'rgba(26,86,219,0.7)'
-                  : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
+                  : 'linear-gradient(135deg, #1a56db 0%, #1341B2 100%)',
                 borderRadius: 8,
                 border: 'none',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -454,13 +454,13 @@ export default function Login() {
             gap: 12,
             margin: '24px 0',
           }}>
-            <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
+            <span style={{ fontSize: '0.75rem', color: '#9CA3AF', fontWeight: 500 }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
           </div>
 
           {/* Register link */}
-          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#4B5563' }}>
             Don't have an account?{' '}
             <Link to="/register" style={{ fontWeight: 600, color: '#1a56db', textDecoration: 'none' }}>
               Create one free

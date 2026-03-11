@@ -53,7 +53,7 @@ export default function ResetPassword() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '48px 24px', background: '#f1f5f9',
+      padding: '48px 24px', background: '#EDEEF2',
     }}>
       <div className="animate-fade-up" style={{ width: '100%', maxWidth: 400 }}>
         {/* Logo */}
@@ -65,7 +65,7 @@ export default function ResetPassword() {
           }}>
             <Briefcase style={{ width: 18, height: 18, color: '#fff' }} />
           </div>
-          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
+          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827' }}>
             HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
           </span>
         </div>
@@ -73,7 +73,7 @@ export default function ResetPassword() {
         {/* Card */}
         <div style={{
           background: '#ffffff', borderRadius: 20, padding: 32,
-          border: '1px solid #e2e8f0',
+          border: '1px solid #E5E7EB',
           boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06)',
         }}>
           {done ? (
@@ -90,10 +90,10 @@ export default function ResetPassword() {
               >
                 <CheckCircle style={{ width: 32, height: 32, color: '#10b981' }} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.02em' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: 8, letterSpacing: '-0.02em' }}>
                 Password updated!
               </h3>
-              <p style={{ fontSize: '0.9375rem', color: '#64748b', lineHeight: 1.65, marginBottom: 24 }}>
+              <p style={{ fontSize: '0.9375rem', color: '#4B5563', lineHeight: 1.65, marginBottom: 24 }}>
                 Your password has been reset successfully.
               </p>
               <div style={{
@@ -111,10 +111,10 @@ export default function ResetPassword() {
             /* Form state */
             <>
               <div style={{ marginBottom: 24 }}>
-                <h2 style={{ fontSize: '1.375rem', fontWeight: 800, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.02em' }}>
+                <h2 style={{ fontSize: '1.375rem', fontWeight: 800, color: '#111827', marginBottom: 8, letterSpacing: '-0.02em' }}>
                   Set new password
                 </h2>
-                <p style={{ fontSize: '0.9375rem', color: '#64748b', lineHeight: 1.55 }}>
+                <p style={{ fontSize: '0.9375rem', color: '#4B5563', lineHeight: 1.55 }}>
                   Choose a strong password for your account.
                 </p>
               </div>
@@ -139,7 +139,7 @@ export default function ResetPassword() {
                   <div style={{ position: 'relative' }}>
                     <Lock style={{
                       position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                      width: 16, height: 16, color: '#94a3b8', pointerEvents: 'none',
+                      width: 16, height: 16, color: '#9CA3AF', pointerEvents: 'none',
                     }} />
                     <input
                       type="password"
@@ -162,7 +162,7 @@ export default function ResetPassword() {
                   <div style={{ position: 'relative' }}>
                     <Lock style={{
                       position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                      width: 16, height: 16, color: '#94a3b8', pointerEvents: 'none',
+                      width: 16, height: 16, color: '#9CA3AF', pointerEvents: 'none',
                     }} />
                     <input
                       type="password"
@@ -171,7 +171,7 @@ export default function ResetPassword() {
                       className="input-field"
                       style={{
                         paddingLeft: 42,
-                        borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#e2e8f0',
+                        borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : '#E5E7EB',
                       }}
                       placeholder="Confirm new password"
                       required
@@ -210,7 +210,7 @@ export default function ResetPassword() {
             to="/login"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              fontSize: '0.9375rem', fontWeight: 500, color: '#64748b', textDecoration: 'none',
+              fontSize: '0.9375rem', fontWeight: 500, color: '#4B5563', textDecoration: 'none',
               transition: 'color 0.15s ease',
             }}
           >
