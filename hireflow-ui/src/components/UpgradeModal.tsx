@@ -25,33 +25,35 @@ export default function UpgradeModal() {
   if (!isOpen) return null;
 
   const features = PLAN_FEATURES[requiredPlan] ?? PLAN_FEATURES.pro;
-  const price = requiredPlan === 'premium' ? '$19.99' : '$9.99';
+  const price = requiredPlan === 'premium' ? '$19' : '$9';
   const isPremium = requiredPlan === 'premium';
+  const accentGradient = isPremium
+    ? 'linear-gradient(135deg, #7c3aed, #6d28d9)'
+    : 'linear-gradient(135deg, #6366f1, #4f46e5)';
+  const accentColor = isPremium ? '#7c3aed' : '#6366f1';
+  const accentBg = isPremium ? '#ede9fe' : '#eef2ff';
+  const accentShadow = isPremium
+    ? '0 4px 16px rgba(124,58,237,0.35)'
+    : '0 4px 16px rgba(99,102,241,0.35)';
 
   return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9998,
-        background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 24,
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) hide(); }}
-    >
+    <div className="modal-overlay open" onClick={hide}>
       <div
-        className="animate-fade-up"
-        style={{
-          background: '#fff', borderRadius: 20, overflow: 'hidden',
-          width: '100%', maxWidth: 440,
-          boxShadow: '0 24px 80px rgba(0,0,0,0.25)',
-        }}
+        className="modal"
+        style={{ maxWidth: 440 }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div style={{
-          background: isPremium ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-          padding: '28px 28px 24px',
-          position: 'relative',
-        }}>
+        {/* Gradient Header */}
+        <div
+          className="modal-header"
+          style={{
+            background: accentGradient,
+            borderBottom: 'none',
+            padding: '28px 28px 24px',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+          }}
+        >
           <button
             onClick={hide}
             style={{
@@ -70,57 +72,53 @@ export default function UpgradeModal() {
           }}>
             <Crown style={{ width: 26, height: 26, color: '#fcd34d' }} />
           </div>
-          <h2 style={{ fontSize: '1.375rem', fontWeight: 700, color: '#fff', marginBottom: 6, letterSpacing: '-0.02em' }}>
+          <h2 className="modal-title" style={{ color: '#fff', fontSize: '1.375rem', letterSpacing: '-0.02em' }}>
             Upgrade to {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)}
           </h2>
-          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5, marginTop: 6 }}>
             This feature requires a higher plan. Upgrade now to unlock it.
           </p>
         </div>
 
         {/* Features */}
-        <div style={{ padding: '24px 28px' }}>
+        <div className="modal-body">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
             {features.map((f) => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 20, height: 20, borderRadius: 99, flexShrink: 0,
-                  background: isPremium ? '#ede9fe' : '#eef2ff',
+                  background: accentBg,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Check style={{ width: 11, height: 11, color: isPremium ? '#7c3aed' : '#6366f1' }} />
+                  <Check style={{ width: 11, height: 11, color: accentColor }} />
                 </div>
                 <span style={{ fontSize: '0.875rem', color: '#374151' }}>{f}</span>
               </div>
             ))}
           </div>
+        </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button
-              style={{
-                width: '100%', padding: '13px 20px',
-                background: isPremium ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer',
-                fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.01em',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: isPremium ? '0 4px 16px rgba(124,58,237,0.35)' : '0 4px 16px rgba(99,102,241,0.35)',
-              }}
-            >
-              <Zap style={{ width: 16, height: 16 }} />
-              Upgrade for {price}/mo
-            </button>
-            <button
-              onClick={hide}
-              style={{
-                width: '100%', padding: '11px 20px',
-                background: 'transparent', color: '#6b7280',
-                border: '1px solid #e5e7eb', borderRadius: 10, cursor: 'pointer',
-                fontSize: '0.875rem', fontWeight: 500,
-              }}
-            >
-              Maybe later
-            </button>
-          </div>
+        {/* Footer */}
+        <div className="modal-footer" style={{ flexDirection: 'column', gap: 10 }}>
+          <button
+            className="btn-primary"
+            style={{
+              width: '100%',
+              background: accentGradient,
+              boxShadow: accentShadow,
+              justifyContent: 'center',
+            }}
+          >
+            <Zap style={{ width: 16, height: 16 }} />
+            Upgrade for {price}/mo
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={hide}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            Maybe later
+          </button>
         </div>
       </div>
     </div>

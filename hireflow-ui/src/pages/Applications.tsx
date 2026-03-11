@@ -548,31 +548,30 @@ export default function Applications() {
 
       {/* ── Add / Edit Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-            {/* Top gradient bar */}
-            <div className="h-1 bg-gradient-to-r from-blue-600 to-violet-600 flex-shrink-0" />
+        <div className="modal-overlay open" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 flex-shrink-0">
+            <div className="modal-header">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <div className="modal-title">
                   {editingApp ? 'Edit Application' : 'Add Application'}
-                </h2>
+                </div>
                 <p className="text-xs text-slate-500 mt-0.5">
                   {editingApp ? `Updating ${editingApp.company}` : 'Track a new job opportunity'}
                 </p>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="btn btn-ghost btn-icon"
+                style={{ color: 'var(--text3)' }}
               >
-                <X className="w-4 h-4" />
+                <X size={16} />
               </button>
             </div>
 
             {/* Body */}
-            <div className="overflow-y-auto flex-1 px-6 py-5">
+            <div className="modal-body">
               <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField label="Company" required>
@@ -688,17 +687,17 @@ export default function Applications() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
+            <div className="modal-footer">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors"
+                className="btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.company || !form.role}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary"
               >
                 {saving ? 'Saving...' : editingApp ? 'Update Application' : 'Create Application'}
               </button>
@@ -708,17 +707,12 @@ export default function Applications() {
       )}
 
       {/* ── Detail Drawer ── */}
-      {selectedApp && (
-        <div className="fixed inset-0 z-40 flex justify-end">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-[rgba(9,16,29,.2)] backdrop-blur-[2px]"
-            onClick={() => setSelectedApp(null)}
-          />
-          {/* Panel */}
-          <div className="relative w-[480px] max-w-[95vw] bg-white shadow-[-8px_0_40px_rgba(0,0,0,.08)] border-l border-slate-200 flex flex-col animate-slide-in-from-right">
-            {/* Drawer header with gradient bg */}
-            <div className="flex-shrink-0 px-[22px] pt-5 pb-4 border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
+      <div className={`drawer-overlay${selectedApp ? ' open' : ''}`} onClick={() => setSelectedApp(null)} />
+      <div className={`drawer${selectedApp ? ' open' : ''}`}>
+        {selectedApp && (
+          <>
+            {/* Drawer header */}
+            <div className="drawer-header">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {/* Company name - 20px bold */}
@@ -802,15 +796,15 @@ export default function Applications() {
             </div>
 
             {/* Scrollable body */}
-            <div className="overflow-y-auto flex-1">
+            <div className="drawer-body">
               {/* Details section */}
-              <div className="px-[22px] py-4 border-b border-slate-200">
-                <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">Details</h4>
-                <div className="grid grid-cols-2">
+              <div className="drawer-section">
+                <div className="drawer-section-label">Details</div>
+                <div className="info-grid">
                   {/* Applied */}
-                  <div className="py-2.5 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Applied</p>
-                    <p className="text-[13px] font-medium text-slate-900 mt-[3px]">
+                  <div className="info-row">
+                    <div className="info-key">Applied</div>
+                    <div className="info-val">
                       {new Date(selectedApp.appliedDate || selectedApp.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -819,46 +813,46 @@ export default function Applications() {
                       <span className="text-slate-400 ml-1">
                         ({daysAgo(selectedApp.appliedDate || selectedApp.createdAt)}d ago)
                       </span>
-                    </p>
+                    </div>
                   </div>
                   {/* Salary */}
-                  <div className="py-2.5 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Salary</p>
-                    <p className="text-[13px] font-medium text-emerald-600 mt-[3px]">
+                  <div className="info-row">
+                    <div className="info-key">Salary</div>
+                    <div className="info-val" style={{ color: 'var(--green, #059669)' }}>
                       {selectedApp.salary || '\u2014'}
-                    </p>
+                    </div>
                   </div>
                   {/* Source */}
-                  <div className="py-2.5 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Source</p>
-                    <p className="text-[13px] font-medium text-slate-900 mt-[3px]">
+                  <div className="info-row">
+                    <div className="info-key">Source</div>
+                    <div className="info-val">
                       {selectedApp.source || '\u2014'}
-                    </p>
+                    </div>
                   </div>
                   {/* Priority */}
-                  <div className="py-2.5 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Priority</p>
-                    <p className="text-[13px] font-medium mt-[3px] flex items-center gap-1.5">
+                  <div className="info-row">
+                    <div className="info-key">Priority</div>
+                    <div className="info-val" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[selectedApp.priority])} />
                       <span className={clsx('capitalize', priorityLabels[selectedApp.priority])}>
                         {selectedApp.priority}
                       </span>
-                    </p>
+                    </div>
                   </div>
                   {/* Follow-up (if exists) */}
                   {selectedApp.followUpDate && (
-                    <div className="py-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-[.6px] text-slate-400">Follow-up</p>
-                      <p className={clsx(
-                        'text-[13px] font-medium mt-[3px]',
-                        isOverdue(selectedApp.followUpDate) ? 'text-amber-600' : 'text-slate-900'
+                    <div className="info-row">
+                      <div className="info-key">Follow-up</div>
+                      <div className={clsx(
+                        'info-val',
+                        isOverdue(selectedApp.followUpDate) ? 'text-amber-600' : ''
                       )}>
                         {new Date(selectedApp.followUpDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
                         })}
-                      </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -866,8 +860,8 @@ export default function Applications() {
 
               {/* Notes section */}
               {selectedApp.notes && (
-                <div className="px-[22px] py-4 border-b border-slate-200">
-                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">Notes</h4>
+                <div className="drawer-section">
+                  <div className="drawer-section-label">Notes</div>
                   <p className="text-[13px] text-slate-500 leading-[1.7] whitespace-pre-wrap">
                     {selectedApp.notes}
                   </p>
@@ -875,19 +869,19 @@ export default function Applications() {
               )}
 
               {/* Timeline section */}
-              <div className="px-[22px] py-4 border-b border-slate-200">
+              <div className="drawer-section">
                 <button
                   onClick={() => setTimelineOpen(!timelineOpen)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400">
+                  <div className="drawer-section-label" style={{ marginBottom: 0 }}>
                     Timeline
                     {timeline.length > 0 && (
                       <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
                         {timeline.length}
                       </span>
                     )}
-                  </h4>
+                  </div>
                   <ChevronRight
                     className={clsx(
                       'w-4 h-4 text-slate-400 transition-transform duration-200',
@@ -934,10 +928,8 @@ export default function Applications() {
               </div>
 
               {/* Add Note to Timeline */}
-              <div className="px-[22px] py-4 border-b border-slate-200">
-                <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400 mb-2.5">
-                  Add Note to Timeline
-                </h4>
+              <div className="drawer-section">
+                <div className="drawer-section-label">Add Note to Timeline</div>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -959,19 +951,19 @@ export default function Applications() {
               </div>
 
               {/* Contacts (collapsible) */}
-              <div className="px-[22px] py-4">
+              <div className="drawer-section">
                 <button
                   onClick={() => setContactsOpen(!contactsOpen)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h4 className="text-[10px] font-bold uppercase tracking-[1px] text-slate-400">
+                  <div className="drawer-section-label" style={{ marginBottom: 0 }}>
                     Contacts
                     {contacts.length > 0 && (
                       <span className="ml-2 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[11px] font-medium normal-case">
                         {contacts.length}
                       </span>
                     )}
-                  </h4>
+                  </div>
                   <ChevronRight
                     className={clsx(
                       'w-4 h-4 text-slate-400 transition-transform duration-200',
@@ -1014,9 +1006,9 @@ export default function Applications() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
