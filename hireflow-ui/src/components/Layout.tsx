@@ -19,14 +19,12 @@ export default function Layout() {
           style={{
             flex: 1,
             overflowY: 'auto',
-            background: '#f8fafc',
+            background: '#F6F7F9',
           }}
         >
-          <div style={{ padding: 28, maxWidth: 1400 }}>
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

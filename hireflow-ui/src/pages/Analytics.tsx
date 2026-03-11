@@ -456,6 +456,7 @@ export default function Analytics() {
         }
       />
 
+      <div style={{ padding: 28 }}>
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         {kpis.map((kpi, index) => (
@@ -614,6 +615,7 @@ export default function Analytics() {
           )}
         </div>
       </div>
+      </div>{/* /padding wrapper */}
     </div>
   );
 }

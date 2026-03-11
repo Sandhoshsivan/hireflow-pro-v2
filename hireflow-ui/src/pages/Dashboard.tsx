@@ -91,11 +91,14 @@ function fmtFollowupDate(iso: string) {
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={clsx(
-        'bg-white rounded-xl border border-slate-200 transition-shadow duration-200 hover:shadow-md',
-        className,
-      )}
-      style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+      className={clsx('rounded-xl transition-shadow duration-200 hover:shadow-md', className)}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%)',
+        border: '1px solid #E5E7EB',
+        borderRadius: 12,
+        boxShadow: '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)',
+        overflow: 'hidden',
+      }}
     >
       {children}
     </div>
@@ -104,7 +107,7 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
 
 function CardHeader({
   icon,
-  iconColor,
+  iconColor: _iconColor,
   title,
   action,
 }: {
@@ -114,15 +117,20 @@ function CardHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between px-6 pt-5 pb-4">
-      <div className="flex items-center gap-2.5">
-        <span
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${iconColor ?? BLUE}14` }}
-        >
-          {icon}
-        </span>
-        <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
+    <div
+      style={{
+        padding: '14px 20px',
+        borderBottom: '1px solid #E5E7EB',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        background: '#FFFFFF',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+        <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#111827', letterSpacing: '-0.1px' }}>
           {title}
         </h3>
       </div>
@@ -207,7 +215,7 @@ export default function Dashboard() {
           subtitle={formattedDate}
           actions={trackAppButton}
         />
-        <div className="flex flex-col items-center justify-center py-28 animate-fade-up">
+        <div className="flex flex-col items-center justify-center py-28 animate-fade-up" style={{ padding: '112px 28px' }}>
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
             style={{ background: `${BLUE}12` }}
@@ -309,28 +317,40 @@ export default function Dashboard() {
         actions={trackAppButton}
       />
 
+      <div style={{ padding: 28 }}>
       {/* -------- KPI CARDS (4 columns) -------- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6 animate-fade-up">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-fade-up">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl border border-slate-200 p-5 cursor-default transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+            className="rounded-xl cursor-default transition-all duration-200"
             style={{
+              background: 'white',
+              border: '1px solid #E5E7EB',
               borderLeft: `3px solid ${kpi.borderColor}`,
-              boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+              borderRadius: 12,
+              padding: '18px 18px 16px 18px',
+              boxShadow: '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)',
               animationDelay: `${idx * 60}ms`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = '';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)';
             }}
           >
             <p
-              className="font-extrabold tracking-tight leading-none mb-1.5"
-              style={{ fontSize: '32px', color: '#0f172a', letterSpacing: '-0.03em' }}
+              style={{ fontSize: 32, fontWeight: 800, color: '#111827', lineHeight: 1, letterSpacing: '-1.5px', marginBottom: 6 }}
             >
               {kpi.value}
             </p>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: '#475569' }}>
+            <p style={{ fontSize: 12, color: '#4B5563', fontWeight: 600, letterSpacing: '-0.1px' }}>
               {kpi.label}
             </p>
-            <p className="text-[11px]" style={{ color: GHOST }}>
+            <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
               {kpi.sub}
             </p>
           </div>
@@ -627,6 +647,7 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
+      </div>{/* /padding wrapper */}
     </div>
   );
 }
