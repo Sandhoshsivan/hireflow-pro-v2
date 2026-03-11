@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type FormEvent, type KeyboardEvent } from 'react';
-import { Send, Bot, Zap, Loader2, Sparkles, ArrowUpRight, MessageSquare } from 'lucide-react';
+import { Send, Zap, Loader2, Sparkles, ArrowUpRight } from 'lucide-react';
 import api from '../lib/api';
 import TopBar from '../components/TopBar';
 import type { ChatMessage, MatchScoreResponse } from '../types';

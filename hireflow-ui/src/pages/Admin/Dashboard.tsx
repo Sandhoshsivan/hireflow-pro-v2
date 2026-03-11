@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Users, Briefcase, DollarSign, TrendingUp, RefreshCw,
-  UserCheck, Crown,
+  Users, Briefcase, TrendingUp, RefreshCw,
+  UserCheck,
 } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import api from '../../lib/api';

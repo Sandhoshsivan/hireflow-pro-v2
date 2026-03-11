@@ -6,7 +6,6 @@ import {
   X,
   Pencil,
   Trash2,
-  Briefcase,
   ChevronDown,
   ChevronRight,
   Link2,
