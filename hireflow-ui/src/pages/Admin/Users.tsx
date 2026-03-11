@@ -11,14 +11,14 @@ import type { User } from '../../types';
 
 const planConfig: Record<string, { label: string; badge: string; dot: string }> = {
   free:    { label: 'Free',    badge: 'bg-slate-100 text-slate-600 border-slate-200',    dot: 'bg-slate-400' },
-  pro:     { label: 'Pro',     badge: 'bg-indigo-100 text-indigo-700 border-indigo-200', dot: 'bg-indigo-500' },
+  pro:     { label: 'Pro',     badge: 'bg-blue-100 text-blue-700 border-blue-200', dot: 'bg-blue-600' },
   premium: { label: 'Premium', badge: 'bg-violet-100 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
 };
 
 function UserAvatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   const initials = name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   const gradients = [
-    'from-indigo-400 to-indigo-600',
+    'from-blue-400 to-blue-600',
     'from-violet-400 to-violet-600',
     'from-blue-400 to-blue-600',
     'from-emerald-400 to-emerald-600',
@@ -154,7 +154,7 @@ export default function AdminUsers() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading users...</p>
         </div>
       </div>
@@ -184,8 +184,8 @@ export default function AdminUsers() {
                 color: '#0f172a',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#6366f1';
-                e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                e.target.style.borderColor = '#1a56db';
+                e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = '#e2e8f0';
@@ -399,7 +399,7 @@ export default function AdminUsers() {
             {/* Gradient header */}
             <div
               className="px-6 py-6 flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #ede9fe 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)' }}
             >
               <div className="flex items-start justify-between mb-4">
                 <h2 className="text-base font-semibold" style={{ color: '#0f172a' }}>User Details</h2>

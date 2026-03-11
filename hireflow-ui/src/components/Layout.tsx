@@ -22,7 +22,7 @@ export default function Layout() {
             background: '#f8fafc',
           }}
         >
-          <div style={{ padding: '28px', maxWidth: 1400 }}>
+          <div style={{ padding: 28, maxWidth: 1400 }}>
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

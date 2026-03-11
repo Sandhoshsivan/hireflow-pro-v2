@@ -65,7 +65,7 @@ export default function ForgotPassword() {
         width: 500,
         height: 500,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 65%)',
+        background: 'radial-gradient(circle, rgba(26,86,219,0.2) 0%, transparent 65%)',
         pointerEvents: 'none',
       }} />
 
@@ -77,7 +77,7 @@ export default function ForgotPassword() {
         width: 440,
         height: 440,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 65%)',
+        background: 'radial-gradient(circle, rgba(26,86,219,0.15) 0%, transparent 65%)',
         pointerEvents: 'none',
       }} />
 
@@ -103,17 +103,17 @@ export default function ForgotPassword() {
             width: 36,
             height: 36,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 4px 12px rgba(99,102,241,0.3)',
+            boxShadow: '0 0 0 1px rgba(26,86,219,0.4), 0 4px 12px rgba(26,86,219,0.3)',
           }}>
             <Briefcase style={{ width: 18, height: 18, color: '#fff' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
             <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em' }}>HireFlow</span>
-            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#6366f1', letterSpacing: '-0.02em' }}>Pro</span>
+            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#1a56db', letterSpacing: '-0.02em' }}>Pro</span>
           </div>
         </div>
 
@@ -172,8 +172,8 @@ export default function ForgotPassword() {
                   borderRadius: 10,
                   textAlign: 'left',
                   marginBottom: 24,
-                  background: 'rgba(99,102,241,0.05)',
-                  border: '1px solid rgba(99,102,241,0.14)',
+                  background: 'rgba(26,86,219,0.05)',
+                  border: '1px solid rgba(26,86,219,0.14)',
                 }}>
                   <p style={{
                     fontSize: '0.625rem',
@@ -181,7 +181,7 @@ export default function ForgotPassword() {
                     marginBottom: 8,
                     letterSpacing: '0.07em',
                     textTransform: 'uppercase',
-                    color: '#6366f1',
+                    color: '#1a56db',
                   }}>
                     Demo reset link
                   </p>
@@ -197,7 +197,7 @@ export default function ForgotPassword() {
                       textDecoration: 'none',
                     }}
                   >
-                    <ExternalLink style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#818cf8' }} />
+                    <ExternalLink style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#60a5fa' }} />
                     {resetLink}
                   </a>
                 </div>
@@ -238,11 +238,11 @@ export default function ForgotPassword() {
                 width: 48,
                 height: 48,
                 borderRadius: 12,
-                background: 'rgba(99,102,241,0.08)',
-                border: '1px solid rgba(99,102,241,0.15)',
+                background: 'rgba(26,86,219,0.08)',
+                border: '1px solid rgba(26,86,219,0.15)',
                 marginBottom: 20,
               }}>
-                <KeyRound style={{ width: 22, height: 22, color: '#6366f1' }} />
+                <KeyRound style={{ width: 22, height: 22, color: '#1a56db' }} />
               </div>
 
               <div style={{ marginBottom: 24 }}>
@@ -309,8 +309,8 @@ export default function ForgotPassword() {
                       required
                       autoComplete="email"
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#6366f1';
-                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                        e.currentTarget.style.borderColor = '#1a56db';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = '#e2e8f0';
@@ -334,13 +334,13 @@ export default function ForgotPassword() {
                     fontWeight: 600,
                     color: '#ffffff',
                     background: isLoading
-                      ? 'rgba(99,102,241,0.7)'
-                      : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      ? 'rgba(26,86,219,0.7)'
+                      : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
                     borderRadius: 8,
                     border: 'none',
                     cursor: isLoading ? 'not-allowed' : 'pointer',
                     transition: 'opacity 0.15s ease',
-                    boxShadow: '0 1px 2px rgba(99,102,241,0.3), 0 4px 12px rgba(99,102,241,0.2)',
+                    boxShadow: '0 1px 2px rgba(26,86,219,0.3), 0 4px 12px rgba(26,86,219,0.2)',
                   }}
                   onMouseEnter={(e) => {
                     if (!isLoading) e.currentTarget.style.opacity = '0.9';

@@ -200,7 +200,7 @@ export default function AIAssistant() {
             <div className="flex items-center gap-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                style={{ background: 'linear-gradient(135deg, #1a56db, #7c3aed)' }}
               >
                 <Bot className="w-4 h-4 text-white" />
               </div>
@@ -218,7 +218,7 @@ export default function AIAssistant() {
             </div>
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
-              style={{ background: '#faf5ff', borderColor: '#ede9fe' }}
+              style={{ background: '#faf5ff', borderColor: '#f5f3ff' }}
             >
               <Sparkles className="w-3 h-3 text-violet-500" />
               <span className="text-xs font-semibold text-violet-600">Powered by Claude</span>
@@ -231,9 +231,9 @@ export default function AIAssistant() {
               <div className="flex flex-col items-center justify-center h-full gap-5 py-8">
                 <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #eef2ff, #ede9fe)' }}
+                  style={{ background: 'linear-gradient(135deg, #eff6ff, #f5f3ff)' }}
                 >
-                  <MessageSquare className="w-7 h-7 text-indigo-500" />
+                  <MessageSquare className="w-7 h-7 text-blue-500" />
                 </div>
                 <div className="text-center max-w-xs">
                   <h3 className="text-sm font-semibold mb-1.5" style={{ color: '#0f172a' }}>
@@ -248,10 +248,10 @@ export default function AIAssistant() {
                     <button
                       key={prompt}
                       onClick={() => sendMessage(prompt)}
-                      className="text-left px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 text-xs text-slate-600 transition-all flex items-center justify-between group"
+                      className="text-left px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 text-xs text-slate-600 transition-all flex items-center justify-between group"
                     >
                       <span>{prompt}</span>
-                      <ArrowUpRight className="w-3 h-3 shrink-0 ml-2 text-slate-300 group-hover:text-indigo-400 transition-colors" />
+                      <ArrowUpRight className="w-3 h-3 shrink-0 ml-2 text-slate-300 group-hover:text-blue-400 transition-colors" />
                     </button>
                   ))}
                 </div>
@@ -268,12 +268,12 @@ export default function AIAssistant() {
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1"
                   style={
                     msg.role === 'user'
-                      ? { background: '#eef2ff' }
-                      : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }
+                      ? { background: '#eff6ff' }
+                      : { background: 'linear-gradient(135deg, #1a56db, #7c3aed)' }
                   }
                 >
                   {msg.role === 'user' ? (
-                    <User className="w-3.5 h-3.5 text-indigo-600" />
+                    <User className="w-3.5 h-3.5 text-blue-600" />
                   ) : (
                     <Bot className="w-3.5 h-3.5 text-white" />
                   )}
@@ -291,7 +291,7 @@ export default function AIAssistant() {
                     style={
                       msg.role === 'user'
                         ? {
-                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                            background: 'linear-gradient(135deg, #1a56db, #1e40af)',
                             color: 'white',
                             borderRadius: '16px',
                             borderBottomRightRadius: 4,
@@ -323,7 +323,7 @@ export default function AIAssistant() {
               <div className="flex gap-3">
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(135deg, #1a56db, #7c3aed)' }}
                 >
                   <Bot className="w-3.5 h-3.5 text-white" />
                 </div>
@@ -350,8 +350,8 @@ export default function AIAssistant() {
               className="flex items-end gap-3 rounded-xl border px-4 py-3 bg-slate-50 transition-all"
               style={{ borderColor: '#e2e8f0' }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                e.currentTarget.style.borderColor = '#1a56db';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = '#e2e8f0';
@@ -373,7 +373,7 @@ export default function AIAssistant() {
                 type="submit"
                 disabled={isChatLoading || !input.trim()}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}
+                style={{ background: 'linear-gradient(135deg, #1a56db, #1e40af)' }}
               >
                 {isChatLoading ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -435,8 +435,8 @@ export default function AIAssistant() {
                     }}
                     rows={6}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#6366f1';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                      e.target.style.borderColor = '#1a56db';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                     }}
                     onBlur={(e) => {
                       e.target.style.borderColor = '#e2e8f0';
@@ -467,8 +467,8 @@ export default function AIAssistant() {
                     }}
                     rows={6}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#6366f1';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                      e.target.style.borderColor = '#1a56db';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                     }}
                     onBlur={(e) => {
                       e.target.style.borderColor = '#e2e8f0';
@@ -502,7 +502,7 @@ export default function AIAssistant() {
                   onClick={analyzeMatch}
                   disabled={isAnalyzing || !jobDescription.trim()}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)' }}
                 >
                   {isAnalyzing ? (
                     <>
@@ -579,7 +579,7 @@ export default function AIAssistant() {
                         >
                           <span
                             className="font-bold shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px]"
-                            style={{ background: '#6366f1' }}
+                            style={{ background: '#1a56db' }}
                           >
                             {i + 1}
                           </span>

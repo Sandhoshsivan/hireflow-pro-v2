@@ -60,13 +60,13 @@ export default function ResetPassword() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 32 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Briefcase style={{ width: 18, height: 18, color: '#fff' }} />
           </div>
           <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
-            HireFlow<span style={{ color: '#6366f1' }}>Pro</span>
+            HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
           </span>
         </div>
 
@@ -99,11 +99,11 @@ export default function ResetPassword() {
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '10px 18px', borderRadius: 10,
-                background: 'rgba(99,102,241,0.07)',
-                border: '1px solid rgba(99,102,241,0.15)',
-                fontSize: '0.9375rem', color: '#6366f1', fontWeight: 500,
+                background: 'rgba(26,86,219,0.07)',
+                border: '1px solid rgba(26,86,219,0.15)',
+                fontSize: '0.9375rem', color: '#1a56db', fontWeight: 500,
               }}>
-                <Loader2 style={{ width: 16, height: 16, color: '#6366f1' }} className="animate-spin" />
+                <Loader2 style={{ width: 16, height: 16, color: '#1a56db' }} className="animate-spin" />
                 Redirecting in {countdown}s...
               </div>
             </div>

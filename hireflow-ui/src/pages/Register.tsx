@@ -35,8 +35,8 @@ const inputStyle: React.CSSProperties = {
 
 const focusHandlers = {
   onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#6366f1';
-    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+    e.currentTarget.style.borderColor = '#1a56db';
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
   },
   onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
     e.currentTarget.style.borderColor = '#e2e8f0';
@@ -106,7 +106,7 @@ export default function Register() {
           width: 380,
           height: 380,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(26,86,219,0.2) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -118,7 +118,7 @@ export default function Register() {
           width: 360,
           height: 360,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.16) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(26,86,219,0.16) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -131,18 +131,18 @@ export default function Register() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 4px 12px rgba(99,102,241,0.3)',
+              boxShadow: '0 0 0 1px rgba(26,86,219,0.4), 0 4px 12px rgba(26,86,219,0.3)',
             }}>
               <Briefcase style={{ width: 18, height: 18, color: '#fff' }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em' }}>HireFlow</span>
-              <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#6366f1', letterSpacing: '-0.02em' }}>Pro</span>
+              <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a56db', letterSpacing: '-0.02em' }}>Pro</span>
             </div>
             <span style={{
               marginLeft: 4,
@@ -169,7 +169,7 @@ export default function Register() {
             }}>
               Your job search,<br />
               <span style={{
-                background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)',
+                background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -195,14 +195,14 @@ export default function Register() {
                   width: 34,
                   height: 34,
                   borderRadius: 9,
-                  background: 'rgba(99,102,241,0.12)',
-                  border: '1px solid rgba(99,102,241,0.2)',
+                  background: 'rgba(26,86,219,0.12)',
+                  border: '1px solid rgba(26,86,219,0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <Icon style={{ width: 15, height: 15, color: '#818cf8' }} />
+                  <Icon style={{ width: 15, height: 15, color: '#60a5fa' }} />
                 </div>
                 <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#cbd5e1', lineHeight: 1.5 }}>
                   {text}
@@ -234,7 +234,7 @@ export default function Register() {
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                background: 'linear-gradient(135deg, #7c3aed, #1a56db)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -275,7 +275,7 @@ export default function Register() {
               width: 34,
               height: 34,
               borderRadius: 9,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -283,7 +283,7 @@ export default function Register() {
               <Briefcase style={{ width: 17, height: 17, color: '#fff' }} />
             </div>
             <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              HireFlow<span style={{ color: '#6366f1' }}>Pro</span>
+              HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
             </span>
           </div>
 
@@ -454,8 +454,8 @@ export default function Register() {
                   autoComplete="new-password"
                   onFocus={(e) => {
                     if (!passwordsMismatch && !passwordsMatch) {
-                      e.currentTarget.style.borderColor = '#6366f1';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                      e.currentTarget.style.borderColor = '#1a56db';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                     }
                   }}
                   onBlur={(e) => {
@@ -490,8 +490,8 @@ export default function Register() {
                   cursor: 'pointer',
                 }}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                  e.currentTarget.style.borderColor = '#1a56db';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = '#e2e8f0';
@@ -511,13 +511,13 @@ export default function Register() {
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                 required
-                style={{ marginTop: 2, width: 15, height: 15, accentColor: '#6366f1', cursor: 'pointer', flexShrink: 0 }}
+                style={{ marginTop: 2, width: 15, height: 15, accentColor: '#1a56db', cursor: 'pointer', flexShrink: 0 }}
               />
               <label htmlFor="terms" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer', userSelect: 'none', lineHeight: 1.55 }}>
                 I agree to the{' '}
-                <span style={{ fontWeight: 600, color: '#6366f1' }}>Terms of Service</span>
+                <span style={{ fontWeight: 600, color: '#1a56db' }}>Terms of Service</span>
                 {' '}and{' '}
-                <span style={{ fontWeight: 600, color: '#6366f1' }}>Privacy Policy</span>
+                <span style={{ fontWeight: 600, color: '#1a56db' }}>Privacy Policy</span>
               </label>
             </div>
 
@@ -536,13 +536,13 @@ export default function Register() {
                 fontWeight: 600,
                 color: '#ffffff',
                 background: isLoading || passwordsMismatch
-                  ? 'rgba(99,102,241,0.5)'
-                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  ? 'rgba(26,86,219,0.5)'
+                  : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
                 borderRadius: 8,
                 border: 'none',
                 cursor: isLoading || passwordsMismatch ? 'not-allowed' : 'pointer',
                 transition: 'opacity 0.15s ease',
-                boxShadow: '0 1px 2px rgba(99,102,241,0.3), 0 4px 12px rgba(99,102,241,0.2)',
+                boxShadow: '0 1px 2px rgba(26,86,219,0.3), 0 4px 12px rgba(26,86,219,0.2)',
                 marginTop: 4,
               }}
               onMouseEnter={(e) => {
@@ -578,7 +578,7 @@ export default function Register() {
           {/* Login link */}
           <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ fontWeight: 600, color: '#6366f1', textDecoration: 'none' }}>
+            <Link to="/login" style={{ fontWeight: 600, color: '#1a56db', textDecoration: 'none' }}>
               Sign in
             </Link>
           </p>

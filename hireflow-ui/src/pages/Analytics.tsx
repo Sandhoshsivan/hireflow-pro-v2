@@ -3,30 +3,27 @@ import clsx from 'clsx';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application } from '../types';
-import { BarChart2, TrendingUp, Layers, Zap } from 'lucide-react';
+import { BarChart2, TrendingUp, Layers, Zap, PieChart, Activity, Globe, Flag } from 'lucide-react';
 import { extractApplications } from '../lib/normalize';
 
 type DateRange = '30' | '90' | 'all';
 
 const statusConfig: Record<string, { label: string; color: string; hex: string }> = {
   saved:     { label: 'Saved',     color: 'bg-cyan-500',    hex: '#06b6d4' },
-  applied:   { label: 'Applied',   color: 'bg-blue-500',    hex: '#3b82f6' },
-  interview: { label: 'Interview', color: 'bg-amber-500',   hex: '#f59e0b' },
-  offer:     { label: 'Offer',     color: 'bg-emerald-500', hex: '#10b981' },
-  rejected:  { label: 'Rejected',  color: 'bg-red-500',     hex: '#ef4444' },
+  applied:   { label: 'Applied',   color: 'bg-blue-600',    hex: '#1a56db' },
+  interview: { label: 'Interview', color: 'bg-amber-600',   hex: '#d97706' },
+  offer:     { label: 'Offer',     color: 'bg-emerald-600', hex: '#059669' },
+  rejected:  { label: 'Rejected',  color: 'bg-red-600',     hex: '#dc2626' },
   ghosted:   { label: 'Ghosted',   color: 'bg-slate-400',   hex: '#94a3b8' },
 };
 
-const priorityConfig: Record<string, { label: string; color: string }> = {
-  high:   { label: 'High',   color: 'bg-red-500' },
-  medium: { label: 'Medium', color: 'bg-amber-500' },
-  low:    { label: 'Low',    color: 'bg-slate-400' },
+const priorityConfig: Record<string, { label: string; hex: string }> = {
+  high:   { label: 'High',   hex: '#dc2626' },
+  medium: { label: 'Medium', hex: '#d97706' },
+  low:    { label: 'Low',    hex: '#94a3b8' },
 };
 
-const sourceColors = [
-  'bg-indigo-500', 'bg-violet-500', 'bg-blue-500', 'bg-cyan-500',
-  'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400',
-];
+const kpiBorderColors = ['#1a56db', '#059669', '#d97706', '#7c3aed'];
 
 function EmptyChart({ message = 'Add applications to see data' }: { message?: string }) {
   return (
@@ -34,43 +31,120 @@ function EmptyChart({ message = 'Add applications to see data' }: { message?: st
       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
         <BarChart2 className="w-5 h-5 text-slate-400" />
       </div>
-      <p className="text-sm font-medium text-slate-400">{message}</p>
+      <p className="text-sm font-medium text-slate-400" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{message}</p>
     </div>
   );
 }
 
-function HorizontalBar({
+function StatusBar({
   label,
   value,
   total,
-  barClass,
+  hex,
 }: {
   label: string;
   value: number;
   total: number;
-  barClass: string;
+  hex: string;
 }) {
-  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+  const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
   return (
     <div className="flex items-center gap-3">
       <span
         className="text-xs font-medium w-20 shrink-0 truncate"
-        style={{ color: '#475569' }}
+        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         {label}
       </span>
       <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
         <div
-          className={clsx('h-full rounded-lg transition-all duration-700 ease-out', barClass)}
-          style={{ width: `${pct}%` }}
-        />
+          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          style={{ width: `${pct}%`, backgroundColor: hex, minWidth: value > 0 ? '32px' : '0' }}
+        >
+          {value > 0 && (
+            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+          )}
+        </div>
       </div>
-      <div className="flex items-baseline gap-1 shrink-0 w-16 justify-end">
-        <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-          {value}
+      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
+        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {total > 0 ? Math.round((value / total) * 100) : 0}%
         </span>
-        <span className="text-xs" style={{ color: '#94a3b8' }}>
-          {pct}%
+      </div>
+    </div>
+  );
+}
+
+function SourceBar({
+  label,
+  value,
+  total,
+}: {
+  label: string;
+  value: number;
+  total: number;
+}) {
+  const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className="text-xs font-medium w-20 shrink-0 truncate"
+        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      >
+        {label}
+      </span>
+      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+        <div
+          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          style={{ width: `${pct}%`, backgroundColor: '#1a56db', minWidth: value > 0 ? '32px' : '0' }}
+        >
+          {value > 0 && (
+            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
+        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {total > 0 ? Math.round((value / total) * 100) : 0}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PriorityBar({
+  label,
+  value,
+  total,
+  hex,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  hex: string;
+}) {
+  const pct = total > 0 ? Math.max(Math.round((value / total) * 100), value > 0 ? 8 : 0) : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className="text-xs font-medium w-20 shrink-0 truncate"
+        style={{ color: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      >
+        {label}
+      </span>
+      <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#f1f5f9' }}>
+        <div
+          className="h-full rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+          style={{ width: `${pct}%`, backgroundColor: hex, minWidth: value > 0 ? '32px' : '0' }}
+        >
+          {value > 0 && (
+            <span className="text-[10px] font-bold text-white leading-none">{value}</span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-baseline gap-1 shrink-0 w-12 justify-end">
+        <span className="text-xs" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {total > 0 ? Math.round((value / total) * 100) : 0}%
         </span>
       </div>
     </div>
@@ -108,8 +182,9 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
       <svg viewBox={`0 0 ${width} ${height + 40}`} className="w-full" style={{ minWidth: 280 }}>
         <defs>
           <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.01" />
+            <stop offset="0%" stopColor="#1a56db" stopOpacity="0.18" />
+            <stop offset="60%" stopColor="#1a56db" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#1a56db" stopOpacity="0.01" />
           </linearGradient>
         </defs>
 
@@ -121,7 +196,7 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
             />
             <text
               x={paddingX - 8} y={step.y + 4} textAnchor="end"
-              style={{ fontSize: 9, fill: '#94a3b8' }}
+              style={{ fontSize: 9, fill: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {step.label}
             </text>
@@ -132,7 +207,7 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
         <path
           d={pathD}
           fill="none"
-          stroke="#6366f1"
+          stroke="#1a56db"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -140,12 +215,12 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
 
         {points.map((p, i) => (
           <g key={i}>
-            <circle cx={p.x} cy={p.y} r="4" fill="#ffffff" stroke="#6366f1" strokeWidth="2.5" />
+            <circle cx={p.x} cy={p.y} r="4" fill="#ffffff" stroke="#1a56db" strokeWidth="2.5" />
             <text
               x={p.x}
               y={height + 32}
               textAnchor="middle"
-              style={{ fontSize: 9, fill: '#94a3b8' }}
+              style={{ fontSize: 9, fill: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {p.label.length > 7 ? p.label.slice(5) : p.label}
             </text>
@@ -153,6 +228,27 @@ function MonthlyTrendSVG({ data }: { data: Array<{ label: string; value: number 
           </g>
         ))}
       </svg>
+    </div>
+  );
+}
+
+function CardHeader({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle: string }) {
+  return (
+    <div className="flex items-start gap-3 mb-5">
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        style={{ backgroundColor: '#eff6ff' }}
+      >
+        <Icon className="w-4 h-4" style={{ color: '#1a56db' }} />
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold" style={{ color: '#0f172a', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {title}
+        </h3>
+        <p className="text-xs mt-0.5" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {subtitle}
+        </p>
+      </div>
     </div>
   );
 }
@@ -198,7 +294,7 @@ export default function Analytics() {
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .map(([label, value], i) => ({ label, value, color: sourceColors[i % sourceColors.length] }));
+      .map(([label, value]) => ({ label, value }));
   }, [filteredApps]);
 
   const topSource = sourceCounts[0]?.label ?? 'N/A';
@@ -232,26 +328,26 @@ export default function Analytics() {
       Object.keys(statusConfig).map((s) => ({
         label: statusConfig[s].label,
         value: filteredApps.filter((a) => a.status === s).length,
-        bar: statusConfig[s].color,
+        hex: statusConfig[s].hex,
         key: s,
       })),
     [filteredApps]
   );
-  const maxStatus = Math.max(...statusCounts.map((s) => s.value), 1);
+  const statusTotal = statusCounts.reduce((sum, s) => sum + s.value, 0);
 
   const priorityCounts = useMemo(
     () =>
       Object.keys(priorityConfig).map((p) => ({
         label: priorityConfig[p].label,
         value: filteredApps.filter((a) => a.priority === p).length,
-        bar: priorityConfig[p].color,
+        hex: priorityConfig[p].hex,
       })),
     [filteredApps]
   );
-  const maxPriority = Math.max(...priorityCounts.map((p) => p.value), 1);
+  const priorityTotal = priorityCounts.reduce((sum, p) => sum + p.value, 0);
 
   const topSourcesTop5 = sourceCounts.slice(0, 5);
-  const maxSource = topSourcesTop5.length > 0 ? Math.max(...topSourcesTop5.map((s) => s.value), 1) : 1;
+  const sourceTotal = topSourcesTop5.reduce((sum, s) => sum + s.value, 0);
 
   const rangeOptions: { label: string; value: DateRange }[] = [
     { label: '30d', value: '30' },
@@ -264,38 +360,32 @@ export default function Analytics() {
       label: 'Total Applications',
       value: total,
       icon: Layers,
-      iconBg: 'bg-indigo-50',
-      iconColor: 'text-indigo-600',
+      iconBg: '#eff6ff',
+      iconColor: '#1a56db',
       sub: dateRange === 'all' ? 'All time' : `Last ${dateRange} days`,
     },
     {
       label: 'Response Rate',
       value: `${responseRate}%`,
       icon: TrendingUp,
-      iconBg:
-        responseRate >= 30 ? 'bg-emerald-50' : responseRate >= 15 ? 'bg-amber-50' : 'bg-slate-50',
-      iconColor:
-        responseRate >= 30
-          ? 'text-emerald-600'
-          : responseRate >= 15
-          ? 'text-amber-600'
-          : 'text-slate-500',
+      iconBg: responseRate >= 30 ? '#ecfdf5' : responseRate >= 15 ? '#fffbeb' : '#f8fafc',
+      iconColor: responseRate >= 30 ? '#059669' : responseRate >= 15 ? '#d97706' : '#94a3b8',
       sub: `${responded} responses received`,
     },
     {
       label: 'Best Source',
       value: topSource,
       icon: BarChart2,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: '#fffbeb',
+      iconColor: '#d97706',
       sub: sourceCounts[0] ? `${sourceCounts[0].value} applications` : 'No source data',
     },
     {
       label: 'Most Active Month',
       value: mostActiveMonth,
       icon: Zap,
-      iconBg: 'bg-violet-50',
-      iconColor: 'text-violet-600',
+      iconBg: '#f5f3ff',
+      iconColor: '#7c3aed',
       sub: total > 0 ? 'By application count' : 'No data yet',
     },
   ];
@@ -304,8 +394,11 @@ export default function Analytics() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
+          <div
+            className="w-8 h-8 rounded-full animate-spin"
+            style={{ border: '3px solid #e2e8f0', borderTopColor: '#1a56db' }}
+          />
+          <p className="text-sm font-medium" style={{ color: '#94a3b8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Loading analytics...
           </p>
         </div>
@@ -314,7 +407,24 @@ export default function Analytics() {
   }
 
   return (
-    <div>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {/* Staggered fadeSlideUp animation keyframes */}
+      <style>{`
+        @keyframes fadeSlideUp {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .anim-fade-slide-up {
+          animation: fadeSlideUp 0.5s ease-out both;
+        }
+      `}</style>
+
       <TopBar
         title="Analytics"
         subtitle="Insights into your job search performance"
@@ -335,8 +445,8 @@ export default function Analytics() {
                 )}
                 style={
                   dateRange === opt.value
-                    ? { background: '#4f46e5', color: 'white' }
-                    : { color: '#64748b' }
+                    ? { background: '#1a56db', color: 'white', fontFamily: "'Plus Jakarta Sans', sans-serif" }
+                    : { color: '#64748b', fontFamily: "'Plus Jakarta Sans', sans-serif" }
                 }
               >
                 {opt.label}
@@ -348,30 +458,35 @@ export default function Analytics() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        {kpis.map((kpi) => (
+        {kpis.map((kpi, index) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200"
+            className="bg-white rounded-xl p-5 hover:shadow-md transition-all duration-200 cursor-default anim-fade-slide-up"
             style={{
+              borderLeft: `3px solid ${kpiBorderColors[index]}`,
+              border: `1px solid #e2e8f0`,
+              borderLeftWidth: '3px',
+              borderLeftColor: kpiBorderColors[index],
               boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+              animationDelay: `${index * 100}ms`,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-medium" style={{ color: '#64748b' }}>
                 {kpi.label}
               </span>
               <div
-                className={clsx(
-                  'w-8 h-8 rounded-lg flex items-center justify-center',
-                  kpi.iconBg
-                )}
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: kpi.iconBg }}
               >
-                <kpi.icon className={clsx('w-4 h-4', kpi.iconColor)} />
+                <kpi.icon className="w-4 h-4" style={{ color: kpi.iconColor }} />
               </div>
             </div>
             <p
-              className="text-2xl font-bold mb-0.5 tracking-tight"
-              style={{ color: '#0f172a', letterSpacing: '-0.02em' }}
+              className="font-bold mb-0.5 tracking-tight"
+              style={{ color: '#0f172a', letterSpacing: '-0.02em', fontSize: '32px', lineHeight: '1.1' }}
             >
               {kpi.value}
             </p>
@@ -386,28 +501,28 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* 1. Applications by Status */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+          style={{
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+          }}
         >
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-              Applications by Status
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
-              {total} total in selected range
-            </p>
-          </div>
+          <CardHeader
+            icon={PieChart}
+            title="Applications by Status"
+            subtitle={`${total} total in selected range`}
+          />
           {total === 0 ? (
             <EmptyChart />
           ) : (
             <div className="space-y-3">
               {statusCounts.map((s) => (
-                <HorizontalBar
+                <StatusBar
                   key={s.key}
                   label={s.label}
                   value={s.value}
-                  total={maxStatus}
-                  barClass={s.bar}
+                  total={statusTotal}
+                  hex={s.hex}
                 />
               ))}
             </div>
@@ -416,44 +531,43 @@ export default function Analytics() {
 
         {/* 2. Monthly Trend */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+          style={{
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+          }}
         >
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-              Monthly Applications Trend
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
-              Applications submitted per month (last 6)
-            </p>
-          </div>
+          <CardHeader
+            icon={Activity}
+            title="Monthly Applications Trend"
+            subtitle="Applications submitted per month (last 6)"
+          />
           <MonthlyTrendSVG data={monthlyData} />
         </div>
 
         {/* 3. Top Sources */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+          style={{
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+          }}
         >
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-              Top Sources
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
-              Where you're finding opportunities (top 5)
-            </p>
-          </div>
+          <CardHeader
+            icon={Globe}
+            title="Top Sources"
+            subtitle="Where you're finding opportunities (top 5)"
+          />
           {topSourcesTop5.length === 0 ? (
             <EmptyChart message="No source data yet" />
           ) : (
             <div className="space-y-3">
               {topSourcesTop5.map((s) => (
-                <HorizontalBar
+                <SourceBar
                   key={s.label}
                   label={s.label}
                   value={s.value}
-                  total={maxSource}
-                  barClass={s.color}
+                  total={sourceTotal}
                 />
               ))}
             </div>
@@ -462,31 +576,31 @@ export default function Analytics() {
 
         {/* 4. Priority Breakdown */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
-          style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+          className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+          style={{
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
+          }}
         >
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold" style={{ color: '#0f172a' }}>
-              Priority Breakdown
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
-              How you're prioritizing applications
-            </p>
-          </div>
+          <CardHeader
+            icon={Flag}
+            title="Priority Breakdown"
+            subtitle="How you're prioritizing applications"
+          />
           {total === 0 ? (
             <EmptyChart />
           ) : (
             <div className="space-y-4">
               {priorityCounts.map((p) => (
-                <HorizontalBar
+                <PriorityBar
                   key={p.label}
                   label={p.label}
                   value={p.value}
-                  total={maxPriority}
-                  barClass={p.bar}
+                  total={priorityTotal}
+                  hex={p.hex}
                 />
               ))}
-              <div className="pt-3 border-t border-slate-100">
+              <div className="pt-3" style={{ borderTop: '1px solid #f1f5f9' }}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs" style={{ color: '#94a3b8' }}>
                     Total tracked

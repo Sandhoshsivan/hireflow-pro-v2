@@ -37,17 +37,17 @@ const planConfig: Record<string, {
   },
   pro: {
     label: 'Pro',
-    badge: 'bg-indigo-100 text-indigo-700',
-    barColor: '#6366f1',
+    badge: 'bg-blue-100 text-blue-700',
+    barColor: '#1a56db',
     limit: 500,
-    icon: <Zap className="w-5 h-5 text-indigo-600" />,
+    icon: <Zap className="w-5 h-5 text-blue-600" />,
     price: '$9.99',
-    iconBg: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+    iconBg: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
   },
   premium: {
     label: 'Premium',
     badge: 'bg-violet-100 text-violet-700',
-    barColor: '#8b5cf6',
+    barColor: '#7c3aed',
     limit: 'Unlimited',
     icon: <Crown className="w-5 h-5 text-violet-600" />,
     price: '$19.99',
@@ -137,7 +137,7 @@ export default function Billing() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading billing...</p>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function Billing() {
             <a
               href="/pricing"
               className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)' }}
             >
               Change Plan
               <ArrowUpRight className="w-3.5 h-3.5" />

@@ -19,7 +19,7 @@ type BadgeVariant = 'ai' | 'pro' | 'free' | 'count';
 
 interface NavItem {
   to: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   badge?: BadgeVariant;
   countKey?: keyof NavCounts;
@@ -36,11 +36,24 @@ interface NavSection {
 function CountBadge({ count, isActive }: { count: number | null; isActive: boolean }) {
   return (
     <span
-      className={`ml-auto shrink-0 min-w-[20px] text-center rounded-full px-[7px] py-px text-[10px] font-bold font-mono leading-tight transition-colors duration-100 ${
-        isActive
-          ? 'bg-[#1a56db]/10 text-[#1a56db]'
-          : 'bg-[#E4E6EC] text-[#9CA3AF]'
-      }`}
+      style={{
+        marginLeft: 'auto',
+        flexShrink: 0,
+        minWidth: 22,
+        textAlign: 'center',
+        borderRadius: 9999,
+        paddingLeft: 7,
+        paddingRight: 7,
+        paddingTop: 1,
+        paddingBottom: 1,
+        fontSize: 10,
+        fontWeight: 700,
+        fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+        lineHeight: 1.4,
+        transition: 'background 100ms, color 100ms',
+        background: isActive ? 'rgba(26,86,219,0.1)' : '#e4e6ec',
+        color: isActive ? '#1a56db' : '#9ca3af',
+      }}
     >
       {count !== null ? count : '\u2014'}
     </span>
@@ -50,7 +63,23 @@ function CountBadge({ count, isActive }: { count: number | null; isActive: boole
 /* ─── AI / PRO badge ─── */
 function AiBadge() {
   return (
-    <span className="ml-auto shrink-0 rounded px-[5px] py-[2px] text-[8px] font-extrabold tracking-wide bg-gradient-to-br from-[#F5F3FF] to-[#EBF2FF] text-[#7C3AED] border border-[#DDD6FE]">
+    <span
+      style={{
+        marginLeft: 'auto',
+        flexShrink: 0,
+        borderRadius: 4,
+        paddingLeft: 5,
+        paddingRight: 5,
+        paddingTop: 2,
+        paddingBottom: 2,
+        fontSize: 8,
+        fontWeight: 800,
+        letterSpacing: '0.5px',
+        background: 'linear-gradient(135deg, #f5f3ff, #ebf2ff)',
+        color: '#7c3aed',
+        border: '1px solid #ddd6fe',
+      }}
+    >
       AI
     </span>
   );
@@ -58,7 +87,23 @@ function AiBadge() {
 
 function FreeBadge() {
   return (
-    <span className="ml-auto shrink-0 rounded px-[5px] py-[2px] text-[8px] font-extrabold tracking-wide bg-[#1a56db]/8 text-[#1a56db] border border-[#1a56db]/15">
+    <span
+      style={{
+        marginLeft: 'auto',
+        flexShrink: 0,
+        borderRadius: 4,
+        paddingLeft: 5,
+        paddingRight: 5,
+        paddingTop: 2,
+        paddingBottom: 2,
+        fontSize: 8,
+        fontWeight: 800,
+        letterSpacing: '0.5px',
+        background: 'rgba(26,86,219,0.08)',
+        color: '#1a56db',
+        border: '1px solid rgba(26,86,219,0.15)',
+      }}
+    >
       FREE
     </span>
   );
@@ -75,8 +120,8 @@ function SidebarNavItem({
   counts: NavCounts | null;
 }) {
   const location = useLocation();
+  const [hovered, setHovered] = useState(false);
 
-  // Manual active check for query-string routes
   const isActive = item.to.includes('?')
     ? location.pathname + location.search === item.to ||
       (location.pathname === item.to.split('?')[0] &&
@@ -91,26 +136,43 @@ function SidebarNavItem({
     <NavLink
       to={item.to}
       end={item.exact}
-      className="group"
+      style={{ textDecoration: 'none' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {({ isActive: navIsActive }) => {
         const active = item.to.includes('?') ? isActive : navIsActive;
         return (
           <div
-            className={`flex items-center gap-2 px-[10px] py-[7px] rounded-lg text-[13px] font-medium mb-px transition-all duration-100 border-l-2 ${
-              active
-                ? 'border-l-[#1a56db] bg-[#EBF2FF] text-[#1a56db] font-semibold'
-                : 'border-l-transparent text-[#4B5563] hover:text-[#111827] hover:bg-[#EDEEF2]'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '9px 12px',
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: active ? 600 : 500,
+              marginBottom: 1,
+              transition: 'all 100ms ease',
+              borderLeft: active ? '2px solid #1a56db' : '2px solid transparent',
+              background: active ? '#eff6ff' : hovered ? '#f1f5f9' : 'transparent',
+              color: active ? '#1a56db' : hovered ? '#0f172a' : '#4b5563',
+              cursor: 'pointer',
+            }}
           >
             <item.icon
-              className={`w-[16px] h-[16px] shrink-0 transition-opacity duration-100 ${
-                active ? 'opacity-100' : 'opacity-70'
-              }`}
+              style={{
+                width: 18,
+                height: 18,
+                flexShrink: 0,
+                opacity: active ? 1 : 0.7,
+                transition: 'opacity 100ms',
+              }}
             />
-            <span className="flex-1 truncate">{item.label}</span>
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.label}
+            </span>
 
-            {/* Badges */}
             {item.badge === 'count' && (
               <CountBadge count={count} isActive={active} />
             )}
@@ -132,7 +194,6 @@ export default function Sidebar() {
 
   const isFreePlan = !user?.plan || user.plan === 'free';
 
-  // Fetch nav counts
   const fetchCounts = useCallback(async () => {
     try {
       const { data } = await api.get('/applications/counts');
@@ -143,7 +204,7 @@ export default function Sidebar() {
         offer: data.offer ?? data.offers ?? 0,
       });
     } catch {
-      // Silently fail - counts will show dash
+      // Silently fail
     }
   }, []);
 
@@ -151,7 +212,6 @@ export default function Sidebar() {
     fetchCounts();
   }, [fetchCounts]);
 
-  // User initials
   const initials = user?.name
     ? user.name
         .split(' ')
@@ -163,15 +223,13 @@ export default function Sidebar() {
 
   const plan = user?.plan ?? 'free';
 
-  // Plan badge colors
   const planColors: Record<string, { bg: string; text: string; border: string }> = {
-    free: { bg: 'bg-[#9CA3AF]/10', text: 'text-[#9CA3AF]', border: 'border-[#D1D5DB]' },
-    pro: { bg: 'bg-[#1a56db]/10', text: 'text-[#1a56db]', border: 'border-[#1a56db]/20' },
-    premium: { bg: 'bg-[#7C3AED]/10', text: 'text-[#7C3AED]', border: 'border-[#7C3AED]/20' },
+    free: { bg: 'rgba(156,163,175,0.1)', text: '#9ca3af', border: '#d1d5db' },
+    pro: { bg: 'rgba(26,86,219,0.1)', text: '#1a56db', border: 'rgba(26,86,219,0.2)' },
+    premium: { bg: 'rgba(124,58,237,0.1)', text: '#7c3aed', border: 'rgba(124,58,237,0.2)' },
   };
   const pc = planColors[plan] ?? planColors.free;
 
-  // Navigation structure
   const sections: NavSection[] = [
     {
       label: 'Overview',
@@ -220,39 +278,80 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-[236px] min-w-[236px] h-screen flex flex-col shrink-0 border-r border-[#E5E7EB] relative z-10 overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%)',
+        width: 236,
+        minWidth: 236,
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        borderRight: '1px solid #e2e8f0',
+        position: 'relative',
+        zIndex: 10,
+        overflow: 'hidden',
+        background: '#ffffff',
         fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
       {/* ── Logo ── */}
-      <div className="h-16 flex items-center px-4 gap-[10px] border-b border-[#E5E7EB] shrink-0">
-        {/* Icon */}
+      <div
+        style={{
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: 16,
+          paddingRight: 16,
+          gap: 10,
+          borderBottom: '1px solid #e2e8f0',
+          flexShrink: 0,
+        }}
+      >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
           style={{
-            background: 'linear-gradient(135deg, #1a56db 0%, #7C3AED 100%)',
-            boxShadow: '0 2px 8px rgba(26,86,219,.3)',
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            background: '#1a56db',
+            boxShadow: '0 2px 8px rgba(26,86,219,0.3)',
           }}
         >
-          <span className="text-[13px] font-extrabold text-white" style={{ letterSpacing: '-0.5px' }}>
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 800,
+              color: '#ffffff',
+              letterSpacing: '-0.5px',
+            }}
+          >
             HF
           </span>
         </div>
 
-        {/* Wordmark */}
-        <div className="leading-none">
-          <span className="text-[15px] font-extrabold text-[#111827]" style={{ letterSpacing: '-0.4px' }}>
+        <div style={{ lineHeight: 1 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px' }}>
             Hire
           </span>
-          <span className="text-[15px] font-extrabold text-[#1a56db]" style={{ letterSpacing: '-0.4px' }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#1a56db', letterSpacing: '-0.4px' }}>
             Flow
           </span>
           <span
-            className="ml-[3px] text-[8px] font-extrabold text-[#1a56db] rounded px-[5px] py-[2px] align-middle border border-[#1a56db]/15"
             style={{
-              background: 'linear-gradient(135deg, #EBF2FF, #F5F3FF)',
+              marginLeft: 4,
+              fontSize: 8,
+              fontWeight: 800,
+              color: '#1a56db',
+              borderRadius: 9999,
+              paddingLeft: 6,
+              paddingRight: 6,
+              paddingTop: 2,
+              paddingBottom: 2,
+              verticalAlign: 'middle',
+              border: '1px solid rgba(26,86,219,0.15)',
+              background: 'linear-gradient(135deg, #ebf2ff, #f5f3ff)',
               letterSpacing: '0.6px',
             }}
           >
@@ -263,22 +362,39 @@ export default function Sidebar() {
 
       {/* ── Navigation ── */}
       <nav
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-[10px]"
-        style={{ scrollbarWidth: 'thin' }}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          paddingLeft: 10,
+          paddingRight: 10,
+          paddingTop: 12,
+          paddingBottom: 12,
+          scrollbarWidth: 'thin' as const,
+        }}
       >
         {sections.map((section, si) => (
-          <div key={section.label} className={si < sections.length - 1 ? 'mb-[18px]' : ''}>
+          <div key={section.label}>
             {/* Section label */}
             <p
-              className={`text-[10px] font-bold uppercase tracking-[1px] px-[10px] mb-[3px] ${
-                section.adminOnly ? 'text-[#DC2626]' : 'text-[#9CA3AF]'
-              }`}
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: 1.2,
+                paddingLeft: 12,
+                paddingRight: 12,
+                marginBottom: 6,
+                marginTop: si === 0 ? 0 : 20,
+                color: section.adminOnly ? '#dc2626' : '#94a3b8',
+                lineHeight: 1,
+              }}
             >
               {section.label}
             </p>
 
             {/* Items */}
-            <div className="flex flex-col">
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {section.items.map((item) => (
                 <SidebarNavItem
                   key={item.to}
@@ -293,36 +409,99 @@ export default function Sidebar() {
       </nav>
 
       {/* ── User card + Sign out ── */}
-      <div className="px-2 pb-3 pt-2 border-t border-[#E5E7EB] shrink-0">
-        {/* User card */}
+      <div
+        style={{
+          paddingLeft: 10,
+          paddingRight: 10,
+          paddingBottom: 12,
+          paddingTop: 10,
+          borderTop: '1px solid #e2e8f0',
+          flexShrink: 0,
+        }}
+      >
         <button
           type="button"
           onClick={() => setLogoutOpen((v) => !v)}
-          className="w-full flex items-center gap-[9px] px-[10px] py-2 rounded-[10px] bg-[#EDEEF2] border border-[#E5E7EB] cursor-pointer transition-colors duration-100 hover:bg-[#E4E6EC] text-left"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 9,
+            padding: '10px',
+            borderRadius: 10,
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            cursor: 'pointer',
+            transition: 'background 100ms',
+            textAlign: 'left',
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f8fafc'; }}
         >
           {/* Avatar */}
           <div
-            className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center text-white text-[12px] font-extrabold shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #1a56db 0%, #7C3AED 100%)',
-              boxShadow: '0 2px 6px rgba(26,86,219,.25)',
+              width: 30,
+              height: 30,
+              borderRadius: 7,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              fontSize: 12,
+              fontWeight: 800,
+              flexShrink: 0,
+              background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)',
+              boxShadow: '0 2px 6px rgba(26,86,219,0.25)',
             }}
           >
             {initials}
           </div>
 
           {/* Name + role + plan */}
-          <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-semibold text-[#111827] truncate leading-tight">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: '#111827',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.2,
+              }}
+            >
               {user?.name ?? 'User'}
             </div>
-            <div className="flex items-center gap-[5px] mt-[1px]">
-              <span className="text-[10px] text-[#9CA3AF] truncate">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+              <span
+                style={{
+                  fontSize: 10,
+                  color: '#9ca3af',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {user?.role === 'admin' ? 'Admin' : 'Job Seeker'}
               </span>
               <span
-                className={`text-[8px] font-extrabold uppercase tracking-wide px-[5px] py-px rounded border leading-tight shrink-0 ${pc.bg} ${pc.text} ${pc.border}`}
-                style={{ letterSpacing: '0.6px' }}
+                style={{
+                  fontSize: 8,
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.6px',
+                  paddingLeft: 5,
+                  paddingRight: 5,
+                  paddingTop: 1,
+                  paddingBottom: 1,
+                  borderRadius: 4,
+                  border: `1px solid ${pc.border}`,
+                  background: pc.bg,
+                  color: pc.text,
+                  lineHeight: 1.4,
+                  flexShrink: 0,
+                }}
               >
                 {plan}
               </span>
@@ -331,24 +510,45 @@ export default function Sidebar() {
 
           {/* Chevron */}
           <ChevronDown
-            className={`w-3 h-3 text-[#D1D5DB] shrink-0 transition-transform duration-200 ${
-              logoutOpen ? 'rotate-180' : ''
-            }`}
+            style={{
+              width: 12,
+              height: 12,
+              color: '#d1d5db',
+              flexShrink: 0,
+              transition: 'transform 200ms',
+              transform: logoutOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
           />
         </button>
 
         {/* Sign out dropdown */}
         {logoutOpen && (
-          <div className="pt-[6px]">
+          <div style={{ paddingTop: 6 }}>
             <button
               type="button"
               onClick={() => {
                 logout();
                 navigate('/login');
               }}
-              className="w-full flex items-center gap-[10px] px-[10px] py-[7px] rounded-lg text-[13px] font-medium text-[#DC2626] bg-[#FEF2F2] border border-[#DC2626]/15 cursor-pointer transition-colors duration-100 hover:bg-[#FECACA]"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '9px 12px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#dc2626',
+                background: '#fef2f2',
+                border: '1px solid rgba(220,38,38,0.15)',
+                cursor: 'pointer',
+                transition: 'background 100ms',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fecaca'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fef2f2'; }}
             >
-              <LogOut className="w-[15px] h-[15px] shrink-0" />
+              <LogOut style={{ width: 15, height: 15, flexShrink: 0 }} />
               Sign Out
             </button>
           </div>

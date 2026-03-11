@@ -75,7 +75,7 @@ export default function Login() {
           width: 420,
           height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(26,86,219,0.22) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -87,7 +87,7 @@ export default function Login() {
           width: 380,
           height: 380,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.16) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(26,86,219,0.16) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -100,18 +100,18 @@ export default function Login() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 4px 12px rgba(99,102,241,0.3)',
+              boxShadow: '0 0 0 1px rgba(26,86,219,0.4), 0 4px 12px rgba(26,86,219,0.3)',
             }}>
               <Briefcase style={{ width: 18, height: 18, color: '#fff' }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em' }}>HireFlow</span>
-              <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#6366f1', letterSpacing: '-0.02em' }}>Pro</span>
+              <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a56db', letterSpacing: '-0.02em' }}>Pro</span>
             </div>
             <span style={{
               marginLeft: 4,
@@ -138,7 +138,7 @@ export default function Login() {
             }}>
               Track every application.<br />
               <span style={{
-                background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)',
+                background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -164,14 +164,14 @@ export default function Login() {
                   width: 22,
                   height: 22,
                   borderRadius: '50%',
-                  background: 'rgba(99,102,241,0.15)',
-                  border: '1px solid rgba(99,102,241,0.25)',
+                  background: 'rgba(26,86,219,0.15)',
+                  border: '1px solid rgba(26,86,219,0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <CheckCircle style={{ width: 12, height: 12, color: '#818cf8' }} />
+                  <CheckCircle style={{ width: 12, height: 12, color: '#60a5fa' }} />
                 </div>
                 <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#cbd5e1', lineHeight: 1.5 }}>
                   {text}
@@ -203,7 +203,7 @@ export default function Login() {
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                background: 'linear-gradient(135deg, #1a56db, #7c3aed)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -243,7 +243,7 @@ export default function Login() {
               width: 34,
               height: 34,
               borderRadius: 9,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -251,7 +251,7 @@ export default function Login() {
               <Briefcase style={{ width: 17, height: 17, color: '#fff' }} />
             </div>
             <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              HireFlow<span style={{ color: '#6366f1' }}>Pro</span>
+              HireFlow<span style={{ color: '#1a56db' }}>Pro</span>
             </span>
           </div>
 
@@ -336,8 +336,8 @@ export default function Login() {
                   required
                   autoComplete="email"
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#6366f1';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                    e.currentTarget.style.borderColor = '#1a56db';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#e2e8f0';
@@ -355,7 +355,7 @@ export default function Login() {
                 </label>
                 <Link
                   to="/forgot-password"
-                  style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#6366f1', textDecoration: 'none' }}
+                  style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#1a56db', textDecoration: 'none' }}
                 >
                   Forgot password?
                 </Link>
@@ -380,8 +380,8 @@ export default function Login() {
                   required
                   autoComplete="current-password"
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#6366f1';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)';
+                    e.currentTarget.style.borderColor = '#1a56db';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(26,86,219,0.1)';
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#e2e8f0';
@@ -398,7 +398,7 @@ export default function Login() {
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ width: 15, height: 15, accentColor: '#6366f1', cursor: 'pointer' }}
+                style={{ width: 15, height: 15, accentColor: '#1a56db', cursor: 'pointer' }}
               />
               <label htmlFor="remember" style={{ fontSize: '0.875rem', color: '#64748b', cursor: 'pointer', userSelect: 'none' }}>
                 Remember me for 30 days
@@ -420,13 +420,13 @@ export default function Login() {
                 fontWeight: 600,
                 color: '#ffffff',
                 background: isLoading
-                  ? 'rgba(99,102,241,0.7)'
-                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  ? 'rgba(26,86,219,0.7)'
+                  : 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
                 borderRadius: 8,
                 border: 'none',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 transition: 'opacity 0.15s ease, transform 0.1s ease',
-                boxShadow: '0 1px 2px rgba(99,102,241,0.3), 0 4px 12px rgba(99,102,241,0.2)',
+                boxShadow: '0 1px 2px rgba(26,86,219,0.3), 0 4px 12px rgba(26,86,219,0.2)',
                 marginTop: 2,
               }}
               onMouseEnter={(e) => {
@@ -462,7 +462,7 @@ export default function Login() {
           {/* Register link */}
           <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#64748b' }}>
             Don't have an account?{' '}
-            <Link to="/register" style={{ fontWeight: 600, color: '#6366f1', textDecoration: 'none' }}>
+            <Link to="/register" style={{ fontWeight: 600, color: '#1a56db', textDecoration: 'none' }}>
               Create one free
             </Link>
           </p>

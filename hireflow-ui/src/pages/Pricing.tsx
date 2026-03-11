@@ -57,15 +57,15 @@ const plans: PlanDef[] = [
     tagline: 'For serious job seekers',
     badge: { label: 'Most Popular' },
     highlighted: true,
-    accentColor: '#6366f1',
-    accentBg: '#eef2ff',
-    accentBorder: '#c7d2fe',
-    icon: <Zap className="w-5 h-5 text-indigo-600" />,
+    accentColor: '#1a56db',
+    accentBg: '#eff6ff',
+    accentBorder: '#bfdbfe',
+    icon: <Zap className="w-5 h-5 text-blue-600" />,
     ctaLabel: 'Upgrade to Pro',
     ctaStyle: {
-      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+      background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
       color: 'white',
-      boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
+      boxShadow: '0 4px 14px rgba(26,86,219,0.4)',
     },
     features: [
       { text: 'Unlimited applications', included: true },
@@ -93,7 +93,7 @@ const plans: PlanDef[] = [
     icon: <Crown className="w-5 h-5 text-violet-600" />,
     ctaLabel: 'Upgrade to Premium',
     ctaStyle: {
-      background: 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)',
+      background: 'linear-gradient(135deg, #7c3aed 0%, #1a56db 100%)',
       color: 'white',
       boxShadow: '0 4px 14px rgba(124,58,237,0.35)',
     },
@@ -141,10 +141,10 @@ export default function Pricing() {
 
       {/* Current plan banner */}
       <div
-        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-indigo-200 bg-indigo-50 mb-8"
+        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50 mb-8"
       >
-        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#6366f1' }} />
-        <p className="text-sm" style={{ color: '#4338ca' }}>
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#1a56db' }} />
+        <p className="text-sm" style={{ color: '#1e40af' }}>
           You are currently on the{' '}
           <span className="font-semibold capitalize">{currentPlan}</span> plan.
           {currentPlan === 'free' && ' Upgrade to unlock all features.'}
@@ -167,7 +167,7 @@ export default function Pricing() {
               style={{
                 border: `1px solid ${plan.highlighted ? plan.accentColor + '60' : '#e2e8f0'}`,
                 boxShadow: plan.highlighted
-                  ? '0 8px 30px rgba(99,102,241,0.15), 0 1px 3px rgba(15,23,42,0.08)'
+                  ? '0 8px 30px rgba(26,86,219,0.15), 0 1px 3px rgba(15,23,42,0.08)'
                   : '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
                 animationDelay: `${idx * 80}ms`,
               }}
@@ -179,8 +179,8 @@ export default function Pricing() {
                     className="text-xs font-bold px-3.5 py-1.5 rounded-full"
                     style={
                       plan.key === 'pro'
-                        ? { background: '#6366f1', color: 'white' }
-                        : { background: '#ede9fe', color: '#5b21b6' }
+                        ? { background: '#1a56db', color: 'white' }
+                        : { background: '#f5f3ff', color: '#5b21b6' }
                     }
                   >
                     {plan.badge.label}
@@ -192,7 +192,7 @@ export default function Pricing() {
               {plan.highlighted && (
                 <div
                   className="h-1 rounded-t-2xl"
-                  style={{ background: 'linear-gradient(to right, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(to right, #1a56db, #7c3aed)' }}
                 />
               )}
 
@@ -200,7 +200,7 @@ export default function Pricing() {
               {plan.highlighted && (
                 <div
                   className="absolute inset-0 rounded-2xl pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.03) 0%, transparent 60%)' }}
+                  style={{ background: 'linear-gradient(180deg, rgba(26,86,219,0.03) 0%, transparent 60%)' }}
                 />
               )}
 

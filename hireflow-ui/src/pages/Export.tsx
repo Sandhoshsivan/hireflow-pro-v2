@@ -67,9 +67,9 @@ export default function Export() {
           <div className="flex items-start justify-between mb-5">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)' }}
+              style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}
             >
-              <FileText className="w-6 h-6 text-indigo-600" />
+              <FileText className="w-6 h-6 text-blue-600" />
             </div>
             <span
               className="text-xs font-semibold px-2.5 py-1 rounded-full border"
@@ -103,7 +103,7 @@ export default function Export() {
             onClick={handleExport}
             disabled={exporting}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)' }}
           >
             {exporting ? (
               <>

@@ -10,7 +10,7 @@ import type { AdminStats } from '../../types';
 
 const planConfig: Record<string, { label: string; bar: string; badge: string }> = {
   free:    { label: 'Free',    bar: 'bg-slate-400',    badge: 'bg-slate-100 text-slate-600' },
-  pro:     { label: 'Pro',     bar: 'bg-indigo-500',   badge: 'bg-indigo-100 text-indigo-700' },
+  pro:     { label: 'Pro',     bar: 'bg-blue-600',   badge: 'bg-blue-100 text-blue-700' },
   premium: { label: 'Premium', bar: 'bg-violet-500',   badge: 'bg-violet-100 text-violet-700' },
 };
 
@@ -83,8 +83,8 @@ function RevenueSVGChart({ data }: { data: Array<{ month: string; amount: number
     <svg viewBox={`0 0 ${width} ${height + 10}`} className="w-full">
       <defs>
         <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.6" />
+          <stop offset="0%" stopColor="#1a56db" />
+          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.6" />
         </linearGradient>
       </defs>
       {data.map((d, i) => {
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>Loading admin data...</p>
         </div>
       </div>
@@ -165,8 +165,8 @@ export default function AdminDashboard() {
       value: (stats?.totalUsers ?? 0).toLocaleString(),
       sub: `${stats?.activeUsers ?? 0} active`,
       icon: Users,
-      iconBg: 'bg-indigo-50',
-      iconColor: 'text-indigo-600',
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
     },
     {
       label: 'Total Applications',
@@ -322,7 +322,7 @@ export default function AdminDashboard() {
                   <div key={u.id} className="flex items-center gap-3 py-1">
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                      style={{ background: 'linear-gradient(135deg, #1a56db, #7c3aed)' }}
                     >
                       {initials}
                     </div>

@@ -87,20 +87,20 @@ function KanbanCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-300 hover:shadow-md cursor-pointer transition-all duration-150 group"
+      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all duration-150 group"
       style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}
     >
       {/* Top row: avatar + details + priority dot */}
       <div className="flex items-start gap-2.5">
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
         >
           {app.company.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
           <p
-            className="text-sm font-semibold leading-tight group-hover:text-indigo-700 transition-colors truncate"
+            className="text-sm font-semibold leading-tight group-hover:text-blue-700 transition-colors truncate"
             style={{ color: '#0f172a' }}
           >
             {app.company}
@@ -189,7 +189,7 @@ export default function Pipeline() {
         <TopBar title="Pipeline" subtitle="Visual kanban of your job search" />
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
             <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
               Loading your pipeline...
             </p>
@@ -216,7 +216,7 @@ export default function Pipeline() {
           <button
             onClick={() => window.location.reload()}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)' }}
           >
             Try again
           </button>
@@ -310,7 +310,7 @@ export default function Pipeline() {
             {/* Gradient top bar */}
             <div
               className="h-1 w-full"
-              style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
             />
 
             {/* Header */}
@@ -318,7 +318,7 @@ export default function Pipeline() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)' }}
                 >
                   {selectedApp.company.charAt(0).toUpperCase()}
                 </div>
@@ -433,7 +433,7 @@ export default function Pipeline() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm font-semibold hover:underline"
-                        style={{ color: '#6366f1' }}
+                        style={{ color: '#1a56db' }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         Open listing
