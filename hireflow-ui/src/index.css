@@ -617,12 +617,15 @@ input, select, textarea { outline: none; }
   background: currentColor;
   flex-shrink: 0;
 }
-.badge-Applied   { background: var(--blue-lt);   color: var(--blue);   border: 1px solid var(--blue-md); }
-.badge-Interview { background: var(--amber-lt);  color: var(--amber);  border: 1px solid var(--amber-md); }
-.badge-Offer     { background: var(--green-lt);  color: var(--green);  border: 1px solid var(--green-md); }
-.badge-Rejected  { background: var(--red-lt);    color: var(--red);    border: 1px solid var(--red-md); }
-.badge-Ghosted   { background: var(--bg2);       color: var(--text3);  border: 1px solid var(--border2); }
-.badge-Saved     { background: var(--cyan-lt);   color: var(--cyan);   border: 1px solid rgba(8,145,178,.2); }
+.badge-Applied,   .badge-applied   { background: var(--blue-lt);   color: var(--blue);   border: 1px solid var(--blue-md); }
+.badge-Interview, .badge-interview { background: var(--amber-lt);  color: var(--amber);  border: 1px solid var(--amber-md); }
+.badge-Offer,     .badge-offer     { background: var(--green-lt);  color: var(--green);  border: 1px solid var(--green-md); }
+.badge-Rejected,  .badge-rejected  { background: var(--red-lt);    color: var(--red);    border: 1px solid var(--red-md); }
+.badge-Ghosted,   .badge-ghosted   { background: var(--bg2);       color: var(--text3);  border: 1px solid var(--border2); }
+.badge-Saved,     .badge-saved     { background: var(--cyan-lt);   color: var(--cyan);   border: 1px solid rgba(8,145,178,.2); }
+
+/* Row action buttons – show on hover */
+.data-table tbody tr:hover .row-actions { opacity: 1 !important; }
 
 /* ─────────────────────────────────────────────
    PRIORITY DOT

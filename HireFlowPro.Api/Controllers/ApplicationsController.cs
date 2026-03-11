@@ -78,6 +78,23 @@ public class ApplicationsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("counts")]
+    public async Task<IActionResult> GetCounts()
+    {
+        var userId = GetUserId();
+        var stats = await _applicationService.GetStatsAsync(userId);
+        return Ok(new
+        {
+            total = stats.TotalApplications,
+            all = stats.TotalApplications,
+            applied = stats.ByStatus.GetValueOrDefault("Applied", 0),
+            interview = stats.ByStatus.GetValueOrDefault("Interview", 0),
+            interviews = stats.ByStatus.GetValueOrDefault("Interview", 0),
+            offer = stats.ByStatus.GetValueOrDefault("Offer", 0),
+            offers = stats.ByStatus.GetValueOrDefault("Offer", 0),
+        });
+    }
+
     [HttpGet("stats")]
     public async Task<IActionResult> GetStats()
     {

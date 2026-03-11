@@ -28,7 +28,7 @@ const planConfig: Record<string, {
     label: 'Free',
     planBadgeStyle: { background: 'var(--bg2)', color: 'var(--text3)', border: '1px solid var(--border2)' },
     barColor: 'var(--text3)',
-    limit: 20,
+    limit: 5,
     icon: <Star size={18} color="var(--text3)" />,
     price: '$0',
     iconBg: 'var(--bg2)',
@@ -37,9 +37,9 @@ const planConfig: Record<string, {
     label: 'Pro',
     planBadgeStyle: { background: 'var(--blue-lt)', color: 'var(--blue)', border: '1px solid var(--blue-md)' },
     barColor: 'var(--blue)',
-    limit: 500,
+    limit: 'Unlimited',
     icon: <Zap size={18} color="var(--blue)" />,
-    price: '$9.99',
+    price: '$9',
     iconBg: 'linear-gradient(135deg, var(--blue-lt), #dbeafe)',
   },
   premium: {
@@ -48,7 +48,7 @@ const planConfig: Record<string, {
     barColor: 'var(--violet)',
     limit: 'Unlimited',
     icon: <Crown size={18} color="var(--violet)" />,
-    price: '$19.99',
+    price: '$19',
     iconBg: 'linear-gradient(135deg, var(--violet-lt), var(--violet-md))',
   },
 };
@@ -153,7 +153,7 @@ export default function Billing() {
     <div>
       <TopBar
         title="Billing &amp; Subscription"
-        subtitle="Manage your subscription and payments"
+        subtitle="Manage your plan and view payment history"
         actions={
           <a href="/pricing" className="btn btn-primary btn-sm">
             View Plans
@@ -257,20 +257,42 @@ export default function Billing() {
                 )}
               </div>
 
+              {/* Active features */}
+              <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 16 }}>
+                {planKey === 'free' ? (
+                  <span style={{ color: 'var(--text3)' }}>Upgrade to unlock AI, Analytics, Export & more</span>
+                ) : (
+                  <>
+                    <strong style={{ color: 'var(--text)' }}>Active features:</strong>{' '}
+                    {[
+                      planKey !== 'free' && 'AI Assistant',
+                      planKey !== 'free' && 'Advanced Analytics',
+                      planKey !== 'free' && 'CSV Export',
+                      planKey !== 'free' && 'Pipeline View',
+                      planKey !== 'free' && 'Contact Tracking',
+                      planKey === 'premium' && 'Priority Support',
+                    ].filter(Boolean).join(', ')}
+                  </>
+                )}
+              </div>
+
               {/* Action buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <a href="/pricing" className="btn btn-primary w-full" style={{ justifyContent: 'center' }}>
-                  Change Plan
-                  <ArrowUpRight size={13} />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <a
+                  href="/pricing"
+                  className="btn btn-primary btn-sm"
+                  style={{ justifyContent: 'center' }}
+                >
+                  {planKey === 'free' ? 'Upgrade Plan' : planKey === 'pro' ? 'Upgrade to Premium' : 'Current: Premium'}
                 </a>
                 {planKey !== 'free' && (
                   <button
                     onClick={handleCancel}
                     disabled={cancelling}
-                    className="btn btn-ghost btn-sm w-full"
-                    style={{ justifyContent: 'center', color: 'var(--text3)', fontSize: 12 }}
+                    className="btn btn-ghost btn-sm"
+                    style={{ color: 'var(--text3)', fontSize: 12 }}
                   >
-                    {cancelling ? 'Cancelling...' : 'Cancel subscription'}
+                    {cancelling ? 'Cancelling...' : 'Downgrade to Free'}
                   </button>
                 )}
               </div>
@@ -372,20 +394,24 @@ export default function Billing() {
         {/* Stripe info banner */}
         <div
           style={{
-            background: 'var(--blue-lt)',
-            border: '1px solid var(--blue-md)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
+            marginTop: 24,
+            padding: '16px 20px',
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 12,
+            fontSize: 13,
+            color: 'var(--text2)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
           }}
         >
           <div style={{ fontSize: 16 }}>🔒</div>
-          <div style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 500 }}>
-            Payments are securely processed by{' '}
-            <span style={{ fontWeight: 700 }}>Stripe</span>.
-            Your card details are never stored on our servers.
+          <div>
+            <strong>Secure payments powered by Stripe</strong>
+            <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>
+              All transactions are encrypted and processed securely. We never store your card details.
+            </div>
           </div>
         </div>
 

@@ -389,111 +389,79 @@ export default function Applications() {
       />
 
       {/* ── Table ── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+      <div className="page-content" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+          <table className="data-table">
             <thead>
-              <tr className="bg-[#F6F7F9] border-b border-slate-200">
-                <th className="text-left px-5 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]" style={{ width: '28%' }}>
-                  Company / Role
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Status
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Applied
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Salary
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Source
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Location
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Follow-up
-                </th>
-                <th className="text-left px-4 py-[11px] text-[11px] font-bold text-slate-400 uppercase tracking-[.6px] whitespace-nowrap sticky top-0 z-[2]">
-                  Priority
-                </th>
-                <th className="px-4 py-[11px] sticky top-0 z-[2]" style={{ width: 60 }} />
+              <tr>
+                <th style={{ width: '28%' }}>Company / Role</th>
+                <th>Status</th>
+                <th>Applied</th>
+                <th>Salary</th>
+                <th>Source</th>
+                <th>Location</th>
+                <th>Follow-up</th>
+                <th>Priority</th>
+                <th style={{ width: 60 }} />
               </tr>
             </thead>
             <tbody>
               {apps.length === 0 ? (
                 <tr>
                   <td colSpan={9}>
-                    <div className="flex flex-col items-center justify-center py-20">
-                      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-                        <Briefcase className="w-8 h-8 text-slate-400" />
-                      </div>
-                      <h3 className="text-base font-semibold text-slate-700 mb-1">No applications found</h3>
-                      <p className="text-sm text-slate-400 mb-6 text-center max-w-xs">
-                        Try a different filter or add a new application
-                      </p>
+                    <div className="empty-state" style={{ padding: '60px 0' }}>
+                      <div className="empty-icon">{'\u{1F4ED}'}</div>
+                      <div className="empty-text">No applications found</div>
+                      <div className="empty-sub">Try a different filter or add a new application</div>
                       <button
                         onClick={openAdd}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors"
+                        className="btn btn-primary"
+                        style={{ marginTop: 16 }}
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4" style={{ marginRight: 6 }} />
                         Add your first application
                       </button>
                     </div>
                   </td>
                 </tr>
               ) : (
-                apps.map((app, idx) => {
+                apps.map((app) => {
                   const color = avatarColor(app.company);
                   return (
                     <tr
                       key={app.id}
                       onClick={() => openDetail(app)}
-                      className={clsx(
-                        'border-b border-slate-200 last:border-b-0 cursor-pointer transition-colors duration-[120ms] group',
-                        idx % 2 === 1 && 'bg-[#F6F7F9]',
-                        'hover:bg-blue-50'
-                      )}
                     >
                       {/* Company / Role */}
-                      <td className="px-5 py-3 align-middle">
-                        <div className="flex items-center gap-2.5">
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div
-                            className="w-8 h-8 rounded-[7px] flex items-center justify-center flex-shrink-0 text-[13px] font-extrabold"
-                            style={{ background: `${color}18`, color }}
+                            style={{
+                              width: 32, height: 32, borderRadius: 7,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              flexShrink: 0, fontSize: 13, fontWeight: 800,
+                              background: `${color}18`, color,
+                            }}
                           >
                             {app.company.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-semibold text-slate-900 tracking-[-0.1px] truncate">
+                          <div style={{ minWidth: 0 }}>
+                            <div className="td-company" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {app.company}
-                            </p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 truncate">{app.role}</p>
+                            </div>
+                            <div className="td-role">{app.role}</div>
                           </div>
                         </div>
-                        {/* Left accent on hover */}
-                        <style>{`
-                          tr:hover > td:first-child {
-                            box-shadow: inset 3px 0 0 #1a56db;
-                          }
-                        `}</style>
                       </td>
                       {/* Status */}
-                      <td className="px-4 py-3 align-middle">
-                        <span
-                          className={clsx(
-                            'inline-flex items-center gap-[5px] text-[11px] font-bold font-mono tracking-[.1px] px-2.5 py-1 rounded-full capitalize whitespace-nowrap',
-                            statusColors[app.status]
-                          )}
-                        >
-                          <span className={clsx('w-[5px] h-[5px] rounded-full flex-shrink-0', statusDots[app.status])} />
-                          {app.status}
+                      <td>
+                        <span className={clsx('badge', `badge-${app.status}`)}>
+                          {'\u2022'} {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </span>
                       </td>
                       {/* Applied date */}
-                      <td className="px-4 py-3 align-middle">
-                        <span className="text-[11px] font-mono text-slate-500">
+                      <td>
+                        <span className="td-mono">
                           {new Date(app.appliedDate || app.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -502,34 +470,33 @@ export default function Applications() {
                         </span>
                       </td>
                       {/* Salary */}
-                      <td className="px-4 py-3 align-middle">
-                        <span className="text-[12px] font-mono font-semibold text-emerald-600">
-                          {app.salary || <span className="text-slate-300 font-normal">&mdash;</span>}
-                        </span>
+                      <td>
+                        {app.salary
+                          ? <span className="td-salary">{app.salary}</span>
+                          : <span style={{ color: 'var(--text4)' }}>&mdash;</span>
+                        }
                       </td>
                       {/* Source */}
-                      <td className="px-4 py-3 align-middle">
-                        <span className="text-[11px] font-mono text-slate-500">
-                          {app.source || <span className="text-slate-300">&mdash;</span>}
+                      <td>
+                        <span className="td-mono">
+                          {app.source || <span style={{ color: 'var(--text4)' }}>&mdash;</span>}
                         </span>
                       </td>
                       {/* Location */}
-                      <td className="px-4 py-3 align-middle">
-                        <span className="text-[12px] text-slate-400">
-                          {app.location || <span className="text-slate-300">&mdash;</span>}
+                      <td>
+                        <span style={{ fontSize: 12, color: 'var(--text2)' }}>
+                          {app.location || <span style={{ color: 'var(--text4)' }}>&mdash;</span>}
                         </span>
                       </td>
                       {/* Follow-up */}
-                      <td className="px-4 py-3 align-middle">
+                      <td>
                         <span
-                          className={clsx(
-                            'text-[11px] font-mono',
-                            app.followUpDate
-                              ? isOverdue(app.followUpDate)
-                                ? 'text-amber-600 font-semibold'
-                                : 'text-slate-400'
-                              : 'text-slate-300'
-                          )}
+                          className="td-mono"
+                          style={
+                            app.followUpDate && isOverdue(app.followUpDate)
+                              ? { color: 'var(--red)', fontWeight: 600 }
+                              : undefined
+                          }
                         >
                           {app.followUpDate
                             ? new Date(app.followUpDate).toLocaleDateString('en-US', {
@@ -541,29 +508,31 @@ export default function Applications() {
                         </span>
                       </td>
                       {/* Priority */}
-                      <td className="px-4 py-3 align-middle">
+                      <td>
                         <span
                           className={clsx('inline-block w-2 h-2 rounded-full', priorityDots[app.priority])}
                           title={app.priority}
                         />
                       </td>
                       {/* Actions */}
-                      <td className="px-4 py-3 align-middle">
+                      <td>
                         <div
-                          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0, transition: 'opacity .15s' }}
+                          className="row-actions"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
                             onClick={() => openEdit(app)}
-                            className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="btn btn-ghost btn-icon"
                             title="Edit"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(app.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="btn btn-ghost btn-icon"
                             title="Delete"
+                            style={{ color: 'var(--red)' }}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -575,7 +544,7 @@ export default function Applications() {
               )}
             </tbody>
           </table>
-        </div>
+      </div>
       </div>
 
       {/* ── Add / Edit Modal ── */}

@@ -26,80 +26,72 @@ const plans: PlanDef[] = [
     key: 'free',
     name: 'Free',
     price: 0,
-    period: 'forever',
-    desc: 'Get started with the basics',
+    period: '/forever',
+    desc: 'Get started with basic tracking',
     popular: false,
     ctaLabel: 'Get Started',
     features: [
-      { text: 'Up to 20 applications', included: true },
-      { text: 'Basic status tracking', included: true },
-      { text: 'Simple dashboard', included: true },
-      { text: 'Email support', included: true },
-      { text: 'Pipeline view', included: false },
-      { text: 'Analytics dashboard', included: false },
-      { text: 'AI Assistant', included: false },
+      { text: 'Up to 5 applications', included: true },
+      { text: 'Dashboard overview', included: true },
+      { text: 'Status tracking', included: true },
+      { text: 'Follow-up reminders', included: true },
+      { text: 'AI Career Assistant', included: false },
+      { text: 'Advanced Analytics', included: false },
+      { text: 'Pipeline / Kanban view', included: false },
       { text: 'CSV Export', included: false },
-      { text: 'API access', included: false },
+      { text: 'Contact tracking', included: false },
     ],
   },
   {
     key: 'pro',
     name: 'Pro',
-    price: 9.99,
-    period: 'per month',
-    desc: 'For serious job seekers',
+    price: 9,
+    period: '/month',
+    desc: 'Everything you need to land your dream job',
     popular: true,
     ctaLabel: 'Upgrade to Pro',
     features: [
       { text: 'Unlimited applications', included: true },
-      { text: 'Advanced status tracking', included: true },
-      { text: 'Pipeline Kanban view', included: true },
-      { text: 'Analytics dashboard', included: true },
-      { text: 'AI Assistant (5 queries/day)', included: true },
+      { text: 'Dashboard overview', included: true },
+      { text: 'Status tracking', included: true },
+      { text: 'Follow-up reminders', included: true },
+      { text: 'AI Career Assistant', included: true },
+      { text: 'Advanced Analytics', included: true },
+      { text: 'Pipeline / Kanban view', included: true },
       { text: 'CSV Export', included: true },
-      { text: 'Priority support', included: true },
-      { text: 'Advanced analytics', included: false },
-      { text: 'API access', included: false },
+      { text: 'Contact tracking', included: true },
     ],
   },
   {
     key: 'premium',
     name: 'Premium',
-    price: 19.99,
-    period: 'per month',
-    desc: 'Everything, unlimited',
+    price: 19,
+    period: '/month',
+    desc: 'For serious job seekers & career changers',
     popular: false,
     ctaLabel: 'Upgrade to Premium',
     features: [
-      { text: 'Unlimited applications', included: true },
-      { text: 'Advanced status tracking', included: true },
-      { text: 'Pipeline Kanban view', included: true },
-      { text: 'Analytics dashboard', included: true },
-      { text: 'Unlimited AI queries', included: true },
-      { text: 'CSV & JSON Export', included: true },
-      { text: 'Advanced analytics', included: true },
-      { text: 'API access', included: true },
-      { text: 'Dedicated support', included: true },
+      { text: 'Everything in Pro', included: true },
+      { text: 'Priority support', included: true },
+      { text: 'Early access to features', included: true },
+      { text: 'Resume review (coming soon)', included: true },
+      { text: 'Interview coaching (coming soon)', included: true },
     ],
   },
 ];
 
 const faqs = [
   {
-    q: 'Can I cancel my subscription at any time?',
-    a: 'Yes, you can cancel at any time. Your plan stays active until the end of the current billing period with no further charges.',
+    q: 'Can I cancel anytime?',
+    a: 'Yes! You can downgrade to Free at any time from your billing settings. No questions asked.',
   },
   {
     q: 'What happens to my data if I downgrade?',
-    a: 'Your data is always safe. If you downgrade to Free, applications beyond the 20-item limit become read-only until you reduce or re-upgrade.',
+    a: 'Your data is never deleted. On the Free plan, you can still view all applications but can\'t add new ones beyond the limit.',
   },
   {
-    q: 'Is there a free trial for paid plans?',
-    a: 'All paid plans include a 14-day free trial. No credit card required to start — upgrade whenever you\'re ready.',
-  },
-  {
-    q: 'Do you offer team or recruiter plans?',
-    a: 'Team plans are on the roadmap. Contact us at support@hireflow.app and we\'ll set you up early.',
+    q: 'Do you offer a free trial?',
+    a: 'The Free plan is your trial! Use it as long as you want. Upgrade when you need more power.',
   },
 ];
 
@@ -129,7 +121,7 @@ export default function Pricing() {
   return (
     <div>
       <TopBar
-        title="Plans & Pricing"
+        title="Pricing"
         subtitle="Choose the plan that fits your job search"
       />
 
@@ -141,6 +133,11 @@ export default function Pricing() {
             You are currently on the <strong>{currentPlanName}</strong> plan.
             {currentPlan === 'free' && ' Upgrade to unlock all features.'}
           </span>
+        </div>
+
+        {/* Center text */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <span style={{ fontSize: 13, color: 'var(--text3)' }}>Simple, transparent pricing. Cancel anytime.</span>
         </div>
 
         {/* 3-column pricing grid */}
@@ -168,12 +165,10 @@ export default function Pricing() {
                 {/* Card header */}
                 <div className="pricing-header">
                   <div className="pricing-name">{plan.name}</div>
-                  <div className="pricing-amount">
-                    {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                  <div className="pricing-price">
+                    <span className="pricing-amount">${plan.price}</span>
+                    <span className="pricing-period">{plan.period}</span>
                   </div>
-                  {plan.price > 0 && (
-                    <div className="pricing-period">{plan.period}</div>
-                  )}
                   <div className="pricing-desc">{plan.desc}</div>
                 </div>
 
@@ -207,7 +202,13 @@ export default function Pricing() {
                       onClick={() => handleUpgrade(plan.key)}
                       disabled={isLoading}
                       className={`btn ${plan.popular ? 'btn-primary' : 'btn-outline'} pricing-btn`}
-                      style={isLoading ? { opacity: 0.7, cursor: 'not-allowed' } : undefined}
+                      style={
+                        isLoading
+                          ? { opacity: 0.7, cursor: 'not-allowed' }
+                          : plan.key === 'premium'
+                          ? { borderColor: 'var(--violet)', color: 'var(--violet)' }
+                          : undefined
+                      }
                     >
                       {isLoading ? (
                         <>
@@ -231,11 +232,6 @@ export default function Pricing() {
             );
           })}
         </div>
-
-        {/* Footnote */}
-        <p className="pricing-footnote" style={{ marginTop: 16 }}>
-          All plans include a 14-day free trial on paid features. No credit card required to start. Prices in USD.
-        </p>
 
         {/* FAQ section */}
         <div className="faq-section">

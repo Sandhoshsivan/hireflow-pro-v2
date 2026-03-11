@@ -23,9 +23,9 @@ public class ApplicationService : IApplicationService
             .Where(a => a.UserId == userId)
             .AsQueryable();
 
-        // Filter by status
+        // Filter by status (case-insensitive to support lowercase from frontend)
         if (!string.IsNullOrWhiteSpace(request.Status))
-            query = query.Where(a => a.Status == request.Status);
+            query = query.Where(a => a.Status.ToLower() == request.Status.ToLower());
 
         // Search across company, job title, and notes
         if (!string.IsNullOrWhiteSpace(request.Search))
