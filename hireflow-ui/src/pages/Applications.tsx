@@ -117,18 +117,17 @@ function FormField({
   required?: boolean;
 }) {
   return (
-    <div>
-      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[.6px] mb-1.5">
+    <div className="form-group">
+      <label className="form-label">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span style={{ color: 'var(--red)', marginLeft: 2 }}>*</span>}
       </label>
       {children}
     </div>
   );
 }
 
-const inputClass =
-  'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none bg-slate-50 focus:bg-white transition-all duration-150';
+const inputClass = 'form-input';
 
 export default function Applications() {
   const [searchParams] = useSearchParams();
@@ -328,62 +327,54 @@ export default function Applications() {
         title="Applications"
         subtitle={`${apps.length} application${apps.length !== 1 ? 's' : ''} tracked`}
         actions={
-          <div className="flex items-center gap-2.5">
+          <>
             {/* Filter bar container */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-[10px] px-2 py-[5px]">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <div className="filter-bar-container">
+              <div className="search-wrap">
+                <span className="search-icon">
+                  <Search size={14} />
+                </span>
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search company, role..."
-                  className="w-[200px] pl-8 pr-3 py-[7px] bg-white border border-slate-200 rounded-lg text-[13px] text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all duration-150"
+                  className="form-input search-input"
+                  style={{ width: 200, background: 'var(--white)' }}
                 />
               </div>
-              {/* Vertical divider */}
-              <div className="w-px h-5 bg-slate-200 flex-shrink-0" />
-              {/* Status dropdown */}
-              <div className="relative">
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-[126px] pl-3 pr-7 py-[7px] bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none appearance-none cursor-pointer transition-all duration-150"
-                >
-                  <option value="">All Status</option>
-                  {statusOptions.map((s) => (
-                    <option key={s} value={s}>
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
-              </div>
-              {/* Sort dropdown */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-[136px] pl-3 pr-7 py-[7px] bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none appearance-none cursor-pointer transition-all duration-150"
-                >
-                  <option value="createdAt_desc">Newest First</option>
-                  <option value="createdAt_asc">Oldest First</option>
-                  <option value="company_asc">Company A-Z</option>
-                  <option value="company_desc">Company Z-A</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
-              </div>
+              <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="form-select"
+                style={{ width: 126, background: 'var(--white)' }}
+              >
+                <option value="">All Status</option>
+                {statusOptions.map((s) => (
+                  <option key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="form-select"
+                style={{ width: 136, background: 'var(--white)' }}
+              >
+                <option value="createdAt_desc">Newest First</option>
+                <option value="createdAt_asc">Oldest First</option>
+                <option value="company_asc">Company A-Z</option>
+                <option value="company_desc">Company Z-A</option>
+              </select>
             </div>
             {/* Track Job button */}
-            <button
-              onClick={openAdd}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white bg-blue-700 rounded-lg hover:bg-blue-800 active:scale-[.98] transition-all duration-150 shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <button onClick={openAdd} className="btn btn-primary">
+              <Plus size={14} strokeWidth={2.5} />
               Track Job
             </button>
-          </div>
+          </>
         }
       />
 
@@ -557,7 +548,7 @@ export default function Applications() {
                 <div className="modal-title">
                   {editingApp ? 'Edit Application' : 'Add Application'}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>
                   {editingApp ? `Updating ${editingApp.company}` : 'Track a new job opportunity'}
                 </p>
               </div>
@@ -572,8 +563,8 @@ export default function Applications() {
 
             {/* Body */}
             <div className="modal-body">
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="form-grid">
                   <FormField label="Company" required>
                     <input
                       type="text"
@@ -594,7 +585,7 @@ export default function Applications() {
                   </FormField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="form-grid">
                   <FormField label="Status">
                     <select
                       value={form.status}
@@ -623,7 +614,7 @@ export default function Applications() {
                   </FormField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="form-grid">
                   <FormField label="Salary">
                     <input
                       type="text"
@@ -644,7 +635,7 @@ export default function Applications() {
                   </FormField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="form-grid">
                   <FormField label="Source">
                     <input
                       type="text"
@@ -680,7 +671,7 @@ export default function Applications() {
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={3}
                     placeholder="Add any notes about this opportunity..."
-                    className={clsx(inputClass, 'resize-none')}
+                    className="form-textarea"
                   />
                 </FormField>
               </div>
