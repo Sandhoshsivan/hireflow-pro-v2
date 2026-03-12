@@ -443,7 +443,7 @@ export default function Dashboard() {
         style={{ animationDelay: '200ms', marginBottom: 24 }}
       >
         {/* Recent Applications */}
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader
             icon={<ClockIcon className="w-3.5 h-3.5" style={{ color: BLUE }} />}
             iconColor={BLUE}
@@ -473,7 +473,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={app.id}
-                    className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 last:border-b-0 transition-colors duration-100 hover:bg-blue-50/40 cursor-pointer"
+                    className="flex items-center gap-3 px-5 py-3.5 border-b border-slate-100 last:border-b-0 transition-colors duration-100 hover:bg-blue-50/40 cursor-pointer"
                   >
                     {/* Avatar */}
                     <div
@@ -522,15 +522,15 @@ export default function Dashboard() {
         </Card>
 
         {/* Follow-ups & Reminders */}
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader
             icon={<Bell className="w-3.5 h-3.5" style={{ color: AMBER }} />}
             iconColor={AMBER}
             title="Follow-ups & Reminders"
           />
-          <div className="card-body">
+          <div className="card-body flex-1 flex flex-col">
             {followups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
+              <div className="flex flex-col items-center justify-center flex-1">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center mb-3">
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                 </div>

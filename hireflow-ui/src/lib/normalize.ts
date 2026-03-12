@@ -57,9 +57,27 @@ export function normalizeStats(raw: unknown): ApplicationStats {
   const total = (d.total as number) ?? (d.totalApplications as number) ?? (applied + interviews + offers + rejected + ghosted + saved);
   const responseRate = (d.responseRate as number) ?? 0;
 
-  // Pass through sources, followups, and byStatus for dashboard charts
-  const sources = Array.isArray(d.sources) ? (d.sources as Array<{ source: string; cnt: number }>) : [];
-  const followups = Array.isArray(d.followups) ? (d.followups as Array<{ id: number; company: string; role: string; followup: string }>) : [];
+  // Map bySource dictionary { "LinkedIn": 5 } to sources array [{ source: "LinkedIn", cnt: 5 }]
+  let sources: Array<{ source: string; cnt: number }> = [];
+  if (Array.isArray(d.sources)) {
+    sources = d.sources as Array<{ source: string; cnt: number }>;
+  } else {
+    const bySource = (d.bySource as Record<string, number>) ?? {};
+    sources = Object.entries(bySource).map(([source, cnt]) => ({ source, cnt }));
+  }
+
+  // Map upcomingFollowUps (backend shape) to followups (frontend shape)
+  let followups: Array<{ id: number; company: string; role: string; followup: string }> = [];
+  if (Array.isArray(d.followups)) {
+    followups = d.followups as Array<{ id: number; company: string; role: string; followup: string }>;
+  } else if (Array.isArray(d.upcomingFollowUps)) {
+    followups = (d.upcomingFollowUps as Array<Record<string, unknown>>).map((f) => ({
+      id: (f.id as number) ?? 0,
+      company: (f.company as string) ?? '',
+      role: (f.jobTitle as string) ?? (f.role as string) ?? '',
+      followup: (f.followUpDate as string) ?? (f.followup as string) ?? '',
+    }));
+  }
   const resolvedByStatus: Record<string, number> = {
     Applied: applied,
     Interview: interviews,
