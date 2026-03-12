@@ -187,7 +187,7 @@ export default function ResetPassword() {
                 <button
                   type="submit"
                   disabled={isLoading || passwordsMismatch}
-                  className="btn-primary"
+                  className="btn btn-primary"
                   style={{ width: '100%' }}
                 >
                   {isLoading ? (

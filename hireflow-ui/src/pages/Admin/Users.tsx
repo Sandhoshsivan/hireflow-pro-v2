@@ -542,16 +542,16 @@ export default function AdminUsers() {
                   <button
                     onClick={() => deleteUser(selectedUser)}
                     disabled={actionLoading === `delete-${selectedUser.id}`}
-                    className="btn btn-danger w-full"
+                    className="btn btn-danger-filled w-full"
                     style={{
                       justifyContent: 'flex-start',
                       opacity: actionLoading === `delete-${selectedUser.id}` ? 0.55 : 1,
                     }}
                   >
                     <Trash2 style={{ width: 15, height: 15, flexShrink: 0 }} />
-                    Delete User
+                    Delete User Permanently
                     {actionLoading === `delete-${selectedUser.id}` && (
-                      <Spinner color="var(--red)" />
+                      <Spinner color="white" />
                     )}
                   </button>
                 </div>

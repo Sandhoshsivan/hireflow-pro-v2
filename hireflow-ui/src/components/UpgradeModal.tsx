@@ -101,7 +101,7 @@ export default function UpgradeModal() {
         {/* Footer */}
         <div className="modal-footer" style={{ flexDirection: 'column', gap: 10 }}>
           <button
-            className="btn-primary"
+            className="btn btn-primary"
             style={{
               width: '100%',
               background: accentGradient,
@@ -113,7 +113,7 @@ export default function UpgradeModal() {
             Upgrade for {price}/mo
           </button>
           <button
-            className="btn-secondary"
+            className="btn btn-secondary"
             onClick={hide}
             style={{ width: '100%', justifyContent: 'center' }}
           >

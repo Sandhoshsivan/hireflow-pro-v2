@@ -481,24 +481,23 @@ export default function Applications() {
                       {/* Actions */}
                       <td>
                         <div
-                          style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0, transition: 'opacity .15s' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 2, opacity: 0, transition: 'opacity .15s' }}
                           className="row-actions"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
                             onClick={() => openEdit(app)}
-                            className="btn btn-ghost btn-icon"
+                            className="btn btn-ghost btn-icon btn-icon-sm"
                             title="Edit"
                           >
-                            <Pencil className="w-3.5 h-3.5" />
+                            <Pencil size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(app.id)}
-                            className="btn btn-ghost btn-icon"
+                            className="btn btn-ghost-danger btn-icon btn-icon-sm"
                             title="Delete"
-                            style={{ color: 'var(--red)' }}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
@@ -655,14 +654,14 @@ export default function Applications() {
             <div className="modal-footer">
               <button
                 onClick={() => setShowModal(false)}
-                className="btn-secondary"
+                className="btn btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.company || !form.role}
-                className="btn-primary"
+                className="btn btn-primary"
               >
                 {saving ? 'Saving...' : editingApp ? 'Update Application' : 'Create Application'}
               </button>
@@ -742,6 +741,7 @@ export default function Applications() {
                     onClick={() => handleDelete(selectedApp.id)}
                     className="drawer-btn-sm drawer-btn-danger"
                   >
+                    <Trash2 style={{ width: 12, height: 12 }} />
                     Delete
                   </button>
                 </div>

@@ -376,7 +376,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary"
+              className="btn btn-primary"
               style={{ width: '100%', marginTop: 2 }}
             >
               {isLoading ? (

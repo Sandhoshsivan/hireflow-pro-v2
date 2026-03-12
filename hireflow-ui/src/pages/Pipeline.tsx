@@ -77,7 +77,7 @@ export default function Pipeline() {
             <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.5 }}>!</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>Failed to load pipeline</div>
             <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 16 }}>There was an error fetching your applications.</div>
-            <button className="btn-primary" onClick={() => window.location.reload()}>Try again</button>
+            <button className="btn btn-primary" onClick={() => window.location.reload()}>Try again</button>
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function Pipeline() {
       <TopBar
         title="Pipeline"
         actions={
-          <button className="btn-primary">{'\uFF0B'} Track Job</button>
+          <button className="btn btn-primary">{'\uFF0B'} Track Job</button>
         }
       />
 
@@ -253,7 +253,7 @@ export default function Pipeline() {
             </div>
 
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setSelectedApp(null)}>Close</button>
+              <button className="btn btn-secondary" onClick={() => setSelectedApp(null)}>Close</button>
             </div>
           </div>
         </div>
