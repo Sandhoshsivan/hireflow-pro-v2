@@ -38,8 +38,8 @@ interface ResumeData {
   email: string;
   phone: string;
   location: string;
-  linkedinUrl: string;
-  portfolioUrl: string;
+  linkedIn: string;
+  portfolio: string;
   summary: string;
   skills: string[];
   experience: ExperienceEntry[];
@@ -54,8 +54,8 @@ const emptyResume: ResumeData = {
   email: '',
   phone: '',
   location: '',
-  linkedinUrl: '',
-  portfolioUrl: '',
+  linkedIn: '',
+  portfolio: '',
   summary: '',
   skills: [],
   experience: [],
@@ -246,8 +246,8 @@ export default function ResumeProfile() {
           email: d.email ?? '',
           phone: d.phone ?? '',
           location: d.location ?? '',
-          linkedinUrl: d.linkedinUrl ?? '',
-          portfolioUrl: d.portfolioUrl ?? '',
+          linkedIn: d.linkedIn ?? '',
+          portfolio: d.portfolio ?? '',
           summary: d.summary ?? '',
           skills: safeParse<string[]>(d.skills, []),
           experience: safeParse<ExperienceEntry[]>(d.experience, []),
@@ -277,8 +277,8 @@ export default function ResumeProfile() {
         email: data.email,
         phone: data.phone,
         location: data.location,
-        linkedinUrl: data.linkedinUrl,
-        portfolioUrl: data.portfolioUrl,
+        linkedIn: data.linkedIn,
+        portfolio: data.portfolio,
         summary: data.summary,
         skills: JSON.stringify(data.skills),
         experience: JSON.stringify(data.experience),
@@ -423,8 +423,8 @@ export default function ResumeProfile() {
                   type="url"
                   className="form-input"
                   placeholder="https://linkedin.com/in/johndoe"
-                  value={data.linkedinUrl}
-                  onChange={(e) => updateField('linkedinUrl', e.target.value)}
+                  value={data.linkedIn}
+                  onChange={(e) => updateField('linkedIn', e.target.value)}
                 />
               </div>
               <div className="form-group full">
@@ -433,8 +433,8 @@ export default function ResumeProfile() {
                   type="url"
                   className="form-input"
                   placeholder="https://johndoe.dev"
-                  value={data.portfolioUrl}
-                  onChange={(e) => updateField('portfolioUrl', e.target.value)}
+                  value={data.portfolio}
+                  onChange={(e) => updateField('portfolio', e.target.value)}
                 />
               </div>
             </div>

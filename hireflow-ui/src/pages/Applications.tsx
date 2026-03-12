@@ -293,10 +293,28 @@ export default function Applications() {
       // Fetch resume profile
       const { data: profile } = await api.get('/resume-profile');
       const skills: string[] = profile.skills ? JSON.parse(profile.skills) : [];
-      const experience = profile.experience ? JSON.parse(profile.experience) : [];
-      const education = profile.education ? JSON.parse(profile.education) : [];
+      const rawExp: { company: string; title: string; startDate: string; endDate: string; description: string }[] =
+        profile.experience ? JSON.parse(profile.experience) : [];
+      const rawEdu: { institution: string; degree: string; field: string; year: string }[] =
+        profile.education ? JSON.parse(profile.education) : [];
       const certifications: string[] = profile.certifications ? JSON.parse(profile.certifications) : [];
       const languages: string[] = profile.languages ? JSON.parse(profile.languages) : [];
+
+      // Map ResumeProfile field names → PDF template field names
+      const experience = rawExp.map((e) => ({
+        company: e.company,
+        position: e.title,
+        duration: [e.startDate, e.endDate].filter(Boolean).join(' – '),
+        achievements: e.description
+          ? e.description.split('\n').map((s) => s.trim()).filter(Boolean)
+          : [],
+      }));
+
+      const education = rawEdu.map((e) => ({
+        institution: e.institution,
+        program: [e.degree, e.field].filter(Boolean).join(' in '),
+        duration: e.year,
+      }));
 
       const resumeData: ResumeData = {
         fullName: profile.fullName,
