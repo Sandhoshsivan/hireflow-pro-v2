@@ -84,6 +84,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<IAIQuotaService, AIQuotaService>();
 
 // ── HttpClient for AIService ─────────────────────────────────────────────────
 builder.Services.AddHttpClient<IAIService, AIService>();

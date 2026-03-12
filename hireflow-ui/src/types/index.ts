@@ -126,3 +126,11 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+export interface AIQuota {
+  allowed: boolean;
+  used: number;
+  limit: number;
+  remaining: number;
+  plan: string;
+}

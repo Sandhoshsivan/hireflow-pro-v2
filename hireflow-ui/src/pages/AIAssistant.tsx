@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, type FormEvent, type KeyboardEvent } from 'react';
 import { Send, Zap, Loader2, Sparkles, ArrowUpRight } from 'lucide-react';
 import api from '../lib/api';
 import TopBar from '../components/TopBar';
-import type { ChatMessage, MatchScoreResponse } from '../types';
+import type { ChatMessage, MatchScoreResponse, AIQuota } from '../types';
 
 const EXAMPLE_PROMPTS = [
   {
@@ -122,6 +122,16 @@ export default function AIAssistant() {
   const [matchResult, setMatchResult] = useState<MatchScoreResponse | null>(null);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [showAnalyzer, setShowAnalyzer] = useState(false);
+  const [quota, setQuota] = useState<AIQuota | null>(null);
+
+  const fetchQuota = useCallback(async () => {
+    try {
+      const { data } = await api.get('/ai/quota');
+      setQuota(data);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { fetchQuota(); }, [fetchQuota]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -159,18 +169,23 @@ export default function AIAssistant() {
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, botMsg]);
+      fetchQuota();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { status?: number } };
+      const axiosErr = err as { response?: { status?: number; data?: { code?: string; message?: string } } };
+      const isQuotaExceeded = axiosErr?.response?.status === 429;
       const isUpgrade = axiosErr?.response?.status === 403;
       const errMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: isUpgrade
+        content: isQuotaExceeded
+          ? (axiosErr?.response?.data?.message ?? 'You have reached your monthly AI limit. Upgrade your plan for more queries.')
+          : isUpgrade
           ? 'You have reached your AI query limit. Upgrade to Pro or Premium for more queries.'
           : 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errMsg]);
+      if (isQuotaExceeded) fetchQuota();
     } finally {
       setIsChatLoading(false);
     }
@@ -199,15 +214,22 @@ export default function AIAssistant() {
     setUpgradeRequired(false);
 
     try {
-      const { data } = await api.post('/ai/match-score', {
+      const { data } = await api.post('/ai/analyze-match', {
         jobDescription: jobDescription.trim(),
-        resume: resume.trim() || undefined,
+        resumeText: resume.trim() || undefined,
       });
-      setMatchResult(data);
+      setMatchResult({
+        score: data.matchScore,
+        strengths: data.suggestions?.slice(0, 3) ?? [],
+        gaps: data.missingKeywords ?? [],
+        suggestions: data.suggestions ?? [],
+      });
+      fetchQuota();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { status?: number } };
-      if (axiosErr?.response?.status === 403) {
+      if (axiosErr?.response?.status === 403 || axiosErr?.response?.status === 429) {
         setUpgradeRequired(true);
+        fetchQuota();
       }
     } finally {
       setIsAnalyzing(false);
@@ -216,7 +238,39 @@ export default function AIAssistant() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <TopBar title="AI Assistant" subtitle="Your intelligent career companion" />
+      <TopBar
+        title="AI Assistant"
+        subtitle="Your intelligent career companion"
+        actions={
+          quota && quota.limit !== -1 ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                <span style={{ fontSize: 12, color: quota.remaining === 0 ? 'var(--red)' : 'var(--text3)', fontWeight: 600 }}>
+                  {quota.used}/{quota.limit} used this month
+                </span>
+                <div style={{ width: 120, height: 6, borderRadius: 99, background: 'var(--bg3)', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${Math.min(100, (quota.used / quota.limit) * 100)}%`,
+                      height: '100%',
+                      borderRadius: 99,
+                      background: quota.remaining === 0
+                        ? 'var(--red)'
+                        : quota.used / quota.limit > 0.8
+                        ? 'var(--amber)'
+                        : 'var(--blue)',
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+              </div>
+              <span className={`badge badge-${quota.plan.toLowerCase()}`}>{quota.plan}</span>
+            </div>
+          ) : quota?.limit === -1 ? (
+            <span className="badge badge-premium">Unlimited</span>
+          ) : null
+        }
+      />
 
       <div className="page-content" style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}>
 
@@ -374,8 +428,11 @@ export default function AIAssistant() {
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 14, borderRadius: 'var(--radius)', background: 'var(--amber-lt)', border: '1px solid var(--amber-md)' }}>
                       <Sparkles size={16} style={{ color: 'var(--amber)', flexShrink: 0, marginTop: 2 }} />
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--amber)', margin: 0 }}>Upgrade Required</p>
-                        <p style={{ fontSize: 12, color: 'var(--text2)', margin: '4px 0 6px' }}>Job match analysis requires a Pro or Premium plan.</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--amber)', margin: 0 }}>Limit Reached</p>
+                        <p style={{ fontSize: 12, color: 'var(--text2)', margin: '4px 0 6px' }}>
+                          {quota ? `You've used ${quota.used}/${quota.limit} AI queries this month.` : 'Monthly AI limit reached.'}{' '}
+                          Upgrade your plan for more.
+                        </p>
                         <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--amber)', textDecoration: 'underline' }}>
                           View plans <ArrowUpRight size={12} />
                         </a>

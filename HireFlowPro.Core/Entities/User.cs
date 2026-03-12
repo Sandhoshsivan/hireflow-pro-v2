@@ -41,6 +41,7 @@ public class User
     public ICollection<Application> Applications { get; set; } = new List<Application>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public ICollection<PasswordReset> PasswordResets { get; set; } = new List<PasswordReset>();
+    public ICollection<AIUsage> AIUsages { get; set; } = new List<AIUsage>();
 }
 
 public static class PlanType

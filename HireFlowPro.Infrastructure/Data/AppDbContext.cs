@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<PasswordReset> PasswordResets => Set<PasswordReset>();
+    public DbSet<AIUsage> AIUsages => Set<AIUsage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +43,11 @@ public class AppDbContext : DbContext
             entity.HasMany(u => u.PasswordResets)
                 .WithOne(pr => pr.User)
                 .HasForeignKey(pr => pr.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(u => u.AIUsages)
+                .WithOne(au => au.User)
+                .HasForeignKey(au => au.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -91,6 +97,14 @@ public class AppDbContext : DbContext
             entity.Property(p => p.Status).HasDefaultValue(PaymentStatus.Pending);
             entity.Property(p => p.Currency).HasDefaultValue("USD");
             entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        // ----- AIUsage -----
+        modelBuilder.Entity<AIUsage>(entity =>
+        {
+            entity.HasIndex(au => new { au.UserId, au.CreatedAt });
+            entity.HasIndex(au => new { au.UserId, au.Feature });
+            entity.Property(au => au.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // ----- PasswordReset -----
