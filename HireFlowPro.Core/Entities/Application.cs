@@ -26,6 +26,9 @@ public class Application
     [MaxLength(100)]
     public string? SalaryRange { get; set; }
 
+    [MaxLength(100)]
+    public string? Source { get; set; }
+
     [Required, MaxLength(20)]
     public string Status { get; set; } = ApplicationStatus.Saved;
 

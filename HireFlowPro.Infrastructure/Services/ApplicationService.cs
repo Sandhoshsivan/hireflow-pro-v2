@@ -63,6 +63,7 @@ public class ApplicationService : IApplicationService
                 Status = a.Status,
                 Priority = a.Priority,
                 SalaryRange = a.SalaryRange,
+                Source = a.Source,
                 MatchScore = a.MatchScore,
                 AppliedDate = a.AppliedDate,
                 FollowUpDate = a.FollowUpDate,
@@ -116,6 +117,7 @@ public class ApplicationService : IApplicationService
             Location = request.Location?.Trim(),
             JobUrl = request.JobUrl?.Trim(),
             SalaryRange = request.SalaryRange?.Trim(),
+            Source = request.Source?.Trim(),
             Status = request.Status,
             Priority = request.Priority,
             Notes = request.Notes,
@@ -164,6 +166,7 @@ public class ApplicationService : IApplicationService
         if (request.Location is not null) app.Location = request.Location.Trim();
         if (request.JobUrl is not null) app.JobUrl = request.JobUrl.Trim();
         if (request.SalaryRange is not null) app.SalaryRange = request.SalaryRange.Trim();
+        if (request.Source is not null) app.Source = request.Source.Trim();
         if (request.Priority is not null) app.Priority = request.Priority;
         if (request.Notes is not null) app.Notes = request.Notes;
         if (request.JobDescription is not null) app.JobDescription = request.JobDescription;
@@ -290,6 +293,7 @@ public class ApplicationService : IApplicationService
                 Status = a.Status,
                 Priority = a.Priority,
                 SalaryRange = a.SalaryRange,
+                Source = a.Source,
                 MatchScore = a.MatchScore,
                 AppliedDate = a.AppliedDate,
                 FollowUpDate = a.FollowUpDate,
@@ -302,7 +306,10 @@ public class ApplicationService : IApplicationService
         {
             ByStatus = byStatus,
             ResponseRate = responseRate,
-            BySource = [], // Source field not in current entity; reserved for future use
+            BySource = apps
+                .Where(a => !string.IsNullOrEmpty(a.Source))
+                .GroupBy(a => a.Source!)
+                .ToDictionary(g => g.Key, g => g.Count()),
             Trend = trend,
             UpcomingFollowUps = followUps,
             TotalApplications = total
@@ -390,6 +397,7 @@ public class ApplicationService : IApplicationService
         Location = app.Location,
         JobUrl = app.JobUrl,
         SalaryRange = app.SalaryRange,
+        Source = app.Source,
         Status = app.Status,
         Priority = app.Priority,
         Notes = app.Notes,

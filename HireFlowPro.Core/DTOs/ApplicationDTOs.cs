@@ -26,6 +26,7 @@ public class ApplicationSummaryDto
     public string Status { get; set; } = string.Empty;
     public string Priority { get; set; } = string.Empty;
     public string? SalaryRange { get; set; }
+    public string? Source { get; set; }
     public int? MatchScore { get; set; }
     public DateTime? AppliedDate { get; set; }
     public DateTime? FollowUpDate { get; set; }
@@ -42,6 +43,7 @@ public class ApplicationDetailDto
     public string? Location { get; set; }
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
+    public string? Source { get; set; }
     public string Status { get; set; } = string.Empty;
     public string Priority { get; set; } = string.Empty;
     public string? Notes { get; set; }
@@ -66,6 +68,7 @@ public class CreateApplicationRequest
     public string? Location { get; set; }
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
+    public string? Source { get; set; }
     public string Status { get; set; } = "Saved";
     public string Priority { get; set; } = "Medium";
     public string? Notes { get; set; }
@@ -83,6 +86,7 @@ public class UpdateApplicationRequest
     public string? Location { get; set; }
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
+    public string? Source { get; set; }
     public string? Status { get; set; }
     public string? Priority { get; set; }
     public string? Notes { get; set; }
