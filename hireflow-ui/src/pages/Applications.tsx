@@ -55,6 +55,11 @@ function isOverdue(dateStr?: string): boolean {
   return new Date(dateStr) <= new Date();
 }
 
+/** Capitalize first letter – backend expects "Saved" not "saved" */
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 interface FormData {
   company: string;
   role: string;
@@ -131,6 +136,10 @@ export default function Applications() {
   // Quick status in drawer
   const [drawerStatus, setDrawerStatus] = useState<ApplicationStatus | ''>('');
 
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const addToast = useToastStore((s) => s.addToast);
 
   const fetchApps = useCallback(async () => {
@@ -185,8 +194,8 @@ export default function Applications() {
       const payload = {
         jobTitle: form.role,
         company: form.company,
-        status: form.status,
-        priority: form.priority,
+        status: capitalize(form.status),
+        priority: capitalize(form.priority),
         salaryRange: form.salary,
         location: form.location,
         source: form.source,
@@ -210,15 +219,19 @@ export default function Applications() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this application?')) return;
+  const confirmDelete = async () => {
+    if (deleteTarget === null) return;
+    setDeleting(true);
     try {
-      await api.delete(`/applications/${id}`);
+      await api.delete(`/applications/${deleteTarget}`);
       addToast('success', 'Application deleted');
-      if (selectedApp?.id === id) setSelectedApp(null);
+      if (selectedApp?.id === deleteTarget) setSelectedApp(null);
+      setDeleteTarget(null);
       fetchApps();
     } catch {
       addToast('error', 'Failed to delete');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -258,7 +271,7 @@ export default function Applications() {
   const handleQuickStatus = async (newStatus: ApplicationStatus) => {
     if (!selectedApp || newStatus === selectedApp.status) return;
     try {
-      await api.patch(`/applications/${selectedApp.id}/status`, { status: newStatus });
+      await api.patch(`/applications/${selectedApp.id}/status`, { status: capitalize(newStatus) });
       addToast('success', `Status updated to ${newStatus}`);
       setDrawerStatus(newStatus);
       fetchApps();
@@ -493,7 +506,7 @@ export default function Applications() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => handleDelete(app.id)}
+                            onClick={() => setDeleteTarget(app.id)}
                             className="btn btn-ghost-danger btn-icon btn-icon-sm"
                             title="Delete"
                           >
@@ -670,6 +683,49 @@ export default function Applications() {
         </div>
       )}
 
+      {/* ── Delete Confirmation Modal ── */}
+      {deleteTarget !== null && (
+        <div className="modal-overlay open" onClick={() => !deleting && setDeleteTarget(null)}>
+          <div
+            className="modal"
+            style={{ maxWidth: 400 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header" style={{ borderBottom: '1px solid var(--bg3)' }}>
+              <h3 className="modal-title" style={{ color: 'var(--red)' }}>
+                <Trash2 style={{ width: 16, height: 16 }} />
+                Delete Application
+              </h3>
+              <button onClick={() => setDeleteTarget(null)} className="drawer-close" disabled={deleting}>
+                <X style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>
+                Are you sure you want to delete this application? This action cannot be undone.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger-filled"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                <Trash2 style={{ width: 14, height: 14 }} />
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Detail Drawer ── */}
       <div className={`drawer-overlay${selectedApp ? ' open' : ''}`} onClick={() => setSelectedApp(null)} />
       <div className={`drawer${selectedApp ? ' open' : ''}`}>
@@ -738,7 +794,7 @@ export default function Applications() {
                   )}
                   {/* Delete button */}
                   <button
-                    onClick={() => handleDelete(selectedApp.id)}
+                    onClick={() => setDeleteTarget(selectedApp.id)}
                     className="drawer-btn-sm drawer-btn-danger"
                   >
                     <Trash2 style={{ width: 12, height: 12 }} />
