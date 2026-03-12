@@ -15,6 +15,7 @@ import Billing from './pages/Billing';
 import AIAssistant from './pages/AIAssistant';
 import Export from './pages/Export';
 import ResumeProfile from './pages/ResumeProfile';
+import JobDiscovery from './pages/JobDiscovery';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminUsers from './pages/Admin/Users';
 import UpgradeModal from './components/UpgradeModal';
@@ -100,6 +101,7 @@ export default function App() {
           <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/export" element={<Export />} />
           <Route path="/resume-profile" element={<ResumeProfile />} />
+          <Route path="/discover-jobs" element={<JobDiscovery />} />
 
           {/* Admin routes */}
           <Route

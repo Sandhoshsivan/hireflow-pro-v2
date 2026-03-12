@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, BarChart3, Briefcase, Send, Users, HandCoins,
-  Kanban, Bot, Download, CreditCard, Crown, Shield, LogOut, ChevronDown, FileText,
+  Kanban, Bot, Download, CreditCard, Crown, Shield, LogOut, ChevronDown, FileText, Globe,
 } from 'lucide-react';
 import { useAuthStore } from '../lib/auth';
 import api from '../lib/api';
@@ -246,6 +246,7 @@ export default function Sidebar() {
         { to: '/applications?status=interview', icon: Users, label: 'Interviews', badge: 'count', countKey: 'interview' },
         { to: '/applications?status=offer', icon: HandCoins, label: 'Offers', badge: 'count', countKey: 'offer' },
         { to: '/pipeline', icon: Kanban, label: 'Pipeline' },
+        { to: '/discover-jobs', icon: Globe, label: 'Discover Jobs', badge: 'free' },
       ],
     },
     {

@@ -89,6 +89,7 @@ builder.Services.AddScoped<IResumeProfileService, ResumeProfileService>();
 
 // ── HttpClient for AIService ─────────────────────────────────────────────────
 builder.Services.AddHttpClient<IAIService, AIService>();
+builder.Services.AddHttpClient<IJobDiscoveryService, JobDiscoveryService>();
 
 // ── Controllers + Swagger ────────────────────────────────────────────────────
 builder.Services.AddControllers();
