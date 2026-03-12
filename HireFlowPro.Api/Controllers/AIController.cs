@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HireFlowPro.Core.DTOs;
 using HireFlowPro.Core.Entities;
 using HireFlowPro.Core.Interfaces;
@@ -11,13 +12,20 @@ namespace HireFlowPro.Api.Controllers;
 [Authorize]
 public class AIController : ControllerBase
 {
+    private static readonly JsonSerializerOptions CamelCaseJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly IAIService _aiService;
     private readonly IAIQuotaService _quotaService;
+    private readonly IResumeProfileService _resumeProfileService;
 
-    public AIController(IAIService aiService, IAIQuotaService quotaService)
+    public AIController(IAIService aiService, IAIQuotaService quotaService, IResumeProfileService resumeProfileService)
     {
         _aiService = aiService;
         _quotaService = quotaService;
+        _resumeProfileService = resumeProfileService;
     }
 
     [HttpGet("quota")]
@@ -87,6 +95,36 @@ public class AIController : ControllerBase
         var result = await _aiService.GetCareerAdviceAsync(adviceRequest);
         await _quotaService.TrackUsageAsync(userId, AIFeature.Chat);
         return Ok(new { response = result.Response });
+    }
+
+    [HttpPost("tailor-resume")]
+    public async Task<IActionResult> TailorResume([FromBody] TailorResumeRequest request)
+    {
+        var userId = GetUserId();
+        var quota = await _quotaService.CheckQuotaAsync(userId);
+        if (!quota.Allowed)
+            return StatusCode(429, new
+            {
+                code = "quota_exceeded",
+                message = $"Monthly AI limit reached ({quota.Limit}). Upgrade your plan for more.",
+                used = quota.Used,
+                limit = quota.Limit,
+                plan = quota.Plan
+            });
+
+        var resumeProfileJson = request.ResumeData;
+        if (string.IsNullOrWhiteSpace(resumeProfileJson))
+        {
+            var profile = await _resumeProfileService.GetByUserIdAsync(userId);
+            if (profile is null)
+                return BadRequest(new { code = "no_resume", message = "No resume profile found. Please create one first or provide resumeData in the request." });
+
+            resumeProfileJson = JsonSerializer.Serialize(profile, CamelCaseJsonOptions);
+        }
+
+        var result = await _aiService.TailorResumeAsync(request, resumeProfileJson);
+        await _quotaService.TrackUsageAsync(userId, AIFeature.TailorResume);
+        return Ok(result);
     }
 
     private int GetUserId()

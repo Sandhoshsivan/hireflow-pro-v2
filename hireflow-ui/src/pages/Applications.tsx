@@ -10,12 +10,21 @@ import {
   ChevronRight,
   Link2,
   Send,
+  Sparkles,
+  Loader2,
+  FileText,
+  CheckCircle2,
+  Download,
 } from 'lucide-react';
+import React from 'react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
 import type { Application, ApplicationStatus, Priority, TimelineEntry, Contact } from '../types';
 import { extractApplications } from '../lib/normalize';
+import { ResumePDFDocument } from '../components/ResumePDF';
+import type { ResumeData, TailorOverrides } from '../components/ResumePDF';
+import { downloadPDF } from '../lib/pdf-download';
 
 const statusOptions: ApplicationStatus[] = [
   'saved',
@@ -140,6 +149,18 @@ export default function Applications() {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Tailor Resume
+  const [tailoring, setTailoring] = useState(false);
+  const [tailorResult, setTailorResult] = useState<{
+    tailoredSummary: string;
+    highlightedSkills: string[];
+    suggestedBulletPoints: string[];
+    coverLetterDraft: string;
+    matchScore: number;
+    keywordsToInclude: string[];
+  } | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
   const addToast = useToastStore((s) => s.addToast);
 
   const fetchApps = useCallback(async () => {
@@ -235,10 +256,102 @@ export default function Applications() {
     }
   };
 
+  const handleTailorResume = async () => {
+    if (!selectedApp || tailoring) return;
+    setTailoring(true);
+    setTailorResult(null);
+    try {
+      const { data } = await api.post('/ai/tailor-resume', {
+        jobDescription: [
+          `Job Title: ${selectedApp.role}`,
+          `Company: ${selectedApp.company}`,
+          selectedApp.location ? `Location: ${selectedApp.location}` : '',
+          selectedApp.salary ? `Salary: ${selectedApp.salary}` : '',
+          selectedApp.notes ? `Additional Info: ${selectedApp.notes}` : '',
+        ].filter(Boolean).join('\n'),
+      });
+      setTailorResult(data);
+      addToast('success', 'Resume tailored successfully!');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { code?: string; message?: string } } };
+      if (axiosErr?.response?.data?.code === 'no_resume') {
+        addToast('error', 'Please create your Resume Profile first (Tools > Resume Profile)');
+      } else if (axiosErr?.response?.status === 429) {
+        addToast('error', 'AI quota exceeded. Upgrade your plan for more.');
+      } else {
+        addToast('error', 'Failed to tailor resume');
+      }
+    } finally {
+      setTailoring(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!selectedApp || downloading) return;
+    setDownloading(true);
+    try {
+      // Fetch resume profile
+      const { data: profile } = await api.get('/resume-profile');
+      const skills: string[] = profile.skills ? JSON.parse(profile.skills) : [];
+      const experience = profile.experience ? JSON.parse(profile.experience) : [];
+      const education = profile.education ? JSON.parse(profile.education) : [];
+      const certifications: string[] = profile.certifications ? JSON.parse(profile.certifications) : [];
+      const languages: string[] = profile.languages ? JSON.parse(profile.languages) : [];
+
+      const resumeData: ResumeData = {
+        fullName: profile.fullName,
+        title: profile.title,
+        summary: profile.summary,
+        phone: profile.phone,
+        email: profile.email,
+        location: profile.location,
+        linkedIn: profile.linkedIn,
+        portfolio: profile.portfolio,
+        skills,
+        experience,
+        education,
+        certifications,
+        languages,
+      };
+
+      const tailor: TailorOverrides | undefined = tailorResult
+        ? {
+            tailoredSummary: tailorResult.tailoredSummary,
+            highlightedSkills: tailorResult.highlightedSkills,
+            suggestedBulletPoints: tailorResult.suggestedBulletPoints,
+            keywordsToInclude: tailorResult.keywordsToInclude,
+          }
+        : undefined;
+
+      const filename = `${profile.fullName.replace(/\s+/g, '_')}_${selectedApp.company.replace(/\s+/g, '_')}_Resume.pdf`;
+
+      await downloadPDF(
+        React.createElement(ResumePDFDocument, {
+          data: resumeData,
+          tailor,
+          jobTitle: selectedApp.role,
+          company: selectedApp.company,
+        }),
+        filename,
+      );
+      addToast('success', 'Resume PDF downloaded!');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number } };
+      if (axiosErr?.response?.status === 404) {
+        addToast('error', 'Please create your Resume Profile first (Tools > Resume Profile)');
+      } else {
+        addToast('error', 'Failed to generate PDF');
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const openDetail = async (app: Application) => {
     setSelectedApp(app);
     setDrawerStatus(app.status);
     setTimelineNote('');
+    setTailorResult(null);
     try {
       const [tlRes, ctRes] = await Promise.all([
         api.get(`/applications/${app.id}/timeline`),
@@ -881,6 +994,157 @@ export default function Applications() {
                   <p className="drawer-notes">{selectedApp.notes}</p>
                 </div>
               )}
+
+              {/* AI Tailor Resume section */}
+              <div className="drawer-section">
+                <div className="drawer-section-label">
+                  <Sparkles style={{ width: 13, height: 13, display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                  AI Resume Tailor
+                </div>
+                {!tailorResult ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleTailorResume}
+                      disabled={tailoring}
+                      style={{ width: '100%', justifyContent: 'center', gap: 8 }}
+                    >
+                      {tailoring ? (
+                        <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Tailoring...</>
+                      ) : (
+                        <><Sparkles size={14} /> Tailor Resume for This Job</>
+                      )}
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      onClick={handleDownloadPDF}
+                      disabled={downloading}
+                      style={{ width: '100%', justifyContent: 'center', gap: 8, fontSize: 12 }}
+                    >
+                      {downloading ? (
+                        <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Generating…</>
+                      ) : (
+                        <><Download size={14} /> Download Resume PDF</>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {/* Match Score */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 99,
+                        background: tailorResult.matchScore >= 70 ? 'var(--green-lt, #ecfdf5)' : tailorResult.matchScore >= 40 ? 'var(--amber-lt, #fffbeb)' : 'var(--red-lt, #fef2f2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 800, fontSize: 13,
+                        color: tailorResult.matchScore >= 70 ? 'var(--green, #059669)' : tailorResult.matchScore >= 40 ? 'var(--amber, #d97706)' : 'var(--red, #dc2626)',
+                      }}>
+                        {tailorResult.matchScore}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Match Score</div>
+                        <div style={{ fontSize: 11, color: 'var(--text3)' }}>
+                          {tailorResult.matchScore >= 70 ? 'Strong match' : tailorResult.matchScore >= 40 ? 'Moderate match' : 'Weak match'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tailored Summary */}
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
+                        <FileText size={11} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                        Tailored Summary
+                      </div>
+                      <p style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text2)', margin: 0, padding: 10, background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                        {tailorResult.tailoredSummary}
+                      </p>
+                    </div>
+
+                    {/* Highlighted Skills */}
+                    {tailorResult.highlightedSkills.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
+                          <CheckCircle2 size={11} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4, color: 'var(--green)' }} />
+                          Key Skills to Highlight
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {tailorResult.highlightedSkills.map((s, i) => (
+                            <span key={i} style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 99, background: '#ecfdf5', color: '#065f46', border: '1px solid #6ee7b7' }}>
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Keywords to Include */}
+                    {tailorResult.keywordsToInclude.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
+                          Keywords to Include
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {tailorResult.keywordsToInclude.map((k, i) => (
+                            <span key={i} style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 99, background: '#eef2ff', color: '#3730a3', border: '1px solid #a5b4fc' }}>
+                              {k}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Suggested Bullet Points */}
+                    {tailorResult.suggestedBulletPoints.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
+                          Suggested Bullet Points
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {tailorResult.suggestedBulletPoints.map((bp, i) => (
+                            <li key={i} style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{bp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Cover Letter */}
+                    {tailorResult.coverLetterDraft && (
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
+                          Cover Letter Draft
+                        </div>
+                        <p style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text2)', margin: 0, padding: 10, background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
+                          {tailorResult.coverLetterDraft}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleDownloadPDF}
+                        disabled={downloading}
+                        style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
+                      >
+                        {downloading ? (
+                          <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Download style={{ width: 14, height: 14 }} />
+                        )}
+                        {downloading ? 'Generating…' : 'Download Tailored PDF'}
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        onClick={() => setTailorResult(null)}
+                        style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
+                      >
+                        Re-tailor Resume
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Timeline section */}
               <div className="drawer-section">

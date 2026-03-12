@@ -37,3 +37,22 @@ public class ChatHistoryItem
     public string Role { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
 }
+
+public class TailorResumeRequest
+{
+    public string JobDescription { get; set; } = string.Empty;
+    /// <summary>
+    /// If empty, will be loaded from user's ResumeProfile.
+    /// </summary>
+    public string? ResumeData { get; set; }
+}
+
+public class TailorResumeResponse
+{
+    public string TailoredSummary { get; set; } = string.Empty;
+    public List<string> HighlightedSkills { get; set; } = [];
+    public List<string> SuggestedBulletPoints { get; set; } = [];
+    public string CoverLetterDraft { get; set; } = string.Empty;
+    public int MatchScore { get; set; }
+    public List<string> KeywordsToInclude { get; set; } = [];
+}

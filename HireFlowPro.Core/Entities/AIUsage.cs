@@ -26,6 +26,7 @@ public static class AIFeature
     public const string AnalyzeMatch = "AnalyzeMatch";
     public const string CareerAdvice = "CareerAdvice";
     public const string Chat = "Chat";
+    public const string TailorResume = "TailorResume";
 }
 
 public static class AIQuotaLimits

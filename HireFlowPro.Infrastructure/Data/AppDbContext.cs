@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<PasswordReset> PasswordResets => Set<PasswordReset>();
     public DbSet<AIUsage> AIUsages => Set<AIUsage>();
+    public DbSet<ResumeProfile> ResumeProfiles => Set<ResumeProfile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,11 @@ public class AppDbContext : DbContext
             entity.HasMany(u => u.AIUsages)
                 .WithOne(au => au.User)
                 .HasForeignKey(au => au.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(u => u.ResumeProfile)
+                .WithOne(rp => rp.User)
+                .HasForeignKey<ResumeProfile>(rp => rp.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -105,6 +111,14 @@ public class AppDbContext : DbContext
             entity.HasIndex(au => new { au.UserId, au.CreatedAt });
             entity.HasIndex(au => new { au.UserId, au.Feature });
             entity.Property(au => au.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        // ----- ResumeProfile -----
+        modelBuilder.Entity<ResumeProfile>(entity =>
+        {
+            entity.HasIndex(rp => rp.UserId).IsUnique();
+            entity.Property(rp => rp.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(rp => rp.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // ----- PasswordReset -----

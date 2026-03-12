@@ -100,6 +100,51 @@ public class AIService : IAIService
         }
     }
 
+    public async Task<TailorResumeResponse> TailorResumeAsync(TailorResumeRequest request, string resumeProfileJson)
+    {
+        var prompt = $"""
+            You are a professional resume writer and career strategist with deep expertise in ATS optimization.
+            Given the following job description and the candidate's resume data, produce a tailored version of the resume content
+            that maximizes the candidate's chances of landing an interview.
+
+            Return a JSON object with exactly these fields:
+            - "tailoredSummary": a compelling professional summary rewritten to align with the job description
+            - "highlightedSkills": array of strings listing the candidate's existing skills that are most relevant to this role
+            - "suggestedBulletPoints": array of strings with achievement-oriented bullet points tailored to the job requirements
+            - "coverLetterDraft": a professional cover letter draft addressing the specific role and company requirements
+            - "matchScore": integer 0-100 indicating how well the candidate's background fits this role
+            - "keywordsToInclude": array of strings with important keywords from the job description the candidate should weave into their resume
+
+            Job Description:
+            {request.JobDescription}
+
+            Candidate Resume Data:
+            {resumeProfileJson}
+
+            Return ONLY valid JSON, no markdown or explanation.
+            """;
+
+        try
+        {
+            var responseText = await SendToAIAsync(prompt);
+            var parsed = ParseTailorResumeResponse(responseText);
+            return parsed;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AI tailor resume failed, returning fallback response");
+            return new TailorResumeResponse
+            {
+                TailoredSummary = string.Empty,
+                HighlightedSkills = ["Unable to analyze - AI service unavailable"],
+                SuggestedBulletPoints = [],
+                CoverLetterDraft = string.Empty,
+                MatchScore = 0,
+                KeywordsToInclude = []
+            };
+        }
+    }
+
     // ---- AI Provider Abstraction ----
 
     private async Task<string> SendToAIAsync(string prompt)
@@ -238,6 +283,59 @@ public class AIService : IAIService
             MatchScore = Math.Clamp(matchScore, 0, 100),
             MissingKeywords = missingKeywords,
             Suggestions = suggestions
+        };
+    }
+
+    private static TailorResumeResponse ParseTailorResumeResponse(string responseText)
+    {
+        var json = responseText.Trim();
+        if (json.StartsWith("```"))
+        {
+            var firstNewline = json.IndexOf('\n');
+            if (firstNewline > 0)
+                json = json[(firstNewline + 1)..];
+            if (json.EndsWith("```"))
+                json = json[..^3];
+            json = json.Trim();
+        }
+
+        var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        var tailoredSummary = root.TryGetProperty("tailoredSummary", out var summaryEl)
+            ? summaryEl.GetString() ?? string.Empty
+            : string.Empty;
+
+        var coverLetterDraft = root.TryGetProperty("coverLetterDraft", out var coverEl)
+            ? coverEl.GetString() ?? string.Empty
+            : string.Empty;
+
+        var matchScore = root.TryGetProperty("matchScore", out var scoreEl)
+            ? scoreEl.GetInt32()
+            : 0;
+
+        static List<string> ParseStringArray(JsonElement root, string propertyName)
+        {
+            var list = new List<string>();
+            if (root.TryGetProperty(propertyName, out var el) && el.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in el.EnumerateArray())
+                {
+                    var val = item.GetString();
+                    if (val is not null) list.Add(val);
+                }
+            }
+            return list;
+        }
+
+        return new TailorResumeResponse
+        {
+            TailoredSummary = tailoredSummary,
+            HighlightedSkills = ParseStringArray(root, "highlightedSkills"),
+            SuggestedBulletPoints = ParseStringArray(root, "suggestedBulletPoints"),
+            CoverLetterDraft = coverLetterDraft,
+            MatchScore = Math.Clamp(matchScore, 0, 100),
+            KeywordsToInclude = ParseStringArray(root, "keywordsToInclude")
         };
     }
 }
