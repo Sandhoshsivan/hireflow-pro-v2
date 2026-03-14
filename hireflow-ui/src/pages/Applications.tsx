@@ -182,6 +182,13 @@ export default function Applications() {
     fetchApps();
   }, [fetchApps]);
 
+  // Refetch when user returns to this tab
+  useEffect(() => {
+    const handleFocus = () => fetchApps();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchApps]);
+
   useEffect(() => {
     setFilterStatus(statusFilter);
   }, [statusFilter]);

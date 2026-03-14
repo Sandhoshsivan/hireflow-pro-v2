@@ -1,4 +1,6 @@
 using HireFlowPro.Core.DTOs;
+using HireFlowPro.Core.Entities;
+using HireFlowPro.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,37 +11,54 @@ namespace HireFlowPro.Api.Controllers;
 [Authorize]
 public class BillingController : ControllerBase
 {
+    private readonly AppDbContext _db;
+
+    public BillingController(AppDbContext db)
+    {
+        _db = db;
+    }
+
+    private int GetUserId() =>
+        int.Parse(User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value ?? "0");
+
     [HttpGet("plans")]
     public IActionResult GetPlans()
     {
+        var userId = GetUserId();
+        var user = _db.Users.Find(userId);
+        var currentPlan = user?.Plan ?? PlanType.Free;
+
         var plans = new List<PlanResponse>
         {
             new()
             {
-                Name = "Free",
-                Price = 0,
+                Name = PlanType.Free,
+                Price = PlanType.GetPrice(PlanType.Free),
                 Currency = "USD",
-                ApplicationLimit = 10,
+                ApplicationLimit = PlanType.GetApplicationLimit(PlanType.Free),
                 PrioritySupport = false,
-                Features = ["Up to 10 applications", "Basic tracking", "CSV export"]
+                Features = ["Up to 5 applications", "Basic tracking", "Status pipeline"],
+                IsCurrent = currentPlan == PlanType.Free
             },
             new()
             {
-                Name = "Pro",
-                Price = 9.99m,
+                Name = PlanType.Pro,
+                Price = PlanType.GetPrice(PlanType.Pro),
                 Currency = "USD",
-                ApplicationLimit = 100,
+                ApplicationLimit = PlanType.GetApplicationLimit(PlanType.Pro),
                 PrioritySupport = false,
-                Features = ["Up to 100 applications", "AI match analysis", "Contact management", "Priority tracking", "CSV export"]
+                Features = ["Unlimited applications", "AI match analysis", "Contact management", "CSV export", "90 AI uses/month"],
+                IsCurrent = currentPlan == PlanType.Pro
             },
             new()
             {
-                Name = "Enterprise",
-                Price = 29.99m,
+                Name = PlanType.Premium,
+                Price = PlanType.GetPrice(PlanType.Premium),
                 Currency = "USD",
-                ApplicationLimit = int.MaxValue,
+                ApplicationLimit = PlanType.GetApplicationLimit(PlanType.Premium),
                 PrioritySupport = true,
-                Features = ["Unlimited applications", "AI match analysis", "AI career advice", "Contact management", "Priority support", "CSV export", "Advanced analytics"]
+                Features = ["Unlimited applications", "AI match analysis", "AI career advice", "AI resume tailoring", "Unlimited AI uses", "Priority support", "Advanced analytics"],
+                IsCurrent = currentPlan == PlanType.Premium
             }
         };
 
@@ -47,9 +66,31 @@ public class BillingController : ControllerBase
     }
 
     [HttpPost("checkout")]
-    public IActionResult Checkout([FromBody] CheckoutRequest request)
+    public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request)
     {
-        // Stripe integration placeholder. In production this creates a Stripe Checkout session.
+        // In production this would create a Stripe Checkout session.
+        // For now, directly upgrade the user's plan.
+        var userId = GetUserId();
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound(new { message = "User not found." });
+
+        var planName = (request.Plan ?? "").Trim();
+        // Normalize plan name (accept lowercase)
+        planName = planName.ToLower() switch
+        {
+            "pro" => PlanType.Pro,
+            "premium" => PlanType.Premium,
+            "free" => PlanType.Free,
+            _ => planName
+        };
+
+        if (planName != PlanType.Free && planName != PlanType.Pro && planName != PlanType.Premium)
+            return BadRequest(new { message = $"Invalid plan: {planName}" });
+
+        user.Plan = planName;
+        user.PlanStartedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
         var session = new CheckoutSessionResponse
         {
             SessionId = $"cs_{Guid.NewGuid():N}",
@@ -59,16 +100,37 @@ public class BillingController : ControllerBase
     }
 
     [HttpPost("downgrade")]
-    public IActionResult Downgrade()
+    public async Task<IActionResult> Downgrade()
     {
-        // Placeholder: downgrade user to Free plan.
-        return Ok(new { message = "Downgraded to Free plan." });
+        var userId = GetUserId();
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound(new { message = "User not found." });
+
+        user.Plan = PlanType.Free;
+        user.PlanStartedAt = null;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { message = "Downgraded to Free plan.", plan = PlanType.Free });
     }
 
     [HttpGet("history")]
     public IActionResult GetHistory()
     {
-        // Placeholder: return empty payment history until Stripe is integrated.
-        return Ok(new List<PaymentHistoryResponse>());
+        var userId = GetUserId();
+        var payments = _db.Payments
+            .Where(p => p.UserId == userId)
+            .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new PaymentHistoryResponse
+            {
+                Id = p.Id,
+                Plan = p.Plan,
+                Amount = p.Amount,
+                Currency = p.Currency,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt
+            })
+            .ToList();
+
+        return Ok(payments);
     }
 }

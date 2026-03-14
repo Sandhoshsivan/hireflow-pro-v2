@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
@@ -35,19 +35,27 @@ export default function Pipeline() {
   const [error, setError] = useState(false);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await api.get('/applications');
-        setApps(extractApplications(data));
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const fetchApps = useCallback(async () => {
+    try {
+      const { data } = await api.get('/applications');
+      setApps(extractApplications(data));
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchApps();
+  }, [fetchApps]);
+
+  // Refetch when user returns to this tab
+  useEffect(() => {
+    const handleFocus = () => fetchApps();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchApps]);
 
   const grouped = columns.map((col) => ({
     ...col,
@@ -177,7 +185,7 @@ export default function Pipeline() {
                 <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{selectedApp.role}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span className={`badge badge-${statusLabel(selectedApp.status)}`}>
+                <span className={`badge badge-${selectedApp.status}`}>
                   {statusLabel(selectedApp.status)}
                 </span>
                 <button className="btn btn-ghost btn-icon" onClick={() => setSelectedApp(null)} style={{ color: 'var(--text3)' }}>

@@ -22,9 +22,12 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('hireflow_token');
       window.location.href = '/login';
+      return Promise.reject(error);
     }
     if (error.response?.status === 403 && error.response?.data?.code === 'upgrade_required') {
       useUpgradeStore.getState().show(error.response.data.requiredPlan ?? 'pro');
+      // Swallow the error so components don't also show an error toast
+      return new Promise(() => {});
     }
     return Promise.reject(error);
   }

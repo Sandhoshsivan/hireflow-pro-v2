@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Briefcase,
@@ -138,24 +138,32 @@ export default function Dashboard() {
   const greeting = getGreeting();
   const firstName = user?.name?.split(' ')[0] ?? 'there';
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [statsRes, appsRes] = await Promise.all([
-          api.get('/applications/stats'),
-          api.get('/applications?limit=7&sort=createdAt_desc'),
-        ]);
-        setStats(normalizeStats(statsRes.data));
-        const apps: Application[] = extractApplications(appsRes.data);
-        setRecentApps(apps.slice(0, 7));
-      } catch {
-        // use empty state
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const loadDashboard = useCallback(async () => {
+    try {
+      const [statsRes, appsRes] = await Promise.all([
+        api.get('/applications/stats'),
+        api.get('/applications?limit=7&sort=createdAt_desc'),
+      ]);
+      setStats(normalizeStats(statsRes.data));
+      const apps: Application[] = extractApplications(appsRes.data);
+      setRecentApps(apps.slice(0, 7));
+    } catch {
+      // use empty state
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  // Refetch when user returns to this tab
+  useEffect(() => {
+    const handleFocus = () => loadDashboard();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [loadDashboard]);
 
   /* ---- Loading state ---- */
   if (loading) {

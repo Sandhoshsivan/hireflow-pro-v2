@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application } from '../types';
@@ -68,19 +68,27 @@ export default function Analytics() {
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await api.get('/applications');
-        setApps(extractApplications(data));
-      } catch {
-        // silent
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const loadAnalytics = useCallback(async () => {
+    try {
+      const { data } = await api.get('/applications');
+      setApps(extractApplications(data));
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
+
+  // Refetch when user returns to this tab
+  useEffect(() => {
+    const handleFocus = () => loadAnalytics();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [loadAnalytics]);
 
   const total = apps.length;
   const responded = apps.filter((a) =>

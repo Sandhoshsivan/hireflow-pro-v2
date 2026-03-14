@@ -208,9 +208,12 @@ export default function Sidebar() {
     }
   }, []);
 
+  const currentLocation = useLocation();
+
+  // Refetch counts whenever user navigates to a different page
   useEffect(() => {
     fetchCounts();
-  }, [fetchCounts]);
+  }, [fetchCounts, currentLocation.pathname]);
 
   const initials = user?.name
     ? user.name

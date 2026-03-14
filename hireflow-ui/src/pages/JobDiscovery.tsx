@@ -92,12 +92,12 @@ export default function JobDiscovery() {
     try {
       await api.post('/applications', {
         company: job.company,
-        role: job.title,
+        jobTitle: job.title,
         status: 'Saved',
         location: job.location,
-        salary: job.salary || '',
+        salaryRange: job.salary || '',
         source: job.source,
-        url: job.url,
+        jobUrl: job.url,
         notes: job.description || '',
         priority: 'Medium',
       });

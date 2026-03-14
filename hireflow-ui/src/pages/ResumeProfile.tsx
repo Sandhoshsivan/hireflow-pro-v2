@@ -286,6 +286,28 @@ export default function ResumeProfile() {
         certifications: JSON.stringify(data.certifications),
         languages: JSON.stringify(data.languages),
       });
+      // Refetch from server to confirm persistence and sync state
+      try {
+        const res = await api.get('/resume-profile');
+        const d = res.data;
+        setData({
+          fullName: d.fullName ?? '',
+          title: d.title ?? '',
+          email: d.email ?? '',
+          phone: d.phone ?? '',
+          location: d.location ?? '',
+          linkedIn: d.linkedIn ?? '',
+          portfolio: d.portfolio ?? '',
+          summary: d.summary ?? '',
+          skills: safeParse<string[]>(d.skills, []),
+          experience: safeParse<ExperienceEntry[]>(d.experience, []),
+          education: safeParse<EducationEntry[]>(d.education, []),
+          certifications: safeParse<string[]>(d.certifications, []),
+          languages: safeParse<string[]>(d.languages, []),
+        });
+      } catch {
+        // Save succeeded, refetch failed — data is still in local state
+      }
       addToast('success', 'Resume profile saved successfully');
     } catch {
       addToast('error', 'Failed to save resume profile');

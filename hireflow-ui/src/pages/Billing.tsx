@@ -118,11 +118,14 @@ export default function Billing() {
     load();
   }, []);
 
+  const { fetchProfile } = useAuthStore();
+
   const handleCancel = async () => {
     if (!confirm('Are you sure you want to cancel your subscription? You will be downgraded to the Free plan.')) return;
     setCancelling(true);
     try {
       await api.post('/billing/downgrade');
+      await fetchProfile(); // Refresh user profile so plan updates in sidebar
       addToast('success', 'Subscription cancelled. You have been moved to the Free plan.');
     } catch {
       addToast('error', 'Failed to cancel subscription. Please contact support.');

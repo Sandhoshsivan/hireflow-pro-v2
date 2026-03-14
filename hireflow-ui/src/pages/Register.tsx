@@ -25,7 +25,6 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('user');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const { register, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
@@ -36,7 +35,7 @@ export default function Register() {
     e.preventDefault();
     if (password !== confirmPassword) return;
     try {
-      await register(name, email, password, role);
+      await register(name, email, password, 'user');
       navigate('/dashboard');
     } catch {
       // error in store
@@ -434,21 +433,6 @@ export default function Register() {
               {passwordsMismatch && (
                 <p style={{ marginTop: 4, fontSize: '0.75rem', color: '#ef4444' }}>Passwords do not match</p>
               )}
-            </div>
-
-            {/* Account type */}
-            <div>
-              <label className="form-label">
-                Account type
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="form-select"
-              >
-                <option value="user">Job Seeker</option>
-                <option value="admin">Admin</option>
-              </select>
             </div>
 
             {/* Terms checkbox */}

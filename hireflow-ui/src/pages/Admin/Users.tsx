@@ -136,7 +136,7 @@ export default function AdminUsers() {
   const changePlan = async (userId: number, plan: string) => {
     await withLoading(`plan-${userId}`, async () => {
       try {
-        await api.put(`/admin/users/${userId}/plan`, { plan });
+        await api.post(`/admin/users/${userId}/set-plan`, { plan });
         if (selectedUser?.id === userId) setSelectedUser({ ...selectedUser!, plan });
         addToast('success', `Plan changed to ${plan}`);
         fetchUsers();
@@ -147,12 +147,17 @@ export default function AdminUsers() {
   };
 
   const resetPassword = async (userId: number) => {
+    const newPassword = prompt('Enter new password for this user (min 6 characters):');
+    if (!newPassword || newPassword.length < 6) {
+      if (newPassword !== null) addToast('error', 'Password must be at least 6 characters');
+      return;
+    }
     await withLoading(`pwd-${userId}`, async () => {
       try {
-        await api.post(`/admin/users/${userId}/reset-password`);
-        addToast('success', 'Password reset email sent');
+        await api.post(`/admin/users/${userId}/reset-password`, { newPassword });
+        addToast('success', 'Password reset successfully');
       } catch {
-        addToast('error', 'Failed to send password reset');
+        addToast('error', 'Failed to reset password');
       }
     });
   };

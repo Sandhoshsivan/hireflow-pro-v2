@@ -108,6 +108,10 @@ export default function UpgradeModal() {
               boxShadow: accentShadow,
               justifyContent: 'center',
             }}
+            onClick={() => {
+              hide();
+              window.location.href = '/pricing';
+            }}
           >
             <Zap style={{ width: 16, height: 16 }} />
             Upgrade for {price}/mo
