@@ -29,6 +29,12 @@ public class Application
     [MaxLength(100)]
     public string? Source { get; set; }
 
+    [MaxLength(50)]
+    public string? JobType { get; set; }
+
+    [MaxLength(50)]
+    public string? WorkMode { get; set; }
+
     [Required, MaxLength(20)]
     public string Status { get; set; } = ApplicationStatus.Saved;
 

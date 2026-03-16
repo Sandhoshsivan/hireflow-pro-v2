@@ -21,6 +21,8 @@ export interface Application {
   source?: string;
   url?: string;
   notes?: string;
+  jobType?: string;
+  workMode?: string;
   priority: Priority;
   appliedDate: string;
   followUpDate?: string;

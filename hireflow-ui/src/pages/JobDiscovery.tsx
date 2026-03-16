@@ -12,6 +12,7 @@ import {
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
+import { emit, APP_CHANGED } from '../lib/app-events';
 
 /* ── Types ── */
 interface DiscoveredJob {
@@ -102,6 +103,7 @@ export default function JobDiscovery() {
         priority: 'Medium',
       });
       addToast('success', `Saved "${job.title}" at ${job.company} to your applications!`);
+      emit(APP_CHANGED);
     } catch {
       addToast('error', 'Failed to save application');
     } finally {

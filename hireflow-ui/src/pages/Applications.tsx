@@ -22,6 +22,7 @@ import api from '../lib/api';
 import { useToastStore } from '../components/Toast';
 import type { Application, ApplicationStatus, Priority, TimelineEntry, Contact } from '../types';
 import { extractApplications } from '../lib/normalize';
+import { emit, APP_CHANGED } from '../lib/app-events';
 import { ResumePDFDocument } from '../components/ResumePDF';
 import type { ResumeData, TailorOverrides } from '../components/ResumePDF';
 import { downloadPDF } from '../lib/pdf-download';
@@ -240,6 +241,7 @@ export default function Applications() {
       }
       setShowModal(false);
       fetchApps();
+      emit(APP_CHANGED);
     } catch {
       addToast('error', 'Failed to save application');
     } finally {
@@ -256,6 +258,7 @@ export default function Applications() {
       if (selectedApp?.id === deleteTarget) setSelectedApp(null);
       setDeleteTarget(null);
       fetchApps();
+      emit(APP_CHANGED);
     } catch {
       addToast('error', 'Failed to delete');
     } finally {
@@ -413,6 +416,7 @@ export default function Applications() {
       addToast('success', `Status updated to ${newStatus}`);
       setDrawerStatus(newStatus);
       fetchApps();
+      emit(APP_CHANGED);
       openDetail({ ...selectedApp, status: newStatus });
     } catch {
       addToast('error', 'Failed to update status');

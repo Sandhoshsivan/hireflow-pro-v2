@@ -27,6 +27,8 @@ public class ApplicationSummaryDto
     public string Priority { get; set; } = string.Empty;
     public string? SalaryRange { get; set; }
     public string? Source { get; set; }
+    public string? JobType { get; set; }
+    public string? WorkMode { get; set; }
     public int? MatchScore { get; set; }
     public DateTime? AppliedDate { get; set; }
     public DateTime? FollowUpDate { get; set; }
@@ -44,6 +46,8 @@ public class ApplicationDetailDto
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
     public string? Source { get; set; }
+    public string? JobType { get; set; }
+    public string? WorkMode { get; set; }
     public string Status { get; set; } = string.Empty;
     public string Priority { get; set; } = string.Empty;
     public string? Notes { get; set; }
@@ -68,7 +72,11 @@ public class CreateApplicationRequest
     public string? Location { get; set; }
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
+    /// <summary>Alias for SalaryRange – frontend may send either field name.</summary>
+    public string? Salary { get; set; }
     public string? Source { get; set; }
+    public string? JobType { get; set; }
+    public string? WorkMode { get; set; }
     public string Status { get; set; } = "Saved";
     public string Priority { get; set; } = "Medium";
     public string? Notes { get; set; }
@@ -77,6 +85,9 @@ public class CreateApplicationRequest
     public DateTime? AppliedDate { get; set; }
     public DateTime? InterviewDate { get; set; }
     public DateTime? FollowUpDate { get; set; }
+
+    /// <summary>Returns whichever salary field was provided (SalaryRange takes precedence).</summary>
+    public string? ResolvedSalary => SalaryRange ?? Salary;
 }
 
 public class UpdateApplicationRequest
@@ -86,7 +97,11 @@ public class UpdateApplicationRequest
     public string? Location { get; set; }
     public string? JobUrl { get; set; }
     public string? SalaryRange { get; set; }
+    /// <summary>Alias for SalaryRange – frontend may send either field name.</summary>
+    public string? Salary { get; set; }
     public string? Source { get; set; }
+    public string? JobType { get; set; }
+    public string? WorkMode { get; set; }
     public string? Status { get; set; }
     public string? Priority { get; set; }
     public string? Notes { get; set; }
@@ -95,12 +110,21 @@ public class UpdateApplicationRequest
     public DateTime? AppliedDate { get; set; }
     public DateTime? InterviewDate { get; set; }
     public DateTime? FollowUpDate { get; set; }
+
+    /// <summary>Returns whichever salary field was provided (SalaryRange takes precedence).</summary>
+    public string? ResolvedSalary => SalaryRange ?? Salary;
 }
 
 public class UpdateStatusRequest
 {
     public string Status { get; set; } = string.Empty;
     public string? Note { get; set; }
+}
+
+public class AddTimelineNoteRequest
+{
+    public string Action { get; set; } = string.Empty;
+    public string? Details { get; set; }
 }
 
 public class TimelineDto

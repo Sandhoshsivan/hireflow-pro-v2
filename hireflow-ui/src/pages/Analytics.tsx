@@ -4,6 +4,7 @@ import api from '../lib/api';
 import type { Application } from '../types';
 import { BarChart2 } from 'lucide-react';
 import { extractApplications } from '../lib/normalize';
+import { on, APP_CHANGED } from '../lib/app-events';
 
 const statusConfig: Record<string, { label: string; hex: string }> = {
   applied:   { label: 'Applied',   hex: 'var(--blue)' },
@@ -88,6 +89,11 @@ export default function Analytics() {
     const handleFocus = () => loadAnalytics();
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
+  }, [loadAnalytics]);
+
+  // Refetch when applications change (CRUD from any page)
+  useEffect(() => {
+    return on(APP_CHANGED, loadAnalytics);
   }, [loadAnalytics]);
 
   const total = apps.length;

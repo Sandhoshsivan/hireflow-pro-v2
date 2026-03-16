@@ -64,6 +64,8 @@ public class ApplicationService : IApplicationService
                 Priority = a.Priority,
                 SalaryRange = a.SalaryRange,
                 Source = a.Source,
+                JobType = a.JobType,
+                WorkMode = a.WorkMode,
                 MatchScore = a.MatchScore,
                 AppliedDate = a.AppliedDate,
                 FollowUpDate = a.FollowUpDate,
@@ -87,7 +89,7 @@ public class ApplicationService : IApplicationService
             .Include(a => a.Timelines.OrderByDescending(t => t.CreatedAt))
             .Include(a => a.Contacts)
             .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
-            ?? throw new InvalidOperationException("Application not found.");
+            ?? throw new KeyNotFoundException("Application not found.");
 
         return MapToDetail(app);
     }
@@ -116,8 +118,10 @@ public class ApplicationService : IApplicationService
             Company = request.Company.Trim(),
             Location = request.Location?.Trim(),
             JobUrl = request.JobUrl?.Trim(),
-            SalaryRange = request.SalaryRange?.Trim(),
+            SalaryRange = (request.ResolvedSalary)?.Trim(),
             Source = request.Source?.Trim(),
+            JobType = request.JobType?.Trim(),
+            WorkMode = request.WorkMode?.Trim(),
             Status = request.Status,
             Priority = request.Priority,
             Notes = request.Notes,
@@ -165,8 +169,10 @@ public class ApplicationService : IApplicationService
         if (request.Company is not null) app.Company = request.Company.Trim();
         if (request.Location is not null) app.Location = request.Location.Trim();
         if (request.JobUrl is not null) app.JobUrl = request.JobUrl.Trim();
-        if (request.SalaryRange is not null) app.SalaryRange = request.SalaryRange.Trim();
+        if (request.ResolvedSalary is not null) app.SalaryRange = request.ResolvedSalary.Trim();
         if (request.Source is not null) app.Source = request.Source.Trim();
+        if (request.JobType is not null) app.JobType = request.JobType.Trim();
+        if (request.WorkMode is not null) app.WorkMode = request.WorkMode.Trim();
         if (request.Priority is not null) app.Priority = request.Priority;
         if (request.Notes is not null) app.Notes = request.Notes;
         if (request.JobDescription is not null) app.JobDescription = request.JobDescription;
@@ -229,7 +235,7 @@ public class ApplicationService : IApplicationService
     {
         var app = await _db.Applications
             .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
-            ?? throw new InvalidOperationException("Application not found.");
+            ?? throw new KeyNotFoundException("Application not found.");
 
         _db.Applications.Remove(app);
         await _db.SaveChangesAsync();
@@ -294,6 +300,8 @@ public class ApplicationService : IApplicationService
                 Priority = a.Priority,
                 SalaryRange = a.SalaryRange,
                 Source = a.Source,
+                JobType = a.JobType,
+                WorkMode = a.WorkMode,
                 MatchScore = a.MatchScore,
                 AppliedDate = a.AppliedDate,
                 FollowUpDate = a.FollowUpDate,
@@ -366,6 +374,37 @@ public class ApplicationService : IApplicationService
         });
     }
 
+    public async Task<TimelineDto> AddTimelineNoteAsync(int userId, int applicationId, string note)
+    {
+        var app = await _db.Applications
+            .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+            ?? throw new KeyNotFoundException("Application not found.");
+
+        var now = DateTime.UtcNow;
+        var timeline = new Timeline
+        {
+            ApplicationId = app.Id,
+            FromStatus = app.Status,
+            ToStatus = app.Status,
+            Note = note,
+            CreatedAt = now
+        };
+        _db.Timelines.Add(timeline);
+
+        app.LastActivityDate = now;
+        app.UpdatedAt = now;
+        await _db.SaveChangesAsync();
+
+        return new TimelineDto
+        {
+            Id = timeline.Id,
+            FromStatus = timeline.FromStatus,
+            ToStatus = timeline.ToStatus,
+            Note = timeline.Note,
+            CreatedAt = timeline.CreatedAt
+        };
+    }
+
     public async Task<IEnumerable<ContactDto>> GetContactsAsync(int userId, int applicationId)
     {
         var app = await _db.Applications
@@ -398,6 +437,8 @@ public class ApplicationService : IApplicationService
         JobUrl = app.JobUrl,
         SalaryRange = app.SalaryRange,
         Source = app.Source,
+        JobType = app.JobType,
+        WorkMode = app.WorkMode,
         Status = app.Status,
         Priority = app.Priority,
         Notes = app.Notes,

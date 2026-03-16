@@ -39,8 +39,7 @@ public class ResumeProfileController : ControllerBase
 
     private int GetUserId()
     {
-        var claim = User.FindFirst("userId")?.Value
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        return int.Parse(claim ?? "0");
+        return int.Parse(User.FindFirst("userId")?.Value
+            ?? throw new UnauthorizedAccessException("User ID not found in token."));
     }
 }

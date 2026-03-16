@@ -306,7 +306,8 @@ export default function ResumeProfile() {
           languages: safeParse<string[]>(d.languages, []),
         });
       } catch {
-        // Save succeeded, refetch failed — data is still in local state
+        // Save succeeded but refetch failed — warn user to refresh on other devices
+        addToast('info', 'Saved, but could not confirm sync. Refresh on other devices.');
       }
       addToast('success', 'Resume profile saved successfully');
     } catch {

@@ -15,6 +15,8 @@ export function normalizeApplication(raw: Record<string, unknown>): Application 
     source: (raw.source as string) ?? undefined,
     url: (raw.jobUrl as string) ?? (raw.url as string) ?? undefined,
     notes: (raw.notes as string) ?? undefined,
+    jobType: (raw.jobType as string) ?? undefined,
+    workMode: (raw.workMode as string) ?? undefined,
     priority: ((raw.priority as string) ?? 'medium').toLowerCase() as Application['priority'],
     appliedDate: (raw.appliedDate as string) ?? (raw.createdAt as string) ?? new Date().toISOString(),
     followUpDate: (raw.followUpDate as string) ?? undefined,

@@ -429,7 +429,49 @@ public static class DbSeeder
             new Timeline { ApplicationId = vercelApp.Id, FromStatus = ApplicationStatus.Interview, ToStatus = ApplicationStatus.Offer, Note = "Offer: $175k base + $40k equity (4yr vest), 20 PTO days.", CreatedAt = now.AddDays(-2) }
         );
 
-        // ── 5. Contacts for demo apps ─────────────────────────────────────────
+        // ── 5. Resume Profiles ─────────────────────────────────────────────────
+        db.ResumeProfiles.AddRange(
+            new ResumeProfile
+            {
+                UserId = admin.Id,
+                FullName = "Super Admin",
+                Title = "Senior .NET Developer",
+                Summary = "Experienced .NET developer with 10+ years building enterprise ERP, HRMS, and financial systems using C#, ASP.NET Core, and Azure.",
+                Skills = "[\"C#\",\".NET Core\",\"ASP.NET Core\",\"Entity Framework\",\"SQL Server\",\"Azure\",\"Docker\",\"REST APIs\",\"Microservices\",\"Git\"]",
+                Experience = "[{\"company\":\"TechCorp India\",\"title\":\"Senior .NET Developer\",\"startDate\":\"2020-01\",\"endDate\":\"\",\"description\":\"Leading backend development for ERP platform serving 50+ enterprise clients.\\nDesigned microservices architecture reducing deployment time by 60%.\"},{\"company\":\"DataSoft Solutions\",\"title\":\".NET Developer\",\"startDate\":\"2016-06\",\"endDate\":\"2019-12\",\"description\":\"Built HRMS and payroll modules used by 200+ companies.\\nImplemented CI/CD pipelines with Azure DevOps.\"}]",
+                Education = "[{\"institution\":\"Anna University\",\"degree\":\"B.Tech\",\"field\":\"Computer Science\",\"year\":\"2016\"}]",
+                Certifications = "[\"Microsoft Certified: Azure Developer Associate\",\"AWS Cloud Practitioner\"]",
+                Languages = "[\"English\",\"Tamil\",\"Hindi\"]",
+                Phone = "+91-9876543210",
+                Email = "admin@hireflowpro.com",
+                Location = "Bangalore, India",
+                LinkedIn = "https://linkedin.com/in/superadmin",
+                CreatedAt = now.AddDays(-30),
+                UpdatedAt = now.AddDays(-5),
+            },
+            new ResumeProfile
+            {
+                UserId = demo.Id,
+                FullName = "Alex Johnson",
+                Title = "Full Stack Engineer",
+                Summary = "Full stack engineer with expertise in React, Node.js, and cloud-native architectures. Passionate about developer tools and productivity platforms.",
+                Skills = "[\"TypeScript\",\"React\",\"Node.js\",\"Python\",\"PostgreSQL\",\"AWS\",\"Docker\",\"GraphQL\",\"Redis\",\"Kubernetes\"]",
+                Experience = "[{\"company\":\"StartupXYZ\",\"title\":\"Senior Full Stack Engineer\",\"startDate\":\"2021-03\",\"endDate\":\"\",\"description\":\"Architected real-time collaboration features serving 100K+ users.\\nReduced API latency by 40% through caching and query optimization.\"},{\"company\":\"BigTech Inc\",\"title\":\"Software Engineer\",\"startDate\":\"2018-06\",\"endDate\":\"2021-02\",\"description\":\"Built internal developer tools used by 500+ engineers.\\nLed migration from monolith to microservices.\"}]",
+                Education = "[{\"institution\":\"Stanford University\",\"degree\":\"M.S.\",\"field\":\"Computer Science\",\"year\":\"2018\"},{\"institution\":\"UC Berkeley\",\"degree\":\"B.S.\",\"field\":\"EECS\",\"year\":\"2016\"}]",
+                Certifications = "[\"AWS Solutions Architect – Associate\"]",
+                Languages = "[\"English\",\"Spanish\"]",
+                Phone = "+1-555-0123",
+                Email = "demo@hireflowpro.com",
+                Location = "San Francisco, CA",
+                LinkedIn = "https://linkedin.com/in/alexjohnson",
+                Portfolio = "https://alexjohnson.dev",
+                CreatedAt = now.AddDays(-40),
+                UpdatedAt = now.AddDays(-10),
+            }
+        );
+        await db.SaveChangesAsync();
+
+        // ── 6. Contacts for demo apps ─────────────────────────────────────────
         db.Contacts.AddRange(
             new Contact { ApplicationId = stripeApp.Id, Name = "Sarah Mitchell", Title = "Technical Recruiter", Email = "sarah.m@stripe.com", LinkedInUrl = "https://linkedin.com/in/sarahmitchell", Notes = "Very responsive. Prefers email.", CreatedAt = now.AddDays(-28) },
             new Contact { ApplicationId = stripeApp.Id, Name = "David Park", Title = "Engineering Manager", Email = "d.park@stripe.com", Notes = "Hiring manager. Strong interest in systems design.", CreatedAt = now.AddDays(-21) },

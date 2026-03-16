@@ -4,6 +4,7 @@ import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import type { Application, ApplicationStatus } from '../types';
 import { extractApplications } from '../lib/normalize';
+import { on, APP_CHANGED } from '../lib/app-events';
 
 const columns: { status: ApplicationStatus; label: string; color: string }[] = [
   { status: 'saved', label: 'Saved', color: 'var(--cyan)' },
@@ -55,6 +56,11 @@ export default function Pipeline() {
     const handleFocus = () => fetchApps();
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchApps]);
+
+  // Refetch when applications change (CRUD from any page)
+  useEffect(() => {
+    return on(APP_CHANGED, fetchApps);
   }, [fetchApps]);
 
   const grouped = columns.map((col) => ({

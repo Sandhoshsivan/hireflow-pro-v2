@@ -16,6 +16,7 @@ import api from '../lib/api';
 import type { Application, ApplicationStats } from '../types';
 import { useAuthStore } from '../lib/auth';
 import { extractApplications, normalizeStats } from '../lib/normalize';
+import { on, APP_CHANGED } from '../lib/app-events';
 
 /* ------------------------------------------------------------------ */
 /*  Colour tokens                                                      */
@@ -163,6 +164,11 @@ export default function Dashboard() {
     const handleFocus = () => loadDashboard();
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
+  }, [loadDashboard]);
+
+  // Refetch when applications change (CRUD from any page)
+  useEffect(() => {
+    return on(APP_CHANGED, loadDashboard);
   }, [loadDashboard]);
 
   /* ---- Loading state ---- */

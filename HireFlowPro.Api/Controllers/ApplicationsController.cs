@@ -119,6 +119,14 @@ public class ApplicationsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{id:int}/timeline")]
+    public async Task<IActionResult> AddTimelineNote(int id, [FromBody] AddTimelineNoteRequest request)
+    {
+        var userId = GetUserId();
+        var result = await _applicationService.AddTimelineNoteAsync(userId, id, request.Action);
+        return Ok(result);
+    }
+
     [HttpGet("{id:int}/contacts")]
     public async Task<IActionResult> GetContacts(int id)
     {

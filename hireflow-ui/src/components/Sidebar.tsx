@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../lib/auth';
 import api from '../lib/api';
+import { on, APP_CHANGED } from '../lib/app-events';
 
 /* ─── Types ─── */
 interface NavCounts {
@@ -214,6 +215,11 @@ export default function Sidebar() {
   useEffect(() => {
     fetchCounts();
   }, [fetchCounts, currentLocation.pathname]);
+
+  // Refetch counts when any CRUD operation fires
+  useEffect(() => {
+    return on(APP_CHANGED, fetchCounts);
+  }, [fetchCounts]);
 
   const initials = user?.name
     ? user.name

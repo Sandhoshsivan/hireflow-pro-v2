@@ -3,6 +3,7 @@ using HireFlowPro.Core.Entities;
 using HireFlowPro.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HireFlowPro.Api.Controllers;
 
@@ -19,13 +20,14 @@ public class BillingController : ControllerBase
     }
 
     private int GetUserId() =>
-        int.Parse(User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value ?? "0");
+        int.Parse(User.FindFirst("userId")?.Value
+            ?? throw new UnauthorizedAccessException("User ID not found in token."));
 
     [HttpGet("plans")]
-    public IActionResult GetPlans()
+    public async Task<IActionResult> GetPlans()
     {
         var userId = GetUserId();
-        var user = _db.Users.Find(userId);
+        var user = await _db.Users.FindAsync(userId);
         var currentPlan = user?.Plan ?? PlanType.Free;
 
         var plans = new List<PlanResponse>
@@ -114,10 +116,10 @@ public class BillingController : ControllerBase
     }
 
     [HttpGet("history")]
-    public IActionResult GetHistory()
+    public async Task<IActionResult> GetHistory()
     {
         var userId = GetUserId();
-        var payments = _db.Payments
+        var payments = await _db.Payments
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PaymentHistoryResponse
@@ -129,7 +131,7 @@ public class BillingController : ControllerBase
                 Status = p.Status,
                 CreatedAt = p.CreatedAt
             })
-            .ToList();
+            .ToListAsync();
 
         return Ok(payments);
     }
